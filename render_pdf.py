@@ -1,8 +1,14 @@
 import os
+import platform
+import subprocess
+
 import pdfkit  # @UnresolvedImport
+
+#------------------------------------------------------------------------------
 
 import local_storage
 
+#------------------------------------------------------------------------------
 
 def build_buy_contract():
     html_template = """
@@ -24,3 +30,13 @@ def build_buy_contract():
         'body': pdf_raw,
         'filename': destination_path,
     }
+
+#------------------------------------------------------------------------------
+
+def open_file(path):
+    if platform.system() == "Windows":
+        os.startfile(path)  # @UndefinedVariable
+    elif platform.system() == "Darwin":
+        subprocess.Popen(["open", path])
+    else:
+        subprocess.Popen(["xdg-open", path])

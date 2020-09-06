@@ -1,7 +1,3 @@
-import os
-
-#------------------------------------------------------------------------------
-
 from kivy.app import App
 
 from kivy.config import Config
@@ -452,7 +448,7 @@ class ScreenManagement(ScreenManager):
 
     def on_buy_pdf_file_button_clicked(self):
         buy_contract = render_pdf.build_buy_contract()
-        os.system('open "{}"'.format(buy_contract['filename']))
+        render_pdf.open_file(buy_contract['filename'])
 
     def on_buy_save_contact_button_clicked(self):
         global _Contacts
