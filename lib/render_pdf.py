@@ -1,12 +1,11 @@
 import os
 import platform
 import subprocess
-
 import pdfkit  # @UnresolvedImport
 
 #------------------------------------------------------------------------------
 
-import local_storage
+from storage import local_storage
 
 #------------------------------------------------------------------------------
 
