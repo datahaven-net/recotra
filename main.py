@@ -13,6 +13,7 @@ from screens import screen_sell
 from screens import screen_transactions
 from screens import screen_customers
 from screens import screen_add_customer
+from screens import screen_camera_take_picture
 
 from storage import local_storage
 
@@ -26,6 +27,7 @@ Config.set('graphics', 'resizable', True)
 kv = """
 #:import NoTransition kivy.uix.screenmanager.NoTransition
 #:import Window kivy.core.window.Window
+#:import fa_icon components.webfont.fa_icon
 """ + '\n'.join([
     labels.kv,
     buttons.kv,
@@ -34,9 +36,10 @@ kv = """
     screen_transactions.kv,
     screen_customers.kv,
     screen_add_customer.kv,
+    screen_camera_take_picture.kv,
     main_window.kv,
 ])
-print(kv)
+# print(kv)
 Builder.load_string(kv)
 
 #------------------------------------------------------------------------------

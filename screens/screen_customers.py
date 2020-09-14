@@ -58,14 +58,13 @@ kv = """
 
 <CustomersScreen>:
     customer_delete_button: customer_delete_button
-    AnchorLayout:
-        id: wrap1
-        anchor_x: 'left'
-        anchor_y: 'bottom'
+    BoxLayout:
+        orientation: 'vertical'
+        CustomersView:
+            id: customers_view
         BoxLayout:
-            id: wrap2
             orientation: 'horizontal'
-            size_hint: 1, .08
+            # size_hint: 1, .08
             padding: 10
             spacing: 2
             Button:
@@ -73,19 +72,14 @@ kv = """
                 text: 'Add Customer'
                 width: 120
                 size_hint_x: None
-                # on_press: root.on_customers_add_button_clicked()
+                on_press: root.on_customers_add_button_clicked()
             Button:
                 id: customer_delete_button
                 text: 'Erase Customer'
                 width: 120
                 size_hint_x: None
-                # disabled: True
-                # on_press: root.on_customers_delete_button_clicked()
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'top'
-        CustomersView:
-            id: customers_view
+                disabled: True
+                on_press: root.on_customers_delete_button_clicked()
 """
 
 #------------------------------------------------------------------------------
@@ -111,8 +105,7 @@ class CustomersScreen(Screen):
     customer_delete_button = ObjectProperty(None)
 
     def on_customers_add_button_clicked(self):
-        print('123')
-        self.current = 'add_customer_screen'
+        App.get_running_app().root.ids.scr_manager.current = 'add_customer_screen'
 
     def on_customers_delete_button_clicked(self):
         print('456')

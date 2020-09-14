@@ -1,11 +1,60 @@
+from kivy.app import App
+from kivy.uix.camera import Camera
+
+#------------------------------------------------------------------------------
+
+from components import screen
+
+#------------------------------------------------------------------------------
+
 kv = """
-<AddCustomerScreen@Screen>:
-    AnchorLayout:
-        anchor_x: 'left'
-        anchor_y: 'bottom'
+<AddCustomerScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        GridLayout:
+            cols: 2
+            padding: 10
+            spacing: 10
+            Label:
+                text: "First name:"
+            TextInput:
+                id: customer_first_name_input
+                text: "John"
+                width: 250
+                height: 30
+                size_hint_x: None
+                size_hint_y: None
+            Label:
+                text: "Last name:"
+            TextInput:
+                id: customer_last_name_input
+                text: "Smith"
+                width: 250
+                height: 30
+                size_hint_x: None
+                size_hint_y: None
+            Label:
+                text: "Photo:"
+            Button:
+                id: customer_photo_button
+                text: fa_icon('camera')
+                height: 150
+                width: 150
+                size_hint_x: None
+                size_hint_y: None
+                on_release: root.on_customer_photo_button_clicked()
+            Label:
+                text: "Passport / ID:"
+            Button:
+                id: customer_passport_photo_button
+                text: fa_icon('camera')
+                height: 150
+                width: 150
+                size_hint_x: None
+                size_hint_y: None
+                on_release: root.on_customer_passport_button_clicked()
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: 1, .08
             padding: 10
             spacing: 2
             Button:
@@ -14,33 +63,14 @@ kv = """
                 width: 120
                 size_hint_x: None
                 on_release: root.on_add_customer_save_button_clicked()
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'top'
-        GridLayout:
-            cols: 2
-            padding: 10
-            spacing: 2
-            row_force_default: True
-            row_default_height: 40
-            Label:
-                text: "First name:"
-            TextInput:
-                id: customer_first_name_input
-                text: "John"
-            Label:
-                text: "Last name:"
-            TextInput:
-                id: customer_last_name_input
-                text: "Smith"
-            Label:
-                text: "Face:"
-            Button:
-                id: customer_face_photo_button
-                text: "take picture"
-            Label:
-                text: "Passport / ID:"
-            Button:
-                id: customer_passport_photo_button
-                text: "take picture"
 """
+
+class AddCustomerScreen(screen.AppScreen):
+
+    def on_customer_photo_button_clicked(self):
+#         camera_object = Camera(play=False)
+#         camera_object.play = True
+#         camera_object.resolution = (300, 300, )
+#         camera_object.export_to_png('/tmp/selfie.png')
+        App.get_running_app().root.ids.scr_manager.current = 'camera_take_picture_screen'
+

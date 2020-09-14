@@ -1,2 +1,5 @@
 kivy==1.11.1
 pdfkit==0.6.1
+Cython==0.29.21
+Kivy-Garden==0.1.4
+opencv-python==4.4.0.42
