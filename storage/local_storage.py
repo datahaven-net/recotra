@@ -2,9 +2,12 @@ from io import open
 import os
 import platform
 
-import jsn
-import strng
+#------------------------------------------------------------------------------
 
+from lib import jsn
+from lib import strng
+
+#------------------------------------------------------------------------------
 
 def WriteBinaryFile(filename, data):
     """
@@ -147,8 +150,8 @@ def transactions_filepath():
     return os.path.join(home_dir(), 'transactions')
 
 
-def contacts_filepath():
-    return os.path.join(home_dir(), 'contacts')
+def customers_filepath():
+    return os.path.join(home_dir(), 'customers')
 
 #------------------------------------------------------------------------------
 
@@ -175,24 +178,24 @@ def save_transactions(transactions_list):
 
 #------------------------------------------------------------------------------
 
-def load_contacts_list():
+def load_customers_list():
     create_home_dir()
-    src = ReadTextFile(contacts_filepath())
+    src = ReadTextFile(customers_filepath())
     src = src or '{"items":[]}'
     json_data = jsn.loads_text(src)
     return json_data['items']
 
 
-def save_contacts_list(contacts_list):
+def save_customers_list(customers_list):
     create_home_dir()
-    json_data = {'items': contacts_list, }
-    return WriteTextFile(contacts_filepath(), jsn.dumps(json_data, indent=2))
+    json_data = {'items': customers_list, }
+    return WriteTextFile(customers_filepath(), jsn.dumps(json_data, indent=2))
 
 #------------------------------------------------------------------------------
 
-def make_contacts_ui_data(contacts_list):
+def make_customers_ui_data(customers_list):
     return [{
-            'contact_id': str(i['contact_id']),
+            'customer_id': str(i['customer_id']),
             'person_name': i['person_name'],
             'known_wallets': '{} BTC addresses'.format(len(i['known_wallets'].split(','))),
-    } for i in contacts_list]
+    } for i in customers_list]
