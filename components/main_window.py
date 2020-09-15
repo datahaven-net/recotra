@@ -44,10 +44,6 @@ kv = """
         id: add_customer_screen
         name: 'add_customer_screen'
 
-    CameraTakePictureScreen:
-        id: camera_take_picture_screen
-        name: 'camera_take_picture_screen'
-
 
 <MainWindow>:
     color: 0, 0, 0, 1

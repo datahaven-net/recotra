@@ -1,6 +1,12 @@
+import sys
+import logging
+
+#------------------------------------------------------------------------------
+
 from kivy.app import App
 from kivy.config import Config
 from kivy.lang import Builder
+from kivy.logger import Logger, LOG_LEVELS
 
 #------------------------------------------------------------------------------
 
@@ -36,7 +42,6 @@ kv = """
     screen_transactions.kv,
     screen_customers.kv,
     screen_add_customer.kv,
-    screen_camera_take_picture.kv,
     main_window.kv,
 ])
 # print(kv)
@@ -47,6 +52,11 @@ Builder.load_string(kv)
 class BitCoinContractsApp(App):
 
     def build(self):
+        level = LOG_LEVELS.get('debug')  #  if len(sys.argv) > 2 else LOG_LEVELS.get('info')
+        Logger.setLevel(level=level)
+        logging.getLogger().setLevel(logging.DEBUG)
+
+        local_storage.init()
         screen_transactions._Transactions = local_storage.load_transactions_list()
         screen_customers._Customers = local_storage.load_customers_list()
         return main_window.MainWindow()
