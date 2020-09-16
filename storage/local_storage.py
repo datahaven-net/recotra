@@ -123,6 +123,13 @@ def write_customer_info(customer_info):
     create_customer_dir(customer_info['customer_id'])
     return WriteTextFile(customer_info_filepath(customer_info['customer_id']), jsn.dumps(customer_info, indent=2))
 
+
+def erase_customer_info(customer_id):
+    create_home_dir()
+    if not os.path.exists(customer_dir(customer_id)):
+        return
+    rmdir_recursive(customer_dir(customer_id))
+
 #------------------------------------------------------------------------------
 
 def make_customers_ui_data(customers_list):
@@ -259,3 +266,52 @@ def ReadTextFile(filename):
     except:
         pass
     return u''
+
+
+def rmdir_recursive(dirpath, ignore_errors=False, pre_callback=None):
+    """
+    Remove a directory, and all its contents if it is not already empty.
+    http://mail.python.org/pipermail/python-
+    list/2000-December/060960.html If ``ignore_errors`` is True process
+    will continue even if some errors happens. Method ``pre_callback``
+    can be used to decide before remove the file.
+    """
+    counter = 0
+    for name in os.listdir(dirpath):
+        full_name = os.path.join(dirpath, name)
+        # on Windows, if we don't have write permission we can't remove
+        # the file/directory either, so turn that on
+        if not os.access(full_name, os.W_OK):
+            try:
+                os.chmod(full_name, 0o600)
+            except:
+                continue
+        if os.path.isdir(full_name):
+            counter += rmdir_recursive(full_name, ignore_errors, pre_callback)
+        else:
+            if pre_callback:
+                if not pre_callback(full_name):
+                    continue
+            if os.path.isfile(full_name):
+                if not ignore_errors:
+                    os.remove(full_name)
+                    counter += 1
+                else:
+                    try:
+                        os.remove(full_name)
+                        counter += 1
+                    except Exception as exc:
+                        pass
+                        continue
+    if pre_callback:
+        if not pre_callback(dirpath):
+            return counter
+    if not ignore_errors:
+        os.rmdir(dirpath)
+    else:
+        try:
+            os.rmdir(dirpath)
+        except Exception as exc:
+            pass
+    return counter
+

@@ -1,11 +1,10 @@
 from kivy.app import App
 from kivy.properties import ObjectProperty  # @UnresolvedImport
 from kivy.uix.screenmanager import Screen
-from kivy.uix.recycleview import RecycleView
 
 #------------------------------------------------------------------------------
 
-from components import list_view
+from components.list_view import SelectableRecord, SelectableRecycleView
 from storage import local_storage
 
 #------------------------------------------------------------------------------
@@ -22,7 +21,7 @@ kv = """
     height: 70
     size_hint_y: None
     customer_id: 'customer_id'
-    fist_name: 'fist_name'
+    first_name: 'first_name'
     last_name: 'last_name'
     Label:
         id: customer_id
@@ -31,19 +30,17 @@ kv = """
         width: 40
     Label:
         id: first_name
-        text: 'John'
+        text: root.first_name
         bold: True
         size_hint: None, 0.5
         width: self.texture_size[0] + 10
     Label:
         id: last_name
-        text: 'Smith'
+        text: root.last_name
         size_hint: None, 0.5
         width: self.texture_size[0] + 10
-        # width: 160
 
 <CustomersView>:
-    id: customers_list_view
     viewclass: 'CustomerRecord'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
@@ -55,6 +52,7 @@ kv = """
         touch_multiselect: False
 
 <CustomersScreen>:
+    customer_edit_button: customer_edit_button
     customer_delete_button: customer_delete_button
     BoxLayout:
         orientation: 'vertical'
@@ -67,13 +65,20 @@ kv = """
             spacing: 2
             RoundedButton:
                 id: customer_add_button
-                text: 'Add Customer'
+                text: 'add'
                 width: 120
                 size_hint_x: None
                 on_press: root.on_customers_add_button_clicked()
             RoundedButton:
+                id: customer_edit_button
+                text: 'modify'
+                width: 120
+                size_hint_x: None
+                disabled: True
+                on_press: root.on_customers_edit_button_clicked()
+            RoundedButton:
                 id: customer_delete_button
-                text: 'Erase Customer'
+                text: 'erase'
                 width: 120
                 size_hint_x: None
                 disabled: True
@@ -82,29 +87,53 @@ kv = """
 
 #------------------------------------------------------------------------------
 
-class CustomerRecord(list_view.SelectableRecord):
+class CustomerRecord(SelectableRecord):
 
     def apply_selection(self, rv, index, is_selected):
-        App.get_running_app().root.ids.scr_manager.get_screen('customers_screen').customer_delete_button.disabled = not is_selected
-        return list_view.SelectableRecord.apply_selection(self, rv, index, is_selected)
+        result = SelectableRecord.apply_selection(self, rv, index, is_selected)
+        print('CustomerRecord.apply_selection', self, index, self.selected, is_selected)
+        cust_screen = App.get_running_app().root.ids.scr_manager.get_screen('customers_screen')
+        cust_screen.customer_delete_button.disabled = not is_selected
+        cust_screen.customer_edit_button.disabled = not is_selected
+        return result
 
 #------------------------------------------------------------------------------
 
-class CustomersView(RecycleView):
+class CustomersView(SelectableRecycleView):
 
     def __init__(self, **kwargs):
         super(CustomersView, self).__init__(**kwargs)
-        self.data = local_storage.make_customers_ui_data(
-            customers_list=local_storage.load_customers_list(sort_by='customer_id'),
-        )
+        self.populate()
+
+    def populate(self):
+        self.data = []
+        for customer_info in local_storage.make_customers_ui_data(
+                customers_list=local_storage.load_customers_list(sort_by='customer_id'),
+            ):
+            self.data.append(customer_info)
 
 #------------------------------------------------------------------------------
 
 class CustomersScreen(Screen):
-    customer_delete_button = ObjectProperty(None)
+
+    customer_edit_button = ObjectProperty(None, allownone=True)
+    customer_delete_button = ObjectProperty(None, allownone=True)
+
+    def clear_selected_items(self):
+        self.ids.customers_view.clear_selection()
+        self.ids.customer_edit_button.disabled = True
+        self.ids.customer_delete_button.disabled = True
+
+    def on_leave(self, *args):
+        self.clear_selected_items()
 
     def on_customers_add_button_clicked(self):
+        App.get_running_app().root.ids.scr_manager.get_screen('add_customer_screen').new_customer_id = None
         App.get_running_app().root.ids.scr_manager.current = 'add_customer_screen'
+        self.clear_selected_items()
 
     def on_customers_delete_button_clicked(self):
-        pass
+        selected_customer_id = self.ids.customers_view.selected_item.customer_id
+        self.clear_selected_items()
+        local_storage.erase_customer_info(selected_customer_id)
+        self.ids.customers_view.populate()

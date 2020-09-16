@@ -63,6 +63,9 @@ class BitCoinContractsApp(App):
         screen_customers._Customers = local_storage.load_customers_list()
         return main_window.MainWindow()
 
+    def on_stop(self):
+        self.root.ids.scr_manager.get_screen('customers_screen').clear_selected_items()
+
 #------------------------------------------------------------------------------
 
 if __name__ == '__main__':

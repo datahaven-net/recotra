@@ -1,4 +1,4 @@
-from kivy.uix.recycleview import RecycleView
+from components import list_view
 
 #------------------------------------------------------------------------------
 
@@ -151,7 +151,7 @@ sample_transactions = [
 
 #------------------------------------------------------------------------------
 
-class TransactionsView(RecycleView):
+class TransactionsView(list_view.SelectableRecycleView):
 
     def __init__(self, **kwargs):
         super(TransactionsView, self).__init__(**kwargs)

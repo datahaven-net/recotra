@@ -4,7 +4,6 @@ from kivy.app import App
 
 from components import screen
 from components.webfont import fa_icon
-# from components.fa_image import FaImage 
 
 from screens import screen_camera_take_picture
 
@@ -18,8 +17,10 @@ kv = """
         orientation: 'vertical'
 
         BoxLayout:
-            size_hint: 1, 1
             orientation: 'horizontal'
+            size_hint: 1, 1
+            pos_hint: {'top': 1}
+
             BoxLayout:
                 orientation: 'vertical'
                 padding: 10
@@ -35,12 +36,12 @@ kv = """
                         Color:
                             rgba: (0, 0, 0, 1)
                         Line:
-                            rectangle: (self.x, self.y, self.width, self.height) 
+                            rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
                             width: 2
                     id: customer_photo_picture_image
                     size_hint: None, None
                     pos_hint: {"right":1}
-                    size: 200, 160
+                    size: 200, 150
                     source: ''
                     Button:
                         width: 30
@@ -50,6 +51,7 @@ kv = """
                         font_size: '24'
                         background_color: 0, 0, 0, 0
                         color: 0.5, 0.5, 0.9, 1
+                        markup: True
                         text: fa_icon('camera')
                         on_release: root.on_customer_photo_button_clicked()
 
@@ -65,12 +67,12 @@ kv = """
                         Color:
                             rgba: (0, 0, 0, 1)
                         Line:
-                            rectangle: (self.x, self.y, self.width, self.height) 
+                            rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
                             width: 2
                     id: customer_passport_picture_image
                     pos_hint: {"right":1}
                     size_hint: None, None
-                    size: 200, 180
+                    size: 200, 150
                     source: ''
                     Button:
                         width: 30
@@ -80,13 +82,14 @@ kv = """
                         font_size: '24'
                         background_color: 0, 0, 0, 0
                         color: 0.5, 0.5, 0.9, 1
+                        markup: True
                         text: fa_icon('camera')
                         on_release: root.on_customer_passport_button_clicked()
 
 
             BoxLayout:
                 orientation: 'vertical'
-                padding: 10
+                padding: 20
                 spacing: 10
                 Label:
                     text_size: self.size
@@ -95,7 +98,7 @@ kv = """
                     text: "First name:"
                 TextInput:
                     id: customer_first_name_input
-                    text: "John"
+                    text: ""
                     right: self.width
                     width: 250
                     height: 30
@@ -108,7 +111,7 @@ kv = """
                     text: "Last name:"
                 TextInput:
                     id: customer_last_name_input
-                    text: "Smith"
+                    text: ""
                     width: 250
                     height: 30
                     size_hint_x: None
@@ -120,8 +123,15 @@ kv = """
                     text: "Phone:"
                 TextInput:
                     id: customer_phone_input
-                    text: "+123456789"
+                    text: ""
                     width: 250
+                    height: 30
+                    size_hint_x: None
+                    size_hint_y: None
+                Button:
+                    text_size: self.size
+                    text: "verified: 123123123"
+                    width: 100
                     height: 30
                     size_hint_x: None
                     size_hint_y: None
@@ -132,9 +142,21 @@ kv = """
                     text: "email:"
                 TextInput:
                     id: customer_email_input
-                    text: "smith.john@gmail.com"
+                    text: ""
                     width: 250
                     height: 30
+                    size_hint_x: None
+                    size_hint_y: None
+                Label:
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                    text: "Address:"
+                TextInput:
+                    id: customer_address_input
+                    text: ""
+                    width: 250
+                    height: 90
                     size_hint_x: None
                     size_hint_y: None
 
@@ -161,9 +183,17 @@ class AddCustomerScreen(screen.AppScreen):
     def take_pic_screen(self):
         return self.scr_manager().get_screen('camera_take_picture_screen')
 
+    def clean_input_fields(self):
+        self.ids.customer_first_name_input.text = ''
+        self.ids.customer_last_name_input.text = ''
+        self.ids.customer_phone_input.text = ''
+        self.ids.customer_email_input.text = ''
+        self.ids.customer_address_input.text = ''
+
     def on_pre_enter(self, *args):
         if self.new_customer_id is None:
             self.new_customer_id = local_storage.create_new_customer_info()
+            self.clean_input_fields()
 
     def on_customer_photo_button_clicked(self, *args):
         self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
@@ -199,8 +229,5 @@ class AddCustomerScreen(screen.AppScreen):
             first_name=self.ids.customer_first_name_input.text,
             last_name=self.ids.customer_last_name_input.text,
         ))
-        new_list = local_storage.make_customers_ui_data(
-            customers_list=local_storage.load_customers_list(sort_by='customer_id'),
-        )
-        print(new_list)
-        # App.get_running_app().root.ids.customers_list_view.data = new_list
+        self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
+        self.scr_manager().current = 'customers_screen'
