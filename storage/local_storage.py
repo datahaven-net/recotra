@@ -9,6 +9,132 @@ from lib import strng
 
 #------------------------------------------------------------------------------
 
+def init():
+    create_home_dir()
+
+#------------------------------------------------------------------------------
+
+def home_dir():
+    return os.path.expanduser('~/.btc_contracts')
+
+
+def contracts_dir():
+    return os.path.join(home_dir(), 'contracts')
+
+#------------------------------------------------------------------------------
+
+def temp_dir():
+    return os.path.join(home_dir(), 'temp')
+
+
+def transactions_filepath():
+    return os.path.join(home_dir(), 'transactions')
+
+
+def customers_dir():
+    return os.path.join(home_dir(), 'customers')
+
+
+def customer_dir(customer_id):
+    return os.path.join(customers_dir(), str(customer_id))
+
+
+def customer_info_filepath(customer_id):
+    return os.path.join(customer_dir(customer_id), 'info.json')
+
+
+def customer_photo_filepath(customer_id):
+    return os.path.join(customer_dir(customer_id), 'photo.jpg')
+
+
+def customer_passport_filepath(customer_id):
+    return os.path.join(customer_dir(customer_id), 'passport.jpg')
+
+#------------------------------------------------------------------------------
+
+def create_home_dir():
+    if not os.path.isdir(home_dir()):
+        os.mkdir(home_dir())
+    if not os.path.isdir(contracts_dir()):
+        os.mkdir(contracts_dir())
+    if not os.path.isdir(customers_dir()):
+        os.mkdir(customers_dir())
+    if not os.path.isdir(temp_dir()):
+        os.mkdir(temp_dir())
+
+
+def create_customer_dir(customer_id):
+    if not os.path.isdir(customer_dir(customer_id)):
+        os.mkdir(customer_dir(customer_id))
+
+#------------------------------------------------------------------------------
+
+def load_transactions_list():
+    create_home_dir()
+    src = ReadTextFile(transactions_filepath())
+    src = src or '{"items":[]}'
+    json_data = jsn.loads_text(src)
+    return json_data['items']
+
+
+def save_transactions(transactions_list):
+    create_home_dir()
+    json_data = {'items': transactions_list, }
+    return WriteTextFile(transactions_filepath(), jsn.dumps(json_data, indent=2))
+
+#------------------------------------------------------------------------------
+
+def load_customers_list(sort_by=None):
+    create_home_dir()
+    result = []
+    for customer_id in os.listdir(customers_dir()):
+        src = ReadTextFile(customer_info_filepath(customer_id))
+        src = src or ('{"customer_id": %s}' % customer_id)
+        json_data = jsn.loads_text(src)
+        result.append(json_data)
+    if sort_by == 'customer_id':
+        result.sort(key=lambda i: str(i.get('customer_id', '')))
+    return result
+
+
+def save_customers_list(customers_list):
+    create_home_dir()
+    for customer_info in customers_list:
+        if not WriteTextFile(customer_info_filepath(customer_info['customer_id']), jsn.dumps(customer_info, indent=2)):
+            return False
+    return True
+
+#------------------------------------------------------------------------------
+
+def create_new_customer_info():
+    create_home_dir()
+    max_customer_id = 0
+    all_customers = os.listdir(customers_dir())
+    for customer_id in all_customers:
+        if int(customer_id) > max_customer_id:
+            max_customer_id = int(customer_id)
+    new_customer_id = str(max_customer_id + 1)
+    os.mkdir(customer_dir(new_customer_id))
+    return str(new_customer_id)
+
+
+def write_customer_info(customer_info):
+    create_home_dir()
+    create_customer_dir(customer_info['customer_id'])
+    return WriteTextFile(customer_info_filepath(customer_info['customer_id']), jsn.dumps(customer_info, indent=2))
+
+#------------------------------------------------------------------------------
+
+def make_customers_ui_data(customers_list):
+    return [{
+            'customer_id': str(i['customer_id']),
+            'first_name': i.get('first_name', ''),
+            'last_name': i.get('last_name', ''),
+            # 'known_wallets': '{} BTC addresses'.format(len(i.get('known_wallets', '').split(','))),
+    } for i in customers_list]
+
+#------------------------------------------------------------------------------
+
 def WriteBinaryFile(filename, data):
     """
     A smart way to write data to binary file. Return True if success.
@@ -88,7 +214,6 @@ def ReadBinaryFile(filename, decode_encoding=None):
 
 #------------------------------------------------------------------------------
 
-
 def WriteTextFile(filepath, data):
     """
     A smart way to write data into text file. Return True if success.
@@ -134,68 +259,3 @@ def ReadTextFile(filename):
     except:
         pass
     return u''
-
-#------------------------------------------------------------------------------
-
-def home_dir():
-    return os.path.expanduser('~/.btc_contracts')
-
-
-def contracts_dir():
-    return os.path.join(home_dir(), 'contracts')
-
-#------------------------------------------------------------------------------
-
-def transactions_filepath():
-    return os.path.join(home_dir(), 'transactions')
-
-
-def customers_filepath():
-    return os.path.join(home_dir(), 'customers')
-
-#------------------------------------------------------------------------------
-
-def create_home_dir():
-    if not os.path.isdir(home_dir()):
-        os.mkdir(home_dir())
-    if not os.path.isdir(contracts_dir()):
-        os.mkdir(contracts_dir())
-
-#------------------------------------------------------------------------------
-
-def load_transactions_list():
-    create_home_dir()
-    src = ReadTextFile(transactions_filepath())
-    src = src or '{"items":[]}'
-    json_data = jsn.loads_text(src)
-    return json_data['items']
-
-
-def save_transactions(transactions_list):
-    create_home_dir()
-    json_data = {'items': transactions_list, }
-    return WriteTextFile(transactions_filepath(), jsn.dumps(json_data, indent=2))
-
-#------------------------------------------------------------------------------
-
-def load_customers_list():
-    create_home_dir()
-    src = ReadTextFile(customers_filepath())
-    src = src or '{"items":[]}'
-    json_data = jsn.loads_text(src)
-    return json_data['items']
-
-
-def save_customers_list(customers_list):
-    create_home_dir()
-    json_data = {'items': customers_list, }
-    return WriteTextFile(customers_filepath(), jsn.dumps(json_data, indent=2))
-
-#------------------------------------------------------------------------------
-
-def make_customers_ui_data(customers_list):
-    return [{
-            'customer_id': str(i['customer_id']),
-            'person_name': i['person_name'],
-            'known_wallets': '{} BTC addresses'.format(len(i['known_wallets'].split(','))),
-    } for i in customers_list]

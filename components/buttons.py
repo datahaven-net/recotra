@@ -1,11 +1,12 @@
 kv = """
-<Button>:
+<RoundedButton@Button>:
     markup: True
     background_color: 0,0,0,0
     color: 1,1,1,1
     disabled_color: .8,.8,.8,1
     background_disabled_normal: ''
     height: 30
+    # height: self.minimum_height
     size_hint_y: None
     bg_normal: .1,.4,.7,1
     bg_pressed: .2,.5,.8,1

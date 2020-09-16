@@ -99,7 +99,7 @@ kv = """
             size_hint: 1, .08
             padding: 10
             spacing: 2
-            Button:
+            RoundedButton:
                 text: 'Print transactions'
                 width: 160
                 size_hint_x: None
