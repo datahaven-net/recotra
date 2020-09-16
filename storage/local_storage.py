@@ -62,6 +62,11 @@ def create_home_dir():
     if not os.path.isdir(temp_dir()):
         os.mkdir(temp_dir())
 
+
+def create_customer_dir(customer_id):
+    if not os.path.isdir(customer_dir(customer_id)):
+        os.mkdir(customer_dir(customer_id))
+
 #------------------------------------------------------------------------------
 
 def load_transactions_list():
@@ -79,7 +84,7 @@ def save_transactions(transactions_list):
 
 #------------------------------------------------------------------------------
 
-def load_customers_list():
+def load_customers_list(sort_by=None):
     create_home_dir()
     result = []
     for customer_id in os.listdir(customers_dir()):
@@ -87,6 +92,8 @@ def load_customers_list():
         src = src or ('{"customer_id": %s}' % customer_id)
         json_data = jsn.loads_text(src)
         result.append(json_data)
+    if sort_by == 'customer_id':
+        result.sort(key=lambda i: str(i.get('customer_id', '')))
     return result
 
 
@@ -110,13 +117,20 @@ def create_new_customer_info():
     os.mkdir(customer_dir(new_customer_id))
     return str(new_customer_id)
 
+
+def write_customer_info(customer_info):
+    create_home_dir()
+    create_customer_dir(customer_info['customer_id'])
+    return WriteTextFile(customer_info_filepath(customer_info['customer_id']), jsn.dumps(customer_info, indent=2))
+
 #------------------------------------------------------------------------------
 
 def make_customers_ui_data(customers_list):
     return [{
             'customer_id': str(i['customer_id']),
-            'person_name': i.get('person_name', ''),
-            'known_wallets': '{} BTC addresses'.format(len(i.get('known_wallets', '').split(','))),
+            'first_name': i.get('first_name', ''),
+            'last_name': i.get('last_name', ''),
+            # 'known_wallets': '{} BTC addresses'.format(len(i.get('known_wallets', '').split(','))),
     } for i in customers_list]
 
 #------------------------------------------------------------------------------

@@ -44,6 +44,10 @@ kv = """
         id: add_customer_screen
         name: 'add_customer_screen'
 
+    # CameraTakePictureScreen:
+    #     id: camera_take_picture_screen
+    #     name: 'camera_take_picture_screen'
+
 
 <MainWindow>:
     color: 0, 0, 0, 1
@@ -61,22 +65,22 @@ kv = """
             size_hint: 1, .08
             padding: 10
             spacing: 2
-            Button:
+            RoundedButton:
                 text: 'Buy BTC'
                 on_press: scr_manager.current = 'buy_screen'
                 width: 120
                 size_hint_x: None
-            Button:
+            RoundedButton:
                 text: 'Sell BTC'
                 on_press: scr_manager.current = 'sell_screen'
                 width: 120
                 size_hint_x: None
-            Button:
+            RoundedButton:
                 text: 'Transactions'
                 on_press: scr_manager.current = 'transactions_screen'
                 width: 120
                 size_hint_x: None
-            Button:
+            RoundedButton:
                 text: 'Customers'
                 on_press: scr_manager.current = 'customers_screen'
                 width: 120

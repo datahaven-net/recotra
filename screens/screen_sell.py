@@ -8,17 +8,17 @@ kv = """
             size_hint: 1, .08
             padding: 10
             spacing: 2
-            Button:
-                id: sell_save_customer_button
-                text: "Save Customer"
+            RoundedButton:
+                id: sell_select_customer_button
+                text: "Select Customer"
                 width: 120
                 size_hint_x: None
-                on_release: root.on_sell_save_customer_button_clicked()
-            Button:
+                # on_release: root.on_sell_select_customer_button_clicked()
+            RoundedButton:
                 text: "PDF file"
                 width: 120
                 size_hint_x: None
-            Button: 
+            RoundedButton: 
                 text: "Print"
                 width: 120
                 size_hint_x: None

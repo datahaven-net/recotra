@@ -4,6 +4,7 @@ import logging
 #------------------------------------------------------------------------------
 
 from kivy.app import App
+from kivy.core.window import Window
 from kivy.config import Config
 from kivy.lang import Builder
 from kivy.logger import Logger, LOG_LEVELS
@@ -19,7 +20,6 @@ from screens import screen_sell
 from screens import screen_transactions
 from screens import screen_customers
 from screens import screen_add_customer
-from screens import screen_camera_take_picture
 
 from storage import local_storage
 
@@ -27,6 +27,8 @@ from storage import local_storage
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')  # disable multi-touch
 Config.set('graphics', 'resizable', True)
+
+Window.clearcolor = (1, 1, 1, 1)
 
 #------------------------------------------------------------------------------
 
