@@ -10,7 +10,7 @@ from storage import local_storage
 #------------------------------------------------------------------------------
 
 kv = """
-<CustomerRecord@SelectableRecord>:
+<SelectCustomerRecord@SelectableRecord>:
     canvas.before:
         Color:
             rgba: (.9, .9, 1, 1) if self.selected else (1, 1, 1, 1)
@@ -40,8 +40,8 @@ kv = """
         size_hint: None, 0.5
         width: self.texture_size[0] + 10
 
-<CustomersView>:
-    viewclass: 'CustomerRecord'
+<SelectCustomerView>:
+    viewclass: 'SelectCustomerRecord'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
         default_size_hint: 1, None
@@ -51,46 +51,31 @@ kv = """
         multiselect: False
         touch_multiselect: False
 
-<CustomersScreen>:
-    customer_edit_button: customer_edit_button
-    customer_delete_button: customer_delete_button
+<SelectCustomerScreen>:
+    customer_select_button: customer_select_button
     BoxLayout:
         orientation: 'vertical'
-        CustomersView:
-            id: customers_view
+        SelectCustomerView:
+            id: select_customer_view
         BoxLayout:
             orientation: 'horizontal'
-            # size_hint: 1, .08
             padding: 10
             spacing: 2
             RoundedButton:
-                id: customer_add_button
-                text: 'add'
-                width: 120
-                size_hint_x: None
-                on_press: root.on_customers_add_button_clicked()
-            RoundedButton:
-                id: customer_edit_button
-                text: 'modify'
+                id: customer_select_button
+                text: 'select'
                 width: 120
                 size_hint_x: None
                 disabled: True
-                on_press: root.on_customers_edit_button_clicked()
-            RoundedButton:
-                id: customer_delete_button
-                text: 'erase'
-                width: 120
-                size_hint_x: None
-                disabled: True
-                on_press: root.on_customers_delete_button_clicked()
+                on_press: root.on_customer_select_button_clicked()
 """
 
 #------------------------------------------------------------------------------
 
-class CustomersView(SelectableRecycleView):
+class SelectCustomerView(SelectableRecycleView):
 
     def __init__(self, **kwargs):
-        super(CustomersView, self).__init__(**kwargs)
+        super(SelectCustomerView, self).__init__(**kwargs)
         self.populate()
 
     def populate(self):
@@ -101,32 +86,28 @@ class CustomersView(SelectableRecycleView):
             self.data.append(customer_info)
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
-        cust_screen = App.get_running_app().root.ids.scr_manager.get_screen('customers_screen')
-        cust_screen.customer_delete_button.disabled = not is_selected
-        cust_screen.customer_edit_button.disabled = not is_selected
+        select_cust_screen = App.get_running_app().root.ids.scr_manager.get_screen('select_customer_screen')
+        select_cust_screen.customer_select_button.disabled = not is_selected
 
 #------------------------------------------------------------------------------
 
-class CustomersScreen(AppScreen):
+class SelectCustomerScreen(AppScreen):
 
-    customer_edit_button = ObjectProperty(None, allownone=True)
-    customer_delete_button = ObjectProperty(None, allownone=True)
+    customer_select_button = ObjectProperty(None, allownone=True)
+    customer_selected_callback = None
+
+    def on_pre_enter(self, *args):
+        self.ids.select_customer_view.populate()
 
     def clear_selected_items(self):
-        self.ids.customers_view.clear_selection()
-        self.ids.customer_edit_button.disabled = True
-        self.ids.customer_delete_button.disabled = True
+        self.ids.select_customer_view.clear_selection()
+        self.ids.customer_select_button.disabled = True
 
     def on_leave(self, *args):
         self.clear_selected_items()
 
-    def on_customers_add_button_clicked(self):
-        App.get_running_app().root.ids.scr_manager.get_screen('add_customer_screen').new_customer_id = None
-        App.get_running_app().root.ids.scr_manager.current = 'add_customer_screen'
-        self.clear_selected_items()
-
-    def on_customers_delete_button_clicked(self):
-        selected_customer_id = self.ids.customers_view.selected_item.customer_id
-        self.clear_selected_items()
-        local_storage.erase_customer_info(selected_customer_id)
-        self.ids.customers_view.populate()
+    def on_customer_select_button_clicked(self):
+        selected_customer_id = self.ids.select_customer_view.selected_item.customer_id
+        if self.customer_selected_callback:
+            self.customer_selected_callback(selected_customer_id)
+            self.customer_selected_callback = None

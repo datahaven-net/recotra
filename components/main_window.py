@@ -44,9 +44,9 @@ kv = """
         id: add_customer_screen
         name: 'add_customer_screen'
 
-    # CameraTakePictureScreen:
-    #     id: camera_take_picture_screen
-    #     name: 'camera_take_picture_screen'
+    SelectCustomerScreen:
+        id: select_customer_screen
+        name: 'select_customer_screen'
 
 
 <MainWindow>:
@@ -97,18 +97,20 @@ kv = """
 #------------------------------------------------------------------------------
 
 class ScreenManagement(ScreenManager):
-    customers_screen = ObjectProperty(None)
+    pass
 
-    def on_buy_pdf_file_button_clicked(self):
-        buy_contract = render_pdf.build_buy_contract()
-        render_pdf.open_file(buy_contract['filename'])
+#     customers_screen = ObjectProperty(None)
 
-    def on_buy_save_customer_button_clicked(self):
-        person_name = self.ids.buy_person_name_input.text.strip()
-        receive_address = self.ids.buy_receive_address_input.text.strip().lower()
-        person_found = None
-        person_found_pos = -1
-        latest_customer_id = 0
+#     def on_buy_pdf_file_button_clicked(self):
+#         buy_contract = render_pdf.build_buy_contract()
+#         render_pdf.open_file(buy_contract['filename'])
+
+#     def on_buy_save_customer_button_clicked(self):
+#         person_name = self.ids.buy_person_name_input.text.strip()
+#         receive_address = self.ids.buy_receive_address_input.text.strip().lower()
+#         person_found = None
+#         person_found_pos = -1
+#         latest_customer_id = 0
 #         for pos in range(len(_Customers)):
 #             person = _Customers[pos]
 #             if person['person_name'].lower() == person_name.lower():
