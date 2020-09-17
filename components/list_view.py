@@ -3,9 +3,13 @@ from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.stacklayout import StackLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
-from kivy.uix.recycleview.views import _cached_views, _view_base_cache
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
+
+#------------------------------------------------------------------------------
+
+kv = """
+"""
 
 #------------------------------------------------------------------------------
 
@@ -31,12 +35,14 @@ class SelectableRecord(RecycleDataViewBehavior, StackLayout):
             return self.parent.select_with_touch(self.index, touch)
 
     def apply_selection(self, rv, index, is_selected):
-        print('SelectableRecord.apply_selection', index, self.selected, is_selected)
+        prev_selected = self.selected
         if is_selected:
             rv.selected_item = self
         else:
             rv.selected_item = None
         self.selected = is_selected
+        rv.on_selection_applied(self, index, is_selected, prev_selected)
+        return index
 
 
 class SelectableRecycleView(RecycleView):
@@ -44,8 +50,9 @@ class SelectableRecycleView(RecycleView):
     selected_item = ObjectProperty(None, allownone=True)
 
     def clear_selection(self):
-        print('clear_selection', self.selected_item)
         if self.selected_item:
-            print(self.selected_item.selected)
             self.selected_item.selected = False
             self.selected_item = None
+
+    def on_selection_applied(self, item, index, is_selected, prev_selected):
+        pass

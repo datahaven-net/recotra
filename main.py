@@ -20,6 +20,7 @@ from screens import screen_sell
 from screens import screen_transactions
 from screens import screen_customers
 from screens import screen_add_customer
+from screens import screen_select_customer
 
 from storage import local_storage
 
@@ -44,6 +45,7 @@ kv = """
     screen_transactions.kv,
     screen_customers.kv,
     screen_add_customer.kv,
+    screen_select_customer.kv,
     main_window.kv,
 ])
 # print(kv)

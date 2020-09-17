@@ -130,6 +130,17 @@ def erase_customer_info(customer_id):
         return
     rmdir_recursive(customer_dir(customer_id))
 
+
+def read_customer_info(customer_id):
+    create_home_dir()
+    if not os.path.exists(customer_dir(customer_id)):
+        return None
+    src = ReadTextFile(customer_info_filepath(customer_id))
+    if not src:
+        return None
+    json_data = jsn.loads_text(src)
+    return json_data
+
 #------------------------------------------------------------------------------
 
 def make_customers_ui_data(customers_list):
@@ -137,6 +148,9 @@ def make_customers_ui_data(customers_list):
             'customer_id': str(i['customer_id']),
             'first_name': i.get('first_name', ''),
             'last_name': i.get('last_name', ''),
+            'phone': i.get('phone', ''),
+            'email': i.get('email', ''),
+            'address': i.get('address', ''),
             # 'known_wallets': '{} BTC addresses'.format(len(i.get('known_wallets', '').split(','))),
     } for i in customers_list]
 

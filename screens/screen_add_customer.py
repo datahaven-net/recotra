@@ -128,18 +128,11 @@ kv = """
                     height: 30
                     size_hint_x: None
                     size_hint_y: None
-                Button:
-                    text_size: self.size
-                    text: "verified: 123123123"
-                    width: 100
-                    height: 30
-                    size_hint_x: None
-                    size_hint_y: None
                 Label:
                     text_size: self.size
                     valign: "bottom"
                     halign: "left"
-                    text: "email:"
+                    text: "E-mail:"
                 TextInput:
                     id: customer_email_input
                     text: ""
@@ -228,6 +221,9 @@ class AddCustomerScreen(screen.AppScreen):
             customer_id=self.new_customer_id,
             first_name=self.ids.customer_first_name_input.text,
             last_name=self.ids.customer_last_name_input.text,
+            phone=self.ids.customer_phone_input.text,
+            email=self.ids.customer_email_input.text,
+            address=self.ids.customer_address_input.text,
         ))
         self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
         self.scr_manager().current = 'customers_screen'
