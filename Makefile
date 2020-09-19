@@ -27,7 +27,7 @@ venv:
 	@$(PIP) install -r $(REQUIREMENTS_TXT)
 
 apt_install:
-	@sudo apt-get install python-setuptools python-pygame python-opengl python-enchant python-dev python-opencv build-essential python-pip libgl1-mesa-dev libgles2-mesa-dev zlib1g-dev xclip wkhtmltopdf
+	@sudo apt-get install python-setuptools python-pygame python-opengl python-enchant python-dev python-opencv build-essential python-pip libgl1-mesa-dev libgles2-mesa-dev zlib1g-dev libzbar-dev xclip wkhtmltopdf
 
 install: apt_install venv
 

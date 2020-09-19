@@ -1,5 +1,10 @@
+certifi==2020.6.20
 kivy==1.11.1
 pdfkit==0.6.1
 Cython==0.29.21
 Kivy-Garden==0.1.4
 opencv-python==4.4.0.42
+qrcode==6.1
+pyzbar==0.1.8
+six==1.15.0
+zbarcam==2020.524

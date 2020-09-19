@@ -159,7 +159,6 @@ kv = """
             padding: 10
             spacing: 2
             RoundedButton:
-                id: buy_save_customer_button
                 text: "Save Customer"
                 width: 120
                 size_hint_x: None
@@ -182,6 +181,8 @@ class AddCustomerScreen(screen.AppScreen):
         self.ids.customer_phone_input.text = ''
         self.ids.customer_email_input.text = ''
         self.ids.customer_address_input.text = ''
+        self.ids.customer_photo_picture_image.source = ''
+        self.ids.customer_passport_picture_image.source = ''
 
     def on_pre_enter(self, *args):
         if self.new_customer_id is None:

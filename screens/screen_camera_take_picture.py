@@ -12,6 +12,7 @@ from kivy.uix.button import Button
 #------------------------------------------------------------------------------
 
 from components import screen
+from components.webfont import fa_icon
 
 #------------------------------------------------------------------------------
 
@@ -33,7 +34,7 @@ class CameraTakePictureScreen(screen.AppScreen):
         f_layout.add_widget(img)
         self.camera_texture = img
 
-        btn = Button(id='take_picture_button', text='click')
+        btn = Button(id='take_picture_button', text=fa_icon('camera'))
         btn.pos_hint = {"x":0.0, "y": 0.0, }
         btn.size_hint = (None, None, )
         btn.width = 50

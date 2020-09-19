@@ -13,6 +13,7 @@ from kivy.logger import Logger, LOG_LEVELS
 
 from components import buttons
 from components import labels
+from components import list_view
 from components import main_window
 
 from screens import screen_buy
@@ -40,6 +41,7 @@ kv = """
 """ + '\n'.join([
     labels.kv,
     buttons.kv,
+    list_view.kv,
     screen_buy.kv,
     screen_sell.kv,
     screen_transactions.kv,
@@ -63,6 +65,8 @@ class BitCoinContractsApp(App):
         local_storage.init()
         screen_transactions._Transactions = local_storage.load_transactions_list()
         screen_customers._Customers = local_storage.load_customers_list()
+        self.title = 'BitCoin Simple Contracts'
+        self.icon = './icons/btcusd.ico'
         return main_window.MainWindow()
 
     def on_stop(self):

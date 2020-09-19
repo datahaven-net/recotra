@@ -58,9 +58,11 @@ kv = """
         orientation: 'vertical'
         CustomersView:
             id: customers_view
+            size_hint: 1, 1
         BoxLayout:
             orientation: 'horizontal'
-            # size_hint: 1, .08
+            size_hint: None, None
+            height: self.minimum_height
             padding: 10
             spacing: 2
             RoundedButton:
@@ -121,7 +123,9 @@ class CustomersScreen(AppScreen):
         self.clear_selected_items()
 
     def on_customers_add_button_clicked(self):
-        App.get_running_app().root.ids.scr_manager.get_screen('add_customer_screen').new_customer_id = None
+        add_customer_screen = App.get_running_app().root.ids.scr_manager.get_screen('add_customer_screen')
+        add_customer_screen.new_customer_id = None
+        # add_customer_screen.clean_input_fields()
         App.get_running_app().root.ids.scr_manager.current = 'add_customer_screen'
         self.clear_selected_items()
 
