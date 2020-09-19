@@ -57,8 +57,11 @@ kv = """
         orientation: 'vertical'
         SelectCustomerView:
             id: select_customer_view
+            size_hint: 1, 1
         BoxLayout:
             orientation: 'horizontal'
+            size_hint: None, None
+            height: self.minimum_height
             padding: 10
             spacing: 2
             RoundedButton:
