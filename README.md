@@ -1,4 +1,4 @@
-# btc-simple-contracts
+# RECOTRA
 
 A tool for accounting BTC exchange contracts
 
