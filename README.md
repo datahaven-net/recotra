@@ -1,6 +1,7 @@
 # RECOTRA
 
 RECOTRA	= REgulatory COmpliant TRAder
+
 This software facilitates in person Bitcoin trading with paper contracts with QR codes.
 It also helps with Regulatory Compliance requirements for KYC and AML.
 One person with a computer, printer, scanner, webcam can trade Bitcoin with in person customers.
