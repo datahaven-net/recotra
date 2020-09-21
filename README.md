@@ -1,5 +1,17 @@
 # RECOTRA
 
+RECOTRA	= REgulatory COmpliant TRAder
+This software facilitates in person Bitcoin trading with paper contracts with QR codes.
+It also helps with Regulatory Compliance requirements for KYC and AML.
+One person with a computer, printer, scanner, webcam can trade Bitcoin with in person customers.
+You can provide the same service as a "Bitcoin ATM" with far lower capital costs.
+It is also much easier to keep in operation than an ATM.
+
+Link to Video showing use of this software coming here soon:   
+
+Regulators classify this under VASP - Virtual Asset Service Provider
+
+
 A tool for accounting BTC exchange contracts
 
 Uses Kivy framework to render user interface
