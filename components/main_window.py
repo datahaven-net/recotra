@@ -4,6 +4,10 @@ from kivy.uix.screenmanager import ScreenManager
 #------------------------------------------------------------------------------
 
 kv = """
+<VerticalScrollView@ScrollView>:
+    do_scroll_x: False
+
+
 <WelcomeScreen@Screen>:
     Label:
         color: 0, 0, 0, 1 
@@ -26,10 +30,6 @@ kv = """
         id: sell_screen
         name: 'sell_screen'
 
-    TransactionsScreen:
-        id: transactions_screen
-        name: 'transactions_screen'
-
     CustomersScreen:
         id: customers_screen
         name: 'customers_screen'
@@ -41,6 +41,14 @@ kv = """
     SelectCustomerScreen:
         id: select_customer_screen
         name: 'select_customer_screen'
+
+    TransactionsScreen:
+        id: transactions_screen
+        name: 'transactions_screen'
+
+    OneTransactionScreen:
+        id: one_transaction_screen
+        name: 'one_transaction_screen'
 
 
 <MainWindow>:
