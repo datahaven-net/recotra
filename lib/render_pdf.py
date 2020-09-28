@@ -1,6 +1,4 @@
 import os
-import platform
-import subprocess
 import tempfile
 import pdfkit  # @UnresolvedImport
 
@@ -10,7 +8,7 @@ from lib import render_qr
 
 #------------------------------------------------------------------------------
 
-def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None):
+def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None):
     if not pdf_filepath:
         pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='btc-contract-')
     if os.path.isfile(pdf_filepath):
@@ -22,13 +20,13 @@ def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
     html_template = """
 <html>
 <head>
-    <title>AI domains registrations</title>
+    <title>Bitcoin.ai Ltd.</title>
 </head>
 <body>
     <table width=100%>
         <tr>
             <td align=right colspan="4">
-                <font size=+1>BITCOIN PURCHASE CONTRACT</font>
+                <font size=+1>BITCOIN {contract_type_str} CONTRACT</font>
                 <hr>
             </td>
         </tr>
@@ -40,8 +38,8 @@ def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
         <tr valign=top>
             <td colspan="4">
                 <font size=+2>
-                <p>Customer selling Bitcoin: <b>{seller[first_name]} {seller[last_name]}</b></p>
-                <p>Customer number: {seller[customer_id]}</p>
+                <p>Customer {buying_selling} Bitcoin: <b>{first_name} {last_name}</b></p>
+                <p>Customer number: {customer_id}</p>
                 <p>Transaction price: <b>${btc_price}</b> US / BTC</p>
                 <p>Dollar Amount: <b>${usd_amount}</b> US</p>
                 <p>BTC Amount: <b>{btc_amount}</b></p>
@@ -106,7 +104,7 @@ def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
                 <br>
                 <br> 
                 <hr>
-                <font size=+1><b>{buyer[first_name]} {buyer[last_name]}</b></font>
+                <font size=+1><b>{first_name} {last_name}</b></font>
             </td>
             <td align=right colspan="2">
                 &nbsp;
@@ -116,8 +114,16 @@ def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
 </body>
 </html>
     """
+    contract_type = transaction_details['contract_type']
+    buyer = transaction_details['buyer']
+    seller = transaction_details['seller']
     params = {
         'qr_filepath': qr_filepath,
+        'contract_type_str': contract_type.upper(),
+        'buying_selling': 'buying' if contract_type == 'purchase' else 'selling',
+        'first_name': seller['first_name'] if contract_type == 'purchase' else buyer['first_name'],
+        'last_name': seller['last_name'] if contract_type == 'purchase' else buyer['last_name'],
+        'customer_id': seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id'],
     }
     params.update(transaction_details)
     rendered_html = html_template.format(**params)
@@ -125,8 +131,6 @@ def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
     pdfkit.from_string(
         input=rendered_html,
         output_path=pdf_filepath,
-        # css=os.path.abspath('print_pdf.css'),
-        # options={ 'quiet': '', 'zoom': 2, 'page-size': 'A4', 'dpi': 400, },
     )
     with open(pdf_filepath, "rb") as pdf_file:
         pdf_raw = pdf_file.read()
@@ -135,13 +139,3 @@ def build_buy_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
         'body': pdf_raw,
         'filename': pdf_filepath,
     }
-
-#------------------------------------------------------------------------------
-
-def open_file(path):
-    if platform.system() == "Windows":
-        os.startfile(path)  # @UndefinedVariable
-    elif platform.system() == "Darwin":
-        subprocess.Popen(["open", path])
-    else:
-        subprocess.Popen(["xdg-open", path])

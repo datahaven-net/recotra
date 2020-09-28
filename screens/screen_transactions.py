@@ -140,7 +140,7 @@ class TransactionsView(list_view.SelectableRecycleView):
             'amount_usd': 'with [b]{}$ US[/b]'.format(i['usd_amount']),
             'date': i['date'],
             'from_to': '{} -> {}'.format(i['seller']['btc_address'], i['buyer']['btc_address']),
-            'blockchain_status': '[{}]'.format(i.get('blockchain_status', 'unconfirmed')),
+            'blockchain_status': '[color=#b0b070]{}[/color]'.format(i.get('blockchain_status', 'unconfirmed')),
         } for i in local_storage.load_transactions_list()]
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
