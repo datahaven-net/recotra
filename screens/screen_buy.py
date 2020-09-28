@@ -13,67 +13,74 @@ from storage import local_storage
 
 kv = """
 <BuyScreen>:
+
     AnchorLayout:
         anchor_x: 'left'
         anchor_y: 'bottom'
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint: 1, .08
             padding: 10
             spacing: 2
+
             RoundedButton:
                 id: save_customer_button
                 text: "select customer"
-                width: 120
+                width: 140
                 size_hint_x: None
                 on_release: root.on_select_customer_button_clicked()
+
             RoundedButton:
                 text: "clear"
-                width: 120
+                width: 140
                 size_hint_x: None
                 on_release: root.clean_input_fields()
+
             RoundedButton:
-                text: "start transaction"
-                width: 120
+                text: "create contract"
+                width: 140
                 size_hint_x: None
-                # on_release: root.on_pdf_file_button_clicked()
                 on_release: root.on_start_transaction_button_clicked()
+
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'top'
+
         GridLayout:
             cols: 2
             padding: 10
             spacing: 2
             row_force_default: True
             row_default_height: 40
+
             Label:
-                text: "First name:"
+                text: "first name:"
             TextInput:
                 id: person_first_name_input
                 text: ""
             Label:
-                text: "Last name:"
+                text: "last name:"
             TextInput:
                 id: person_last_name_input
                 text: ""
             Label:
-                text: "Phone:"
+                text: "phone:"
             TextInput:
                 id: person_phone_input
                 text: ""
             Label:
-                text: "E-mail:"
+                text: "e-mail:"
             TextInput:
                 id: person_email_input
                 text: ""
             Label:
-                text: "Address:"
+                text: "street address:"
             TextInput:
                 id: person_address_input
                 text: ""
             Label:
-                text: "Amount (US $):"
+                text: "amount (US $):"
             TextInput:
                 id: usd_amount_input
                 text: ""
@@ -88,7 +95,7 @@ kv = """
                 id: btc_amount_input
                 text: ""
             Label:
-                text: "Receiving BitCoin address:"
+                text: "receiving BitCoin address:"
             TextInput:
                 id: receive_address_input
                 text: ""
@@ -107,8 +114,8 @@ class BuyScreen(AppScreen):
         self.ids.person_phone_input.text = ''
         self.ids.person_email_input.text = ''
         self.ids.person_address_input.text = ''
-        self.ids.btc_price_input.text = ''
         self.ids.usd_amount_input.text = ''
+        self.ids.btc_price_input.text = ''
         self.ids.btc_amount_input.text = ''
         self.ids.receive_address_input.text = ''
         self.selected_customer_id = None
@@ -134,7 +141,7 @@ class BuyScreen(AppScreen):
         self.selected_customer_id = selected_customer_id
         self.selected_customer_info = local_storage.read_customer_info(self.selected_customer_id)
         self.populate_customer_info_fields(self.selected_customer_info)
-        App.get_running_app().root.ids.scr_manager.current = 'buy_screen'
+        self.scr_manager().current = 'buy_screen'
 
     def on_start_transaction_button_clicked(self):
         t_now = datetime.datetime.now()
@@ -166,5 +173,6 @@ class BuyScreen(AppScreen):
             ),
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
+        local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)
         self.scr('one_transaction_screen').transaction_id = new_transaction_details['transaction_id']
         self.scr_manager().current = 'one_transaction_screen'

@@ -4,6 +4,7 @@ import datetime
 #------------------------------------------------------------------------------
 
 from lib import render_pdf
+from lib import system
 
 from components.screen import AppScreen
 
@@ -163,7 +164,10 @@ class OneTransactionScreen(AppScreen):
     transaction_id = None
 
     def populate_fields(self, tran_details):
-        self.ids.contract_type_input.text = '[size=30]BTC %s Contract[/size]' % ('Purchase' if tran_details['contract_type'] == 'purchase' else 'Sales')
+        self.ids.contract_type_input.text = '[size=30]BTC %s Contract #%s[/size]' % (
+            ('Purchase' if tran_details['contract_type'] == 'purchase' else 'Sales'),
+            tran_details['transaction_id'],
+        )
 
         self.ids.seller_first_name_input.text = tran_details['seller']['first_name'] or ''
         self.ids.seller_last_name_input.text = tran_details['seller']['last_name'] or ''
@@ -196,8 +200,8 @@ class OneTransactionScreen(AppScreen):
     def on_pdf_file_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)
         if transaction_details:
-            buy_contract = render_pdf.build_buy_contract(
+            buy_contract = render_pdf.build_pdf_contract(
                 transaction_details=transaction_details,
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
-            render_pdf.open_file(buy_contract['filename'])
+            system.open_file(buy_contract['filename'])
