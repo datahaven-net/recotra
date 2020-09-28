@@ -1,8 +1,8 @@
+
+from components import screen
 from components import list_view
 
-#------------------------------------------------------------------------------
-
-_Transactions = []
+from storage import local_storage
 
 #------------------------------------------------------------------------------
 
@@ -22,6 +22,7 @@ kv = """
     buyer: 'buyer'
     seller: 'seller'
     from_to: 'from_to'
+    blockchain_status: 'blockchain_status'
     amount_usd: 'amount_usd'
     amount_btc: 'amount_btc'
     price_btc: 'price_btc'
@@ -78,6 +79,12 @@ kv = """
         font_size: 12
         size_hint: None, 0.3
         width: self.texture_size[0] + 10
+    Label:
+        id: blockchain_status
+        text: root.blockchain_status
+        size_hint: None, 0.3
+        width: self.texture_size[0] + 10
+
 
 <TransactionsView>:
     viewclass: 'TransactionRecord'
@@ -90,7 +97,7 @@ kv = """
         multiselect: False
         touch_multiselect: False
 
-<TransactionsScreen@Screen>:
+<TransactionsScreen>:
     AnchorLayout:
         anchor_x: 'left'
         anchor_y: 'bottom'
@@ -100,7 +107,14 @@ kv = """
             padding: 10
             spacing: 2
             RoundedButton:
-                text: 'Print transactions'
+                id: view_transaction_button
+                text: 'open'
+                width: 160
+                size_hint_x: None
+                disabled: True
+                on_release: root.on_view_transaction_button_clicked()
+            RoundedButton:
+                text: 'print transactions'
                 width: 160
                 size_hint_x: None
     AnchorLayout:
@@ -112,59 +126,30 @@ kv = """
 
 #------------------------------------------------------------------------------
 
-sample_transactions = [
-    {
-        'tr_id': 1,
-        'tr_type': 'buy',
-        'buyer': 'Vincent Cate',
-        'seller': 'John Smith',
-        'addr_from': '1FiTczw1GeaEdMoGbQWngWT8gCirYuzfne',
-        'addr_to': '15f66HZrumZ5eW6RuA5A2JewBasBh44gB7',
-        'amount_btc': 0.009804,
-        'amount_usd': 100.0,
-        'price_btc': 10221.5,
-        'date': 'Sept 4, 2020 9:04 AM',
-    }, {
-        'tr_id': 2,
-        'tr_type': 'sell',
-        'buyer': 'Marry Jane',
-        'seller': 'Vincent Cate',
-        'addr_from': '3AGZzm6QMmYG8e7JzRuAUPnSYnXfHRtFSZ',
-        'addr_to': '15f66HZrumZ5eW6RuA5A2JewBasBh44gB7',
-        'amount_usd': 500.0,
-        'amount_btc': 0.049523,
-        'price_btc': 10121.25,
-        'date': 'Sept 5, 2020 11:08 AM',
-    }, {
-        'tr_id': 3,
-        'tr_type': 'buy',
-        'buyer': 'Vincent Cate',
-        'seller': 'John Smith',
-        'addr_from': '17jEt5PSWwVt8WZFHZ3urE7fQ4m7Y28eUo',
-        'addr_to': '15f66HZrumZ5eW6RuA5A2JewBasBh44gB7',
-        'amount_usd': 2000.0,
-        'amount_btc': 0.180243,
-        'price_btc': 10033.12,
-        'date': 'Sept 9, 2020 5:34 PM',
-    }
-]
-
-#------------------------------------------------------------------------------
-
 class TransactionsView(list_view.SelectableRecycleView):
 
     def __init__(self, **kwargs):
         super(TransactionsView, self).__init__(**kwargs)
         self.data = [{
-            'tr_id': str(i['tr_id']),
-            'buyer': i['buyer'],
-            'tr_type': '{}'.format('bought' if i['tr_type'] == 'buy' else 'sold'),
-            'amount_btc': '[b]{}[/b] BTC {}'.format(i['amount_btc'], 'from' if i['tr_type'] == 'buy' else 'to'),
-            'seller': '[b]{}[/b]'.format(i['seller']),
-            'price_btc': 'at [b]{}[/b] $/BTC'.format(i['price_btc']),
-            'amount_usd': 'with [b]{}$ US[/b]'.format(i['amount_usd']),
+            'tr_id': str(i['transaction_id']),
+            'tr_type': '{}'.format('bought' if i['contract_type'] == 'purchase' else 'sold'),
+            'buyer': '[b]{} {}[/b]'.format(i['buyer']['first_name'], i['buyer']['last_name']),
+            'amount_btc': '[b]{}[/b] BTC {}'.format(i['btc_amount'], 'from' if i['contract_type'] == 'purchase' else 'to'),
+            'seller': '[b]{} {}[/b]'.format(i['seller']['first_name'], i['seller']['last_name']),
+            'price_btc': 'at [b]{}[/b] $/BTC'.format(i['btc_price']),
+            'amount_usd': 'with [b]{}$ US[/b]'.format(i['usd_amount']),
             'date': i['date'],
-            'from_to': '{} -> {}'.format(i['addr_from'], i['addr_to']),
-        } for i in sample_transactions]
+            'from_to': '{} -> {}'.format(i['seller']['btc_address'], i['buyer']['btc_address']),
+            'blockchain_status': '[{}]'.format(i.get('blockchain_status', 'unconfirmed')),
+        } for i in local_storage.load_transactions_list()]
+
+    def on_selection_applied(self, item, index, is_selected, prev_selected):
+        self.parent.parent.ids.view_transaction_button.disabled = not is_selected
 
 #------------------------------------------------------------------------------
+
+class TransactionsScreen(screen.AppScreen):
+
+    def on_view_transaction_button_clicked(self):
+        self.scr('one_transaction_screen').transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
+        self.scr_manager().current = 'one_transaction_screen'

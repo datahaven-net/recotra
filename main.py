@@ -18,10 +18,11 @@ from components import main_window
 
 from screens import screen_buy
 from screens import screen_sell
-from screens import screen_transactions
 from screens import screen_customers
 from screens import screen_add_customer
 from screens import screen_select_customer
+from screens import screen_transactions
+from screens import screen_one_transaction
 
 from storage import local_storage
 
@@ -44,10 +45,11 @@ kv = """
     list_view.kv,
     screen_buy.kv,
     screen_sell.kv,
-    screen_transactions.kv,
     screen_customers.kv,
     screen_add_customer.kv,
     screen_select_customer.kv,
+    screen_transactions.kv,
+    screen_one_transaction.kv,
     main_window.kv,
 ])
 # print(kv)
@@ -63,11 +65,10 @@ class BitCoinContractsApp(App):
         logging.getLogger().setLevel(logging.DEBUG)
 
         local_storage.init()
-        screen_transactions._Transactions = local_storage.load_transactions_list()
-        screen_customers._Customers = local_storage.load_customers_list()
         self.title = 'BitCoin Simple Contracts'
         self.icon = './icons/btcusd.ico'
-        return main_window.MainWindow()
+        self.main_window = main_window.MainWindow()
+        return self.main_window
 
     def on_stop(self):
         self.root.ids.scr_manager.get_screen('customers_screen').clear_selected_items()

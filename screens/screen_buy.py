@@ -6,14 +6,13 @@ from kivy.app import App
 
 #------------------------------------------------------------------------------
 
-from lib import render_pdf
 from components.screen import AppScreen
 from storage import local_storage
 
 #------------------------------------------------------------------------------
 
 kv = """
-<BuyScreen@Screen>:
+<BuyScreen>:
     AnchorLayout:
         anchor_x: 'left'
         anchor_y: 'bottom'
@@ -24,20 +23,21 @@ kv = """
             spacing: 2
             RoundedButton:
                 id: save_customer_button
-                text: "Select Customer"
+                text: "select customer"
                 width: 120
                 size_hint_x: None
                 on_release: root.on_select_customer_button_clicked()
             RoundedButton:
-                text: "Clear"
+                text: "clear"
                 width: 120
                 size_hint_x: None
                 on_release: root.clean_input_fields()
             RoundedButton:
-                text: "Print!"
+                text: "start transaction"
                 width: 120
                 size_hint_x: None
-                on_release: root.on_pdf_file_button_clicked()
+                # on_release: root.on_pdf_file_button_clicked()
+                on_release: root.on_start_transaction_button_clicked()
     AnchorLayout:
         anchor_x: 'center'
         anchor_y: 'top'
@@ -73,14 +73,14 @@ kv = """
                 id: person_address_input
                 text: ""
             Label:
-                text: "BTC price (US $ / BTC):"
-            TextInput:
-                id: btc_price_input
-                text: ""
-            Label:
                 text: "Amount (US $):"
             TextInput:
                 id: usd_amount_input
+                text: ""
+            Label:
+                text: "BTC price (US $ / BTC):"
+            TextInput:
+                id: btc_price_input
                 text: ""
             Label:
                 text: "BTC Amount:"
@@ -92,7 +92,6 @@ kv = """
             TextInput:
                 id: receive_address_input
                 text: ""
-
 """
 
 #------------------------------------------------------------------------------
@@ -100,7 +99,7 @@ kv = """
 class BuyScreen(AppScreen):
 
     selected_customer_id = None
-    selected_custoimer_info = None
+    selected_customer_info = None
 
     def clean_input_fields(self):
         self.ids.person_first_name_input.text = ''
@@ -133,21 +132,39 @@ class BuyScreen(AppScreen):
 
     def on_customer_selected(self, selected_customer_id):
         self.selected_customer_id = selected_customer_id
-        self.selected_custoimer_info = local_storage.read_customer_info(self.selected_customer_id)
-        self.populate_customer_info_fields(self.selected_custoimer_info)
+        self.selected_customer_info = local_storage.read_customer_info(self.selected_customer_id)
+        self.populate_customer_info_fields(self.selected_customer_info)
         App.get_running_app().root.ids.scr_manager.current = 'buy_screen'
 
-    def on_pdf_file_button_clicked(self):
+    def on_start_transaction_button_clicked(self):
         t_now = datetime.datetime.now()
-        buy_contract = render_pdf.build_buy_contract(
-            customer_info=self.selected_custoimer_info,
-            contract_info=dict(
-                btc_price=self.ids.btc_price_input.text,
-                usd_amount=self.ids.usd_amount_input.text,
-                btc_amount=self.ids.btc_amount_input.text,
-                receive_address=self.ids.receive_address_input.text,
-                date=t_now.strftime("%b %d %Y"),
-                time=t_now.strftime("%H:%M %p"),
+        transaction_details = {}
+        transaction_details.update(dict(
+            contract_type='purchase',
+            usd_amount=self.ids.usd_amount_input.text,
+            btc_price=self.ids.btc_price_input.text,
+            btc_amount=self.ids.btc_amount_input.text,
+            date=t_now.strftime("%b %d %Y"),
+            time=t_now.strftime("%H:%M %p"),
+            seller=dict(
+                customer_id=self.selected_customer_id,
+                first_name=self.ids.person_first_name_input.text,
+                last_name=self.ids.person_last_name_input.text,
+                btc_address=self.ids.receive_address_input.text,
+                address=self.ids.person_address_input.text,
+                email=self.ids.person_email_input.text,
+                phone=self.ids.person_phone_input.text,
             ),
-        )
-        render_pdf.open_file(buy_contract['filename'])
+            buyer=dict(
+                customer_id=None,
+                first_name='ABCD',
+                last_name='EFGH',
+                btc_address='11223344556677889900abcdefabcdef',
+                address='Anguilla, ABCD 1234',
+                email='abcdefgh@gmail.com',
+                phone='12345679',
+            ),
+        ))
+        new_transaction_details = local_storage.create_new_transaction(transaction_details)
+        self.scr('one_transaction_screen').transaction_id = new_transaction_details['transaction_id']
+        self.scr_manager().current = 'one_transaction_screen'

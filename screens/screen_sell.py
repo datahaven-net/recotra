@@ -8,7 +8,7 @@ from storage import local_storage
 #------------------------------------------------------------------------------
 
 kv = """
-<SellScreen@Screen>:
+<SellScreen>:
     AnchorLayout:
         anchor_x: 'left'
         anchor_y: 'bottom'
