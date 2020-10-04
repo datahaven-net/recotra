@@ -7,6 +7,7 @@ from kivy.app import App
 #------------------------------------------------------------------------------
 
 from components.screen import AppScreen
+from screens.screen_camera_scan_qr import CameraScanQRScreen
 from storage import local_storage
 
 #------------------------------------------------------------------------------
@@ -96,9 +97,16 @@ kv = """
                 text: ""
             Label:
                 text: "receiving BitCoin address:"
-            TextInput:
-                id: receive_address_input
-                text: ""
+            BoxLayout:
+                orientation: 'horizontal'
+                TextInput:
+                    id: receive_address_input
+                    text: ""
+                RoundedButton:
+                    size_hint: None, 1
+                    width: self.texture_size[0]
+                    text: "  scan  "
+                    on_release: root.on_receive_address_scan_qr_button_clicked()
 """
 
 #------------------------------------------------------------------------------
@@ -142,6 +150,25 @@ class BuyScreen(AppScreen):
         self.selected_customer_info = local_storage.read_customer_info(self.selected_customer_id)
         self.populate_customer_info_fields(self.selected_customer_info)
         self.scr_manager().current = 'buy_screen'
+
+    def on_receive_address_scan_qr_button_clicked(self, *args):
+        self.scan_qr_screen = CameraScanQRScreen(
+            name='camera_scan_qr_screen',
+            scan_qr_callback=self.on_receive_address_scan_qr_ready,
+            cancel_callback=self.on_receive_address_scan_qr_cancel,
+        )
+        self.scr_manager().add_widget(self.scan_qr_screen)
+        self.scr_manager().current = 'camera_scan_qr_screen'
+
+    def on_receive_address_scan_qr_ready(self, *args):
+        print('on_receive_address_scan_qr_ready', args[0])
+        self.scr_manager().current = 'buy_screen'
+        self.scr_manager().remove_widget(self.scan_qr_screen)
+        self.ids.receive_address_input.text = args[0]
+
+    def on_receive_address_scan_qr_cancel(self, *args):
+        self.scr_manager().current = 'buy_screen'
+        self.scr_manager().remove_widget(self.scan_qr_screen)
 
     def on_start_transaction_button_clicked(self):
         t_now = datetime.datetime.now()

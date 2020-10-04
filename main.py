@@ -1,3 +1,4 @@
+import os
 import sys
 import logging
 
@@ -23,6 +24,7 @@ from screens import screen_add_customer
 from screens import screen_select_customer
 from screens import screen_transactions
 from screens import screen_one_transaction
+# from screens import screen_camera_scan_qr
 
 from storage import local_storage
 
@@ -32,6 +34,8 @@ Config.set('input', 'mouse', 'mouse,multitouch_on_demand')  # disable multi-touc
 Config.set('graphics', 'resizable', True)
 
 Window.clearcolor = (1, 1, 1, 1)
+
+os.environ['OPENCV_VIDEOIO_PRIORITY_MSMF'] = '0'
 
 #------------------------------------------------------------------------------
 
@@ -50,9 +54,9 @@ kv = """
     screen_select_customer.kv,
     screen_transactions.kv,
     screen_one_transaction.kv,
+    # screen_camera_scan_qr.kv,
     main_window.kv,
 ])
-# print(kv)
 Builder.load_string(kv)
 
 #------------------------------------------------------------------------------
@@ -63,6 +67,9 @@ class BitCoinContractsApp(App):
         level = LOG_LEVELS.get('debug')  #  if len(sys.argv) > 2 else LOG_LEVELS.get('info')
         Logger.setLevel(level=level)
         logging.getLogger().setLevel(logging.DEBUG)
+
+        from components import xcamera
+        from components import zbarcam
 
         local_storage.init()
         self.title = 'BitCoin Simple Contracts'
