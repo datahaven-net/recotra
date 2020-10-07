@@ -6,8 +6,12 @@ from kivy.app import App
 
 #------------------------------------------------------------------------------
 
+from lib import coinmarketcap_client
+
 from components.screen import AppScreen
+
 from screens.screen_camera_scan_qr import CameraScanQRScreen
+
 from storage import local_storage
 
 #------------------------------------------------------------------------------
@@ -134,7 +138,7 @@ class BuyScreen(AppScreen):
     selected_customer_info = None
 
     def clean_input_fields(self):
-        cur_settings = local_storage.read_settings()
+        self.selected_customer_id = None
         self.ids.person_first_name_input.text = ''
         self.ids.person_last_name_input.text = ''
         self.ids.person_phone_input.text = ''
@@ -143,8 +147,21 @@ class BuyScreen(AppScreen):
         self.ids.usd_amount_input.text = ''
         self.ids.btc_price_input.text = ''
         self.ids.btc_amount_input.text = ''
+        cur_settings = local_storage.read_settings()
         self.ids.receive_address_input.text = cur_settings.get('receiving_btc_address', '')
-        self.selected_customer_id = None
+        coinmarketcap_api_key = cur_settings.get('coinmarketcap_api_key', '')
+        if coinmarketcap_api_key:
+            coinmarketcap_response = coinmarketcap_client.cryptocurrency_listings(
+                api_key=coinmarketcap_api_key, start=1, limit=1, convert='USD',
+            )
+            if coinmarketcap_response:
+                try:
+                    btc_usd_price = coinmarketcap_response['data'][0]['quote']['USD']['price']
+                except:
+                    print('failed coinmarketcap response:', coinmarketcap_response)
+                    btc_usd_price = None
+                if btc_usd_price is not None:
+                    self.ids.btc_price_input.text = '%.2f' % btc_usd_price
 
     def populate_customer_info_fields(self, customer_info):
         self.ids.person_first_name_input.text = customer_info.get('first_name') or ''
