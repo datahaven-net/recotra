@@ -9,6 +9,7 @@ kv = """
 
 
 <WelcomeScreen@Screen>:
+
     Label:
         color: 0, 0, 0, 1 
         markup: True
@@ -18,6 +19,7 @@ kv = """
 <ScreenManagement>:
     transition: NoTransition()
     customers_screen: customers_screen
+
     WelcomeScreen:
         id: welcome_screen
         name: 'welcome_screen'
@@ -50,43 +52,61 @@ kv = """
         id: one_transaction_screen
         name: 'one_transaction_screen'
 
+    SettingsScreen:
+        id: settings_screen
+        name: 'settings_screen'
+
 
 <MainWindow>:
     color: 0, 0, 0, 1
+
     canvas.before:
         Color:
             rgba: 1, 1, 1, 1
         Rectangle:
             pos: self.pos
             size: self.size
+
     BoxLayout:
         orientation: 'vertical'
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint: None, None
             height: self.minimum_height
             padding: 10
             spacing: 2
+
             RoundedButton:
                 text: 'Buy BTC'
                 on_press: scr_manager.current = 'buy_screen'
                 width: 120
                 size_hint_x: None
+
             RoundedButton:
                 text: 'Sell BTC'
                 on_press: scr_manager.current = 'sell_screen'
                 width: 120
                 size_hint_x: None
+
             RoundedButton:
                 text: 'Transactions'
                 on_press: scr_manager.current = 'transactions_screen'
                 width: 120
                 size_hint_x: None
+
             RoundedButton:
                 text: 'Customers'
                 on_press: scr_manager.current = 'customers_screen'
                 width: 120
                 size_hint_x: None
+
+            RoundedButton:
+                text: 'Settings'
+                on_press: scr_manager.current = 'settings_screen'
+                width: 120
+                size_hint_x: None
+
         ScreenManagement:
             id: scr_manager
             size_hint: 1, 1

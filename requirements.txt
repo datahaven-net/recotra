@@ -7,4 +7,3 @@ opencv-python==4.4.0.42
 qrcode==6.1
 pyzbar==0.1.8
 six==1.15.0
-zbarcam==2020.524

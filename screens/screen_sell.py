@@ -3,15 +3,33 @@ import datetime
 #------------------------------------------------------------------------------
 
 from kivy.app import App
+from screens.screen_camera_scan_qr import CameraScanQRScreen
 
 #------------------------------------------------------------------------------
 
+from lib import coinmarketcap_client
+
 from components.screen import AppScreen
+
 from storage import local_storage
 
 #------------------------------------------------------------------------------
 
 kv = """
+<SellFieldLabel@RightAlignLabel>:
+    size_hint_x: None
+    width: dp(200)
+    valign: 'middle'
+
+
+<SellFieldInput@TextInput>:
+    size_hint_x: None
+    size_hint_y: None
+    width: dp(360)
+    height: self.minimum_height
+    multiline: False
+
+
 <SellScreen>:
 
     AnchorLayout:
@@ -48,57 +66,76 @@ kv = """
         anchor_y: 'top'
 
         GridLayout:
+            size_hint_x: None
+            size_hint_y: None
+            width: self.minimum_width
+            height: self.minimum_height
             cols: 2
             padding: 10
-            spacing: 2
-            row_force_default: True
-            row_default_height: 40
+            spacing: 10
 
-            Label:
+            SellFieldLabel:
                 text: "first name:"
-            TextInput:
+            SellFieldInput:
                 id: person_first_name_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "last name:"
-            TextInput:
+            SellFieldInput:
                 id: person_last_name_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "phone:"
-            TextInput:
+            SellFieldInput:
                 id: person_phone_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "e-mail:"
-            TextInput:
+            SellFieldInput:
                 id: person_email_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "street address:"
-            TextInput:
+            SellFieldInput:
                 id: person_address_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "Amount (US $):"
-            TextInput:
+            SellFieldInput:
                 id: usd_amount_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "BTC price (US $ / BTC):"
-            TextInput:
+            SellFieldInput:
                 id: btc_price_input
                 text: ""
-            Label:
-                text: "BTC Amount:"
-            TextInput:
+
+            SellFieldLabel:
+                text: "BTC amount:"
+            SellFieldInput:
                 id: btc_amount_input
                 text: ""
-            Label:
+
+            SellFieldLabel:
                 text: "receiving BitCoin address:"
-            TextInput:
-                id: receive_address_input
-                text: ""
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: self.minimum_height
+                SellFieldInput:
+                    id: receive_address_input
+                    text: ""
+                RoundedButton:
+                    size_hint: None, 1
+                    width: self.texture_size[0]
+                    text: "  scan  "
+                    on_release: root.on_receive_address_scan_qr_button_clicked()
 """
 
 #------------------------------------------------------------------------------
@@ -109,6 +146,7 @@ class SellScreen(AppScreen):
     selected_customer_info = None
 
     def clean_input_fields(self):
+        self.selected_customer_id = None
         self.ids.person_first_name_input.text = ''
         self.ids.person_last_name_input.text = ''
         self.ids.person_phone_input.text = ''
@@ -118,7 +156,20 @@ class SellScreen(AppScreen):
         self.ids.btc_price_input.text = ''
         self.ids.btc_amount_input.text = ''
         self.ids.receive_address_input.text = ''
-        self.selected_customer_id = None
+        cur_settings = local_storage.read_settings()
+        coinmarketcap_api_key = cur_settings.get('coinmarketcap_api_key', '')
+        if coinmarketcap_api_key:
+            coinmarketcap_response = coinmarketcap_client.cryptocurrency_listings(
+                api_key=coinmarketcap_api_key, start=1, limit=1, convert='USD',
+            )
+            if coinmarketcap_response:
+                try:
+                    btc_usd_price = coinmarketcap_response['data'][0]['quote']['USD']['price']
+                except:
+                    print('failed coinmarketcap response:', coinmarketcap_response)
+                    btc_usd_price = None
+                if btc_usd_price is not None:
+                    self.ids.btc_price_input.text = '%.2f' % btc_usd_price
 
     def populate_customer_info_fields(self, customer_info):
         self.ids.person_first_name_input.text = customer_info.get('first_name') or ''
@@ -142,6 +193,24 @@ class SellScreen(AppScreen):
         self.selected_customer_info = local_storage.read_customer_info(self.selected_customer_id)
         self.populate_customer_info_fields(self.selected_customer_info)
         self.scr_manager().current = 'sell_screen'
+
+    def on_receive_address_scan_qr_button_clicked(self, *args):
+        self.scan_qr_screen = CameraScanQRScreen(
+            name='camera_scan_qr_screen',
+            scan_qr_callback=self.on_receive_address_scan_qr_ready,
+            cancel_callback=self.on_receive_address_scan_qr_cancel,
+        )
+        self.scr_manager().add_widget(self.scan_qr_screen)
+        self.scr_manager().current = 'camera_scan_qr_screen'
+
+    def on_receive_address_scan_qr_ready(self, *args):
+        self.scr_manager().current = 'sell_screen'
+        self.scr_manager().remove_widget(self.scan_qr_screen)
+        self.ids.receive_address_input.text = args[0]
+
+    def on_receive_address_scan_qr_cancel(self, *args):
+        self.scr_manager().current = 'sell_screen'
+        self.scr_manager().remove_widget(self.scan_qr_screen)
 
     def on_start_transaction_button_clicked(self):
         t_now = datetime.datetime.now()
