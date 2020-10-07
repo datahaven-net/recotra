@@ -24,7 +24,7 @@ from screens import screen_add_customer
 from screens import screen_select_customer
 from screens import screen_transactions
 from screens import screen_one_transaction
-# from screens import screen_camera_scan_qr
+from screens import screen_settings
 
 from storage import local_storage
 
@@ -54,7 +54,7 @@ kv = """
     screen_select_customer.kv,
     screen_transactions.kv,
     screen_one_transaction.kv,
-    # screen_camera_scan_qr.kv,
+    screen_settings.kv,
     main_window.kv,
 ])
 Builder.load_string(kv)
@@ -67,9 +67,6 @@ class BitCoinContractsApp(App):
         level = LOG_LEVELS.get('debug')  #  if len(sys.argv) > 2 else LOG_LEVELS.get('info')
         Logger.setLevel(level=level)
         logging.getLogger().setLevel(logging.DEBUG)
-
-        from components import xcamera
-        from components import zbarcam
 
         local_storage.init()
         self.title = 'BitCoin Simple Contracts'

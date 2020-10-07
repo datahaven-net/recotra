@@ -13,6 +13,20 @@ from storage import local_storage
 #------------------------------------------------------------------------------
 
 kv = """
+<BuyFieldLabel@RightAlignLabel>:
+    size_hint_x: None
+    width: dp(200)
+    valign: 'middle'
+
+
+<BuyFieldInput@TextInput>:
+    size_hint_x: None
+    size_hint_y: None
+    width: dp(360)
+    height: self.minimum_height
+    multiline: False
+
+
 <BuyScreen>:
 
     AnchorLayout:
@@ -49,64 +63,67 @@ kv = """
         anchor_y: 'top'
 
         GridLayout:
+            size_hint_x: None
+            size_hint_y: None
+            width: self.minimum_width
+            height: self.minimum_height
             cols: 2
             padding: 10
-            spacing: 2
-            row_force_default: True
-            row_default_height: 40
+            spacing: 10
 
-            Label:
+            BuyFieldLabel:
                 text: "first name:"
-            TextInput:
+            BuyFieldInput:
                 id: person_first_name_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "last name:"
-            TextInput:
+            BuyFieldInput:
                 id: person_last_name_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "phone:"
-            TextInput:
+            BuyFieldInput:
                 id: person_phone_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "e-mail:"
-            TextInput:
+            BuyFieldInput:
                 id: person_email_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "street address:"
-            TextInput:
+            BuyFieldInput:
                 id: person_address_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "amount (US $):"
-            TextInput:
+            BuyFieldInput:
                 id: usd_amount_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "BTC price (US $ / BTC):"
-            TextInput:
+            BuyFieldInput:
                 id: btc_price_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "BTC Amount:"
-            TextInput:
+            BuyFieldInput:
                 id: btc_amount_input
                 text: ""
-            Label:
+
+            BuyFieldLabel:
                 text: "receiving BitCoin address:"
-            BoxLayout:
-                orientation: 'horizontal'
-                TextInput:
-                    id: receive_address_input
-                    text: ""
-                RoundedButton:
-                    size_hint: None, 1
-                    width: self.texture_size[0]
-                    text: "  scan  "
-                    on_release: root.on_receive_address_scan_qr_button_clicked()
+            BuyFieldInput:
+                id: receive_address_input
+                text: "<automatically populated from settings>"
 """
 
 #------------------------------------------------------------------------------
@@ -117,6 +134,7 @@ class BuyScreen(AppScreen):
     selected_customer_info = None
 
     def clean_input_fields(self):
+        cur_settings = local_storage.read_settings()
         self.ids.person_first_name_input.text = ''
         self.ids.person_last_name_input.text = ''
         self.ids.person_phone_input.text = ''
@@ -125,7 +143,7 @@ class BuyScreen(AppScreen):
         self.ids.usd_amount_input.text = ''
         self.ids.btc_price_input.text = ''
         self.ids.btc_amount_input.text = ''
-        self.ids.receive_address_input.text = ''
+        self.ids.receive_address_input.text = cur_settings.get('receiving_btc_address', '')
         self.selected_customer_id = None
 
     def populate_customer_info_fields(self, customer_info):
@@ -161,7 +179,6 @@ class BuyScreen(AppScreen):
         self.scr_manager().current = 'camera_scan_qr_screen'
 
     def on_receive_address_scan_qr_ready(self, *args):
-        print('on_receive_address_scan_qr_ready', args[0])
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
         self.ids.receive_address_input.text = args[0]

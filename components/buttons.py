@@ -1,3 +1,5 @@
+from kivy.uix.button import Button
+
 kv = """
 <RoundedButton@Button>:
     markup: True
@@ -28,3 +30,7 @@ kv = """
             size: self.size[0]-4, self.size[1]-4
             radius: [self.corner_radius,]
 """
+
+
+class RoundedButton(Button):
+    pass

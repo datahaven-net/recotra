@@ -52,6 +52,11 @@ def transaction_filepath(transaction_id):
 
 #------------------------------------------------------------------------------
 
+def settings_filepath():
+    return os.path.join(home_dir(), 'settings.json')
+
+#------------------------------------------------------------------------------
+
 def create_home_dir():
     if not os.path.isdir(home_dir()):
         os.mkdir(home_dir())
@@ -166,6 +171,21 @@ def read_customer_info(customer_id):
     src = ReadTextFile(customer_info_filepath(customer_id))
     if not src:
         return None
+    json_data = jsn.loads_text(src)
+    return json_data
+
+#------------------------------------------------------------------------------
+
+def write_settings(settings_dict):
+    create_home_dir()
+    return WriteTextFile(settings_filepath(), jsn.dumps(settings_dict, indent=2))
+
+
+def read_settings():
+    create_home_dir()
+    src = ReadTextFile(settings_filepath())
+    if not src:
+        return {}
     json_data = jsn.loads_text(src)
     return json_data
 
