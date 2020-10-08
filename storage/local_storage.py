@@ -162,6 +162,10 @@ def erase_customer_info(customer_id):
     if not os.path.exists(customer_dir(customer_id)):
         return
     rmdir_recursive(customer_dir(customer_id))
+    try:
+        os.rmdir(customer_dir(customer_id))
+    except:
+        pass
 
 
 def read_customer_info(customer_id):

@@ -7,7 +7,7 @@ kv = """
     color: 1,1,1,1
     disabled_color: .8,.8,.8,1
     background_disabled_normal: ''
-    height: 30
+    height: dp(30)
     # height: self.minimum_height
     size_hint_y: None
     bg_normal: .1,.4,.7,1

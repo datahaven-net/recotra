@@ -1,5 +1,4 @@
 import os
-import datetime
 
 #------------------------------------------------------------------------------
 
@@ -128,7 +127,7 @@ kv = """
                     text: ""
 
                 RightAlignLabel:
-                    text: "spending BitCoin address (optional):"
+                    text: "spending BitCoin address:"
                 LeftAlignLabel:
                     id: spending_btc_address_input
                     text: ""
@@ -187,10 +186,10 @@ class OneTransactionScreen(AppScreen):
 
         if tran_details['contract_type'] == 'purchase':
             self.ids.receiving_btc_address_input.text = tran_details['buyer']['btc_address'] or ''
-            self.ids.spending_btc_address_input.text = tran_details['seller']['btc_address'] or ''
+            self.ids.spending_btc_address_input.text = ''  # tran_details['seller']['btc_address'] or ''
         else:
             self.ids.receiving_btc_address_input.text = tran_details['buyer']['btc_address'] or ''
-            self.ids.spending_btc_address_input.text = tran_details['seller']['btc_address'] or ''
+            self.ids.spending_btc_address_input.text = ''  # tran_details['seller']['btc_address'] or ''
 
         self.ids.blockchain_status_input.text = '[unconfirmed]'
         self.ids.started_date_time_input.text = '{} at {}'.format(tran_details['date'] or '', tran_details['time'] or '')

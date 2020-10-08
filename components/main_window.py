@@ -78,33 +78,33 @@ kv = """
             spacing: 2
 
             RoundedButton:
-                text: 'Buy BTC'
-                on_press: scr_manager.current = 'buy_screen'
-                width: 120
+                text: 'Customer Buying BTC'
+                on_press: scr_manager.current = 'sell_screen'
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 
             RoundedButton:
-                text: 'Sell BTC'
-                on_press: scr_manager.current = 'sell_screen'
-                width: 120
+                text: 'Customer Selling BTC'
+                on_press: scr_manager.current = 'buy_screen'
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 
             RoundedButton:
                 text: 'Transactions'
                 on_press: scr_manager.current = 'transactions_screen'
-                width: 120
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 
             RoundedButton:
                 text: 'Customers'
                 on_press: scr_manager.current = 'customers_screen'
-                width: 120
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 
             RoundedButton:
                 text: 'Settings'
                 on_press: scr_manager.current = 'settings_screen'
-                width: 120
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 
         ScreenManagement:

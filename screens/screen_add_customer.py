@@ -25,24 +25,28 @@ kv = """
                 orientation: 'vertical'
                 padding: 10
                 spacing: 10
+
                 Label:
                     text_size: self.size
                     height: 30
                     valign: "bottom"
                     halign: "right"
                     text: "Photo:"
+
                 Image:
+                    id: customer_photo_picture_image
+                    size_hint: None, None
+                    pos_hint: {"right":1}
+                    size: 200, 150
+                    source: ''
+
                     canvas.before:
                         Color:
                             rgba: (0, 0, 0, 1)
                         Line:
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
                             width: 2
-                    id: customer_photo_picture_image
-                    size_hint: None, None
-                    pos_hint: {"right":1}
-                    size: 200, 150
-                    source: ''
+
                     Button:
                         width: 30
                         height: 30
@@ -63,17 +67,19 @@ kv = """
                     text: "Passport / ID:"
 
                 Image:
+                    id: customer_passport_picture_image
+                    pos_hint: {"right":1}
+                    size_hint: None, None
+                    size: 200, 150
+                    source: ''
+
                     canvas.before:
                         Color:
                             rgba: (0, 0, 0, 1)
                         Line:
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
                             width: 2
-                    id: customer_passport_picture_image
-                    pos_hint: {"right":1}
-                    size_hint: None, None
-                    size: 200, 150
-                    source: ''
+
                     Button:
                         width: 30
                         height: 30
@@ -86,11 +92,11 @@ kv = """
                         text: fa_icon('camera')
                         on_release: root.on_customer_passport_button_clicked()
 
-
             BoxLayout:
                 orientation: 'vertical'
                 padding: 20
                 spacing: 10
+
                 Label:
                     text_size: self.size
                     valign: "bottom"
@@ -104,6 +110,7 @@ kv = """
                     height: 30
                     size_hint_x: None
                     size_hint_y: None
+
                 Label:
                     text_size: self.size
                     valign: "bottom"
@@ -116,6 +123,7 @@ kv = """
                     height: 30
                     size_hint_x: None
                     size_hint_y: None
+
                 Label:
                     text_size: self.size
                     valign: "bottom"
@@ -128,6 +136,7 @@ kv = """
                     height: 30
                     size_hint_x: None
                     size_hint_y: None
+
                 Label:
                     text_size: self.size
                     valign: "bottom"
@@ -140,6 +149,7 @@ kv = """
                     height: 30
                     size_hint_x: None
                     size_hint_y: None
+
                 Label:
                     text_size: self.size
                     valign: "bottom"
@@ -158,6 +168,7 @@ kv = """
             size_hint_y: None
             padding: 10
             spacing: 2
+
             RoundedButton:
                 text: "Save Customer"
                 width: 120
