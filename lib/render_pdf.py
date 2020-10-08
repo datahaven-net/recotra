@@ -52,7 +52,7 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
         </tr>
         <tr>
             <td colspan="4" align=center>
-                <p>Where customer will send Bitcoin to:</p>
+                <p>Where {sender} will send {btc_amount} BTC to:</p>
                 <font size=26>
                     <code>
                     {buyer[btc_address]}
@@ -120,10 +120,11 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
     params = {
         'qr_filepath': qr_filepath,
         'contract_type_str': contract_type.upper(),
-        'buying_selling': 'buying' if contract_type == 'purchase' else 'selling',
+        'buying_selling': 'selling' if contract_type == 'purchase' else 'buying',
         'first_name': seller['first_name'] if contract_type == 'purchase' else buyer['first_name'],
         'last_name': seller['last_name'] if contract_type == 'purchase' else buyer['last_name'],
         'customer_id': seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id'],
+        'sender': '{} {}'.format(seller['first_name'], seller['last_name']),
     }
     params.update(transaction_details)
     rendered_html = html_template.format(**params)

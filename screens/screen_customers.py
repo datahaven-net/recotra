@@ -77,7 +77,7 @@ kv = """
                 width: 120
                 size_hint_x: None
                 disabled: True
-                on_press: root.on_customers_edit_button_clicked()
+                # on_press: root.on_customers_edit_button_clicked()
             RoundedButton:
                 id: customer_delete_button
                 text: 'erase'

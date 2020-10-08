@@ -70,72 +70,87 @@ kv = """
             size_hint_y: None
             width: self.minimum_width
             height: self.minimum_height
-            cols: 2
+            cols: 1
             padding: 10
             spacing: 10
 
-            SellFieldLabel:
-                text: "first name:"
-            SellFieldInput:
-                id: person_first_name_input
-                text: ""
+            Label:
+                size_hint: 1, None
+                height: dp(40)
+                font_size: sp(20)
+                text: "Customer buying BTC from Bitcoin.ai"
 
-            SellFieldLabel:
-                text: "last name:"
-            SellFieldInput:
-                id: person_last_name_input
-                text: ""
-
-            SellFieldLabel:
-                text: "phone:"
-            SellFieldInput:
-                id: person_phone_input
-                text: ""
-
-            SellFieldLabel:
-                text: "e-mail:"
-            SellFieldInput:
-                id: person_email_input
-                text: ""
-
-            SellFieldLabel:
-                text: "street address:"
-            SellFieldInput:
-                id: person_address_input
-                text: ""
-
-            SellFieldLabel:
-                text: "Amount (US $):"
-            SellFieldInput:
-                id: usd_amount_input
-                text: ""
-
-            SellFieldLabel:
-                text: "BTC price (US $ / BTC):"
-            SellFieldInput:
-                id: btc_price_input
-                text: ""
-
-            SellFieldLabel:
-                text: "BTC amount:"
-            SellFieldInput:
-                id: btc_amount_input
-                text: ""
-
-            SellFieldLabel:
-                text: "receiving BitCoin address:"
-            BoxLayout:
-                orientation: 'horizontal'
+            GridLayout:
+                size_hint_x: None
                 size_hint_y: None
+                width: self.minimum_width
                 height: self.minimum_height
+                cols: 2
+                padding: 10
+                spacing: 10
+
+                SellFieldLabel:
+                    text: "first name:"
                 SellFieldInput:
-                    id: receive_address_input
+                    id: person_first_name_input
                     text: ""
-                RoundedButton:
-                    size_hint: None, 1
-                    width: self.texture_size[0]
-                    text: "  scan  "
-                    on_release: root.on_receive_address_scan_qr_button_clicked()
+
+                SellFieldLabel:
+                    text: "last name:"
+                SellFieldInput:
+                    id: person_last_name_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "phone:"
+                SellFieldInput:
+                    id: person_phone_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "e-mail:"
+                SellFieldInput:
+                    id: person_email_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "street address:"
+                SellFieldInput:
+                    id: person_address_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "Amount (US $):"
+                SellFieldInput:
+                    id: usd_amount_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "BTC price (US $ / BTC):"
+                SellFieldInput:
+                    id: btc_price_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "BTC amount:"
+                SellFieldInput:
+                    id: btc_amount_input
+                    text: ""
+
+                SellFieldLabel:
+                    text: "receiving BitCoin address:"
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    SellFieldInput:
+                        id: receive_address_input
+                        text: ""
+                    RoundedButton:
+                        size_hint: None, 1
+                        width: self.texture_size[0]
+                        text: "  scan  "
+                        on_release: root.on_receive_address_scan_qr_button_clicked()
 """
 
 #------------------------------------------------------------------------------
@@ -156,20 +171,18 @@ class SellScreen(AppScreen):
         self.ids.btc_price_input.text = ''
         self.ids.btc_amount_input.text = ''
         self.ids.receive_address_input.text = ''
+
+    def populate_btc_usd_price(self):
         cur_settings = local_storage.read_settings()
         coinmarketcap_api_key = cur_settings.get('coinmarketcap_api_key', '')
         if coinmarketcap_api_key:
-            coinmarketcap_response = coinmarketcap_client.cryptocurrency_listings(
-                api_key=coinmarketcap_api_key, start=1, limit=1, convert='USD',
+            coinmarketcap_client.cryptocurrency_listings(
+                api_key=coinmarketcap_api_key,
+                start=1,
+                limit=1,
+                convert='USD',
+                cb=self.on_coinmarketcap_response,
             )
-            if coinmarketcap_response:
-                try:
-                    btc_usd_price = coinmarketcap_response['data'][0]['quote']['USD']['price']
-                except:
-                    print('failed coinmarketcap response:', coinmarketcap_response)
-                    btc_usd_price = None
-                if btc_usd_price is not None:
-                    self.ids.btc_price_input.text = '%.2f' % btc_usd_price
 
     def populate_customer_info_fields(self, customer_info):
         self.ids.person_first_name_input.text = customer_info.get('first_name') or ''
@@ -181,6 +194,7 @@ class SellScreen(AppScreen):
     def on_pre_enter(self, *args):
         if self.selected_customer_id is None:
             self.clean_input_fields()
+            self.populate_btc_usd_price()
 
     def on_select_customer_button_clicked(self, *args):
         select_customer_screen = App.get_running_app().root.ids.scr_manager.get_screen('select_customer_screen')
@@ -212,7 +226,18 @@ class SellScreen(AppScreen):
         self.scr_manager().current = 'sell_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
 
+    def on_coinmarketcap_response(self, request, response):
+        if response:
+            try:
+                btc_usd_price = response['data'][0]['quote']['USD']['price']
+            except:
+                print('failed coinmarketcap response:', response)
+                btc_usd_price = None
+            if btc_usd_price is not None:
+                self.ids.btc_price_input.text = '%.2f' % btc_usd_price
+
     def on_start_transaction_button_clicked(self):
+        cur_settings = local_storage.read_settings()
         t_now = datetime.datetime.now()
         transaction_details = {}
         transaction_details.update(dict(
@@ -224,12 +249,12 @@ class SellScreen(AppScreen):
             time=t_now.strftime("%H:%M %p"),
             seller=dict(
                 customer_id=None,
-                first_name='ABCD',
-                last_name='EFGH',
-                btc_address='11223344556677889900abcdefabcdef',
-                address='Anguilla, ABCD 1234',
-                email='abcdefgh@gmail.com',
-                phone='12345679',
+                first_name=cur_settings.get('business_owner_first_name', ''),
+                last_name=cur_settings.get('business_owner_last_name', ''),
+                address=cur_settings.get('business_address', ''),
+                email=cur_settings.get('business_email', ''),
+                phone=cur_settings.get('business_phone', ''),
+                btc_address=cur_settings.get('receiving_btc_address', ''),
             ),
             buyer=dict(
                 customer_id=self.selected_customer_id,
@@ -240,6 +265,7 @@ class SellScreen(AppScreen):
                 email=self.ids.person_email_input.text,
                 phone=self.ids.person_phone_input.text,
             ),
+            company_name=cur_settings.get('business_company_name', ''),
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)
