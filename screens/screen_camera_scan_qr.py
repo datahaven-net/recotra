@@ -16,6 +16,7 @@ from kivy.uix.image import Image
 
 from components import screen
 from components.buttons import RoundedButton
+from components.webfont import fa_icon
 
 #------------------------------------------------------------------------------
 
@@ -44,8 +45,8 @@ class CameraScanQRScreen(screen.AppScreen):
         f_layout.add_widget(img)
         self.camera_texture = img
 
-        btn = RoundedButton(id='cancel_button', text=' cancel ')
-        btn.pos_hint = {"x":0.0, "y": 0.0, }
+        btn = RoundedButton(id='cancel_button', text=fa_icon('window-close'))
+        btn.pos_hint = {"right": 1, "top": 0, }
         btn.size_hint = (None, None, )
         btn.width = 50
         btn.height = 50

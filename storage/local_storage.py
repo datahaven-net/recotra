@@ -15,7 +15,7 @@ def init():
 #------------------------------------------------------------------------------
 
 def home_dir():
-    return os.path.expanduser('~/.btc_contracts')
+    return os.path.expanduser('~/.recotra')
 
 def customers_dir():
     return os.path.join(home_dir(), 'customers')

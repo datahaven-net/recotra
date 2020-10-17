@@ -17,10 +17,11 @@ from components import labels
 from components import list_view
 from components import main_window
 
-from screens import screen_buy
+from screens import screen_buy, screen_edit_customer
 from screens import screen_sell
 from screens import screen_customers
 from screens import screen_add_customer
+from screens import screen_edit_customer
 from screens import screen_select_customer
 from screens import screen_transactions
 from screens import screen_one_transaction
@@ -51,6 +52,7 @@ kv = """
     screen_sell.kv,
     screen_customers.kv,
     screen_add_customer.kv,
+    screen_edit_customer.kv,
     screen_select_customer.kv,
     screen_transactions.kv,
     screen_one_transaction.kv,
