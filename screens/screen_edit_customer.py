@@ -1,4 +1,5 @@
 from kivy.app import App
+from kivy.cache import Cache
 
 #------------------------------------------------------------------------------
 
@@ -12,7 +13,8 @@ from storage import local_storage
 #------------------------------------------------------------------------------
 
 kv = """
-<AddCustomerScreen>:
+<EditCustomerScreen>:
+
     BoxLayout:
         orientation: 'vertical'
 
@@ -23,7 +25,7 @@ kv = """
 
             BoxLayout:
                 orientation: 'vertical'
-                pos_hint: {"top":1}
+                pos_hint: {'top': 1}
                 size_hint_y: None
                 height: self.minimum_height
                 padding: 20
@@ -38,7 +40,7 @@ kv = """
                 Image:
                     id: customer_photo_picture_image
                     size_hint: None, None
-                    pos_hint: {"right":1}
+                    pos_hint: {'right':1}
                     size: 200, 150
                     source: ''
 
@@ -49,7 +51,7 @@ kv = """
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
                             width: 2
 
-                    RoundedButton:
+                    Button:
                         width: 30
                         height: 30
                         x: self.parent.x + self.parent.width - 40
@@ -145,12 +147,18 @@ kv = """
                 text: "Save Customer"
                 width: 120
                 size_hint_x: None
+                on_release: root.on_edit_customer_save_button_clicked()
+
+            RoundedButton:
+                text: "Print User ID Card"
+                width: 180
+                size_hint_x: None
                 on_release: root.on_add_customer_save_button_clicked()
 """
 
-class AddCustomerScreen(screen.AppScreen):
+class EditCustomerScreen(screen.AppScreen):
 
-    new_customer_id = None
+    customer_id = None
 
     def scr_manager(self):
         return App.get_running_app().root.ids.scr_manager
@@ -158,46 +166,43 @@ class AddCustomerScreen(screen.AppScreen):
     def take_pic_screen(self):
         return self.scr_manager().get_screen('camera_take_picture_screen')
 
-    def clean_input_fields(self):
-        self.ids.customer_first_name_input.text = ''
-        self.ids.customer_last_name_input.text = ''
-        self.ids.customer_phone_input.text = ''
-        self.ids.customer_email_input.text = ''
-        self.ids.customer_address_input.text = ''
-        self.ids.customer_photo_picture_image.source = ''
-        self.ids.customer_passport_picture_image.source = ''
+    def populate_input_fields(self):
+        customer_info = local_storage.read_customer_info(self.customer_id)
+        self.ids.customer_first_name_input.text = customer_info.get('first_name') or ''
+        self.ids.customer_last_name_input.text = customer_info.get('last_name') or ''
+        self.ids.customer_phone_input.text = customer_info.get('phone') or ''
+        self.ids.customer_email_input.text = customer_info.get('email') or ''
+        self.ids.customer_address_input.text = customer_info.get('address') or ''
+        self.ids.customer_photo_picture_image.source = local_storage.customer_photo_filepath(self.customer_id)
 
     def on_pre_enter(self, *args):
-        if self.new_customer_id is None:
-            self.new_customer_id = local_storage.create_new_customer_info()
-            self.clean_input_fields()
+        self.populate_input_fields()
 
     def on_customer_photo_button_clicked(self, *args):
         self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
             name='camera_take_picture_screen',
             picture_taken_callback=self.on_customer_photo_picture_ready,
-            picture_filepath=local_storage.customer_photo_filepath(self.new_customer_id), 
-        )
-        self.scr_manager().add_widget(self.camera_screen)
-        self.scr_manager().current = 'camera_take_picture_screen'
-
-    def on_customer_passport_button_clicked(self, *args):
-        self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
-            name='camera_take_picture_screen',
-            picture_taken_callback=self.on_customer_passport_picture_ready,
-            picture_filepath=local_storage.customer_passport_filepath(self.new_customer_id),
+            cancel_callback=self.on_customer_photo_picture_cancel,
+            picture_filepath=local_storage.customer_photo_filepath(self.customer_id), 
         )
         self.scr_manager().add_widget(self.camera_screen)
         self.scr_manager().current = 'camera_take_picture_screen'
 
     def on_customer_photo_picture_ready(self, *args):
+        Cache.remove('kv.image')
+        Cache.remove('kv.texture')
+        self.ids.customer_photo_picture_image.source = ''
         self.ids.customer_photo_picture_image.source = args[0]
-        self.scr_manager().current = 'add_customer_screen'
+        self.scr_manager().current = 'edit_customer_screen'
         self.scr_manager().remove_widget(self.camera_screen)
 
-    def on_add_customer_save_button_clicked(self, *args):
+    def on_customer_photo_picture_cancel(self, *args):
+        self.scr_manager().current = 'edit_customer_screen'
+        self.scr_manager().remove_widget(self.camera_screen)
+
+    def on_edit_customer_save_button_clicked(self, *args):
         local_storage.write_customer_info(dict(
-            customer_id=self.new_customer_id,
+            customer_id=self.customer_id,
             first_name=self.ids.customer_first_name_input.text,
             last_name=self.ids.customer_last_name_input.text,
             phone=self.ids.customer_phone_input.text,
@@ -206,3 +211,6 @@ class AddCustomerScreen(screen.AppScreen):
         ))
         self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
         self.scr_manager().current = 'customers_screen'
+
+    def on_add_customer_save_button_clicked(self, *args):
+        pass

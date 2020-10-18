@@ -40,6 +40,10 @@ kv = """
         id: add_customer_screen
         name: 'add_customer_screen'
 
+    EditCustomerScreen:
+        id: edit_customer_screen
+        name: 'edit_customer_screen'
+
     SelectCustomerScreen:
         id: select_customer_screen
         name: 'select_customer_screen'

@@ -3,6 +3,7 @@ import datetime
 #------------------------------------------------------------------------------
 
 from kivy.app import App
+from kivy.clock import Clock
 
 #------------------------------------------------------------------------------
 
@@ -125,6 +126,7 @@ kv = """
                 BuyFieldInput:
                     id: usd_amount_input
                     text: ""
+                    on_text: root.on_usd_amount_input_changed(self.text)
 
                 BuyFieldLabel:
                     text: "BTC price (US $ / BTC):"
@@ -137,6 +139,7 @@ kv = """
                 BuyFieldInput:
                     id: btc_amount_input
                     text: ""
+                    on_text: root.on_btc_amount_input_changed(self.text)
 
                 BuyFieldLabel:
                     text: "receiving BitCoin address:"
@@ -151,6 +154,8 @@ class BuyScreen(AppScreen):
 
     selected_customer_id = None
     selected_customer_info = None
+    populate_usd_amount_task = None
+    populate_btc_amount_task = None
 
     def clean_input_fields(self):
         self.selected_customer_id = None
@@ -159,9 +164,9 @@ class BuyScreen(AppScreen):
         self.ids.person_phone_input.text = ''
         self.ids.person_email_input.text = ''
         self.ids.person_address_input.text = ''
-        self.ids.usd_amount_input.text = ''
-        self.ids.btc_price_input.text = ''
-        self.ids.btc_amount_input.text = ''
+        self.ids.usd_amount_input.text = '0.0'
+        self.ids.btc_price_input.text = '0.0'
+        self.ids.btc_amount_input.text = '0.0'
         cur_settings = local_storage.read_settings()
         self.ids.receive_address_input.text = cur_settings.get('receiving_btc_address', '')
 
@@ -228,6 +233,42 @@ class BuyScreen(AppScreen):
                 btc_usd_price = None
             if btc_usd_price is not None:
                 self.ids.btc_price_input.text = '%.2f' % btc_usd_price
+
+    def on_usd_amount_input_changed(self, new_text):
+        print('on_usd_amount_input_changed', new_text)
+        if self.populate_btc_amount_task:
+            Clock.unschedule(self.populate_btc_amount_task)
+            self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 1)
+        else:
+            self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 1)
+
+    def on_usd_amount_input_changed_earlier(self, *args):
+        print('on_usd_amount_input_changed_earlier', args)
+        self.populate_btc_amount_task = None
+        try:
+            usd_amount_current = float(self.ids.usd_amount_input.text)
+            btc_price_current = float(self.ids.btc_price_input.text)
+        except:
+            return
+        self.ids.btc_amount_input.text = str(round(usd_amount_current / btc_price_current, 6))
+
+    def on_btc_amount_input_changed(self, new_text):
+        print('on_btc_amount_input_changed', new_text)
+        if self.populate_usd_amount_task:
+            Clock.unschedule(self.populate_usd_amount_task)
+            self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 1)
+        else:
+            self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 1)
+
+    def on_btc_amount_input_changed_earlier(self, *args):
+        print('on_usd_amount_input_changed_earlier', args)
+        self.populate_usd_amount_task = None
+        try:
+            btc_amount_current = float(self.ids.btc_amount_input.text)
+            btc_price_current = float(self.ids.btc_price_input.text)
+        except:
+            return
+        self.ids.usd_amount_input.text = str(round(btc_amount_current * btc_price_current, 2))
 
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
