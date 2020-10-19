@@ -66,12 +66,12 @@ Builder.load_string(kv)
 class BitCoinContractsApp(App):
 
     def build(self):
-        level = LOG_LEVELS.get('debug')  #  if len(sys.argv) > 2 else LOG_LEVELS.get('info')
+        level = LOG_LEVELS.get('debug')
         Logger.setLevel(level=level)
         logging.getLogger().setLevel(logging.DEBUG)
 
         local_storage.init()
-        self.title = 'BitCoin Simple Contracts'
+        self.title = 'Regulatory Compliant Trader'
         self.icon = './icons/btcusd.ico'
         self.main_window = main_window.MainWindow()
         return self.main_window

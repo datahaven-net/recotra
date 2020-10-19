@@ -121,7 +121,7 @@ kv = """
                     text: ""
 
                 SellFieldLabel:
-                    text: "Amount (US $):"
+                    text: "amount (US $):"
                 SellFieldInput:
                     id: usd_amount_input
                     text: ""
@@ -234,48 +234,60 @@ class SellScreen(AppScreen):
     def on_coinmarketcap_response(self, request, response):
         if response:
             try:
-                btc_usd_price = response['data'][0]['quote']['USD']['price']
+                btc_usd_price = float(response['data'][0]['quote']['USD']['price'])
             except:
-                print('failed coinmarketcap response:', response)
                 btc_usd_price = None
             if btc_usd_price is not None:
                 self.ids.btc_price_input.text = '%.2f' % btc_usd_price
 
     def on_usd_amount_input_changed(self, new_text):
-        print('on_usd_amount_input_changed', new_text)
+        if not new_text:
+            self.populate_btc_amount_task = None
+            return
         if self.populate_btc_amount_task:
             Clock.unschedule(self.populate_btc_amount_task)
             self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 1)
         else:
             self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 1)
 
-    def on_usd_amount_input_changed_earlier(self, *args):
-        print('on_usd_amount_input_changed_earlier', args)
-        self.populate_btc_amount_task = None
-        try:
-            usd_amount_current = float(self.ids.usd_amount_input.text)
-            btc_price_current = float(self.ids.btc_price_input.text)
-        except:
-            return
-        self.ids.btc_amount_input.text = str(round(usd_amount_current / btc_price_current, 6))
-
     def on_btc_amount_input_changed(self, new_text):
-        print('on_btc_amount_input_changed', new_text)
+        if not new_text:
+            self.populate_usd_amount_task = None
+            return
         if self.populate_usd_amount_task:
             Clock.unschedule(self.populate_usd_amount_task)
             self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 1)
         else:
             self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 1)
 
-    def on_btc_amount_input_changed_earlier(self, *args):
-        print('on_usd_amount_input_changed_earlier', args)
-        self.populate_usd_amount_task = None
+    def on_usd_amount_input_changed_earlier(self, *args):
+        self.populate_btc_amount_task = None
+        if not self.ids.usd_amount_input.focused:
+            return
+        cur_settings = local_storage.read_settings()
         try:
-            btc_amount_current = float(self.ids.btc_amount_input.text)
+            usd_amount_current = float(self.ids.usd_amount_input.text)
+            btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
             btc_price_current = float(self.ids.btc_price_input.text)
+            factor = 100.0 / (100.0 + btc_usd_commission_percent)
         except:
             return
-        self.ids.usd_amount_input.text = str(round(btc_amount_current * btc_price_current, 2))
+        if btc_price_current:
+            self.ids.btc_amount_input.text = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
+
+    def on_btc_amount_input_changed_earlier(self, *args):
+        self.populate_usd_amount_task = None
+        if not self.ids.btc_amount_input.focused:
+            return
+        cur_settings = local_storage.read_settings()
+        try:
+            btc_amount_current = float(self.ids.btc_amount_input.text)
+            usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
+            btc_price_current = float(self.ids.btc_price_input.text)
+            factor = (100.0 + usd_btc_commission_percent) / 100.0 
+        except:
+            return
+        self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
 
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
