@@ -11,7 +11,7 @@ from kivy.core.image import Image as CoreImage
 #------------------------------------------------------------------------------
 
 from components import screen
-from components.buttons import RoundedButton
+from components.buttons import CloseButton, RoundedButton
 from components.webfont import fa_icon
 
 #------------------------------------------------------------------------------
@@ -43,11 +43,8 @@ class CameraTakePictureScreen(screen.AppScreen):
         btn1.on_release = self.on_capture
         f_layout.add_widget(btn1)
 
-        btn2 = RoundedButton(id='cancel_button', text=fa_icon('window-close'))
-        btn2.pos_hint = {"right": .98, "top": .98, }
-        btn2.size_hint = (None, None, )
-        btn2.width = 28
-        btn2.height = 28
+        btn2 = CloseButton(id='cancel_button', text=fa_icon('window-close'))
+        btn2.pos_hint = {"right": .95, "top": .98, }
         btn2.on_release = self.on_cancel_button_clicked
         f_layout.add_widget(btn2)
 

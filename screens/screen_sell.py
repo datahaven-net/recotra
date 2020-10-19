@@ -246,9 +246,9 @@ class SellScreen(AppScreen):
             return
         if self.populate_btc_amount_task:
             Clock.unschedule(self.populate_btc_amount_task)
-            self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 1)
+            self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 0.1)
         else:
-            self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 1)
+            self.populate_btc_amount_task = Clock.schedule_once(self.on_usd_amount_input_changed_earlier, 0.1)
 
     def on_btc_amount_input_changed(self, new_text):
         if not new_text:
@@ -256,9 +256,9 @@ class SellScreen(AppScreen):
             return
         if self.populate_usd_amount_task:
             Clock.unschedule(self.populate_usd_amount_task)
-            self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 1)
+            self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 0.1)
         else:
-            self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 1)
+            self.populate_usd_amount_task = Clock.schedule_once(self.on_btc_amount_input_changed_earlier, 0.1)
 
     def on_usd_amount_input_changed_earlier(self, *args):
         self.populate_btc_amount_task = None
@@ -273,7 +273,10 @@ class SellScreen(AppScreen):
         except:
             return
         if btc_price_current:
-            self.ids.btc_amount_input.text = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
+            t = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
+            if t.endswith('.'):
+                t += '0'
+            self.ids.btc_amount_input.text = t
 
     def on_btc_amount_input_changed_earlier(self, *args):
         self.populate_usd_amount_task = None
