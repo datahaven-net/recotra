@@ -138,6 +138,25 @@ kv = """
                         text: ""
                         on_text: root.on_field_modified('coinmarketcap_api_key')
 
+                    OptionHeaderLabel:
+                        text: "buy/sell commission percent"
+                    Widget:
+                        size: 1, 1
+
+                    OptionFieldLabel:
+                        text: "BTC / USD price extra (%):"
+                    OptionFieldInput:
+                        id: btc_usd_commission_percent
+                        text: ""
+                        on_text: root.on_field_modified('btc_usd_commission_percent')
+
+                    OptionFieldLabel:
+                        text: "USD / BTC price extra (%):"
+                    OptionFieldInput:
+                        id: usd_btc_commission_percent
+                        text: ""
+                        on_text: root.on_field_modified('usd_btc_commission_percent')
+
                 Widget:
                     size: 1, 1
                     size_hint: 0.5, 1
@@ -172,6 +191,8 @@ class SettingsScreen(AppScreen):
         self.ids.business_phone.text = cur_settings.get('business_phone', '')
         self.ids.receiving_btc_address.text = cur_settings.get('receiving_btc_address', '')
         self.ids.coinmarketcap_api_key.text = cur_settings.get('coinmarketcap_api_key', '')
+        self.ids.btc_usd_commission_percent.text = cur_settings.get('btc_usd_commission_percent', '0.0')
+        self.ids.usd_btc_commission_percent.text = cur_settings.get('usd_btc_commission_percent', '0.0')
         self.ids.save_settings_button.disabled = True
 
     def on_enter(self, *args):
@@ -182,13 +203,15 @@ class SettingsScreen(AppScreen):
 
     def on_save_button_clicked(self, *args):
         cur_settings = local_storage.read_settings()
-        cur_settings['receiving_btc_address'] = self.ids.receiving_btc_address.text
-        cur_settings['coinmarketcap_api_key'] = self.ids.coinmarketcap_api_key.text
         cur_settings['business_company_name'] = self.ids.business_company_name.text
         cur_settings['business_owner_first_name'] = self.ids.business_owner_first_name.text
         cur_settings['business_owner_last_name'] = self.ids.business_owner_last_name.text
         cur_settings['business_address'] = self.ids.business_address.text
         cur_settings['business_email'] = self.ids.business_email.text
         cur_settings['business_phone'] = self.ids.business_phone.text
+        cur_settings['receiving_btc_address'] = self.ids.receiving_btc_address.text
+        cur_settings['coinmarketcap_api_key'] = self.ids.coinmarketcap_api_key.text
+        cur_settings['btc_usd_commission_percent'] = self.ids.btc_usd_commission_percent.text
+        cur_settings['usd_btc_commission_percent'] = self.ids.usd_btc_commission_percent.text
         local_storage.write_settings(cur_settings)
         self.ids.save_settings_button.disabled = True
