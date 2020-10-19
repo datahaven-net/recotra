@@ -144,14 +144,14 @@ kv = """
                         size: 1, 1
 
                     OptionFieldLabel:
-                        text: "BTC / USD price extra (%):"
+                        text: "BTC sales commission (%):"
                     OptionFieldInput:
                         id: btc_usd_commission_percent
                         text: ""
                         on_text: root.on_field_modified('btc_usd_commission_percent')
 
                     OptionFieldLabel:
-                        text: "USD / BTC price extra (%):"
+                        text: "BTC purchase commission (%):"
                     OptionFieldInput:
                         id: usd_btc_commission_percent
                         text: ""
