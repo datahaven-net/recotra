@@ -285,9 +285,9 @@ class SellScreen(AppScreen):
         cur_settings = local_storage.read_settings()
         try:
             btc_amount_current = float(self.ids.btc_amount_input.text)
-            usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
+            btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
             btc_price_current = float(self.ids.btc_price_input.text)
-            factor = (100.0 + usd_btc_commission_percent) / 100.0 
+            factor = (100.0 + btc_usd_commission_percent) / 100.0 
         except:
             return
         self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
