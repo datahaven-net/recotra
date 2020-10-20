@@ -216,8 +216,8 @@ class SellScreen(AppScreen):
     def on_receive_address_scan_qr_button_clicked(self, *args):
         self.scan_qr_screen = CameraScanQRScreen(
             name='camera_scan_qr_screen',
-            image_width=320,
-            image_height=240,
+            # image_width=320,
+            # image_height=240,
             scan_qr_callback=self.on_receive_address_scan_qr_ready,
             cancel_callback=self.on_receive_address_scan_qr_cancel,
         )
