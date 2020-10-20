@@ -206,15 +206,6 @@ class BuyScreen(AppScreen):
         self.populate_customer_info_fields(self.selected_customer_info)
         self.scr_manager().current = 'buy_screen'
 
-    def on_receive_address_scan_qr_button_clicked(self, *args):
-        self.scan_qr_screen = CameraScanQRScreen(
-            name='camera_scan_qr_screen',
-            scan_qr_callback=self.on_receive_address_scan_qr_ready,
-            cancel_callback=self.on_receive_address_scan_qr_cancel,
-        )
-        self.scr_manager().add_widget(self.scan_qr_screen)
-        self.scr_manager().current = 'camera_scan_qr_screen'
-
     def on_receive_address_scan_qr_ready(self, *args):
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
