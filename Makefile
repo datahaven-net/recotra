@@ -1,12 +1,12 @@
 # This Makefile requires the following commands to be available:
 # * virtualenv
-# * python3
+# * python3.6
 
 REQUIREMENTS_TXT:=requirements.txt
 
 PIP:="venv/bin/pip"
 PYTHON="venv/bin/python"
-PYTHON_VERSION=python3
+PYTHON_VERSION=python3.6
 
 .PHONY: clean pyclean
 
@@ -26,10 +26,18 @@ venv:
 	@$(PIP) install Cython pygments docutils pillow
 	@$(PIP) install -r $(REQUIREMENTS_TXT)
 
-apt_install:
-	@sudo apt-get install python-setuptools python-pygame python-opengl python-enchant python-dev python-opencv build-essential python-pip libgl1-mesa-dev libgles2-mesa-dev zlib1g-dev libzbar-dev xclip wkhtmltopdf
+install_python36:
+	@sudo apt update
+	@sudo apt install software-properties-common
+	@sudo add-apt-repository ppa:deadsnakes/ppa
+	@sudo apt install python3.6
+	@sudo apt install python3.6-venv
+	@sudo apt install python3.6-dev
 
-install: apt_install venv
+install_kivy_requirements:
+	@sudo apt install python3-pygame python3-opengl python3-enchant python3-opencv libgl1-mesa-dev libgles2-mesa-dev zlib1g-dev libzbar-dev xclip wkhtmltopdf
+
+install: install_python36 install_kivy_requirements venv
 
 update:
 	@git fetch
