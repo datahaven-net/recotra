@@ -127,8 +127,62 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
         'sender': '{} {}'.format(seller['first_name'], seller['last_name']),
     }
     params.update(transaction_details)
-    rendered_html = html_template.format(**params)
     render_qr.make_qr_file(transaction_details['buyer']['btc_address'], qr_filepath)
+    rendered_html = html_template.format(**params)
+    pdfkit.from_string(
+        input=rendered_html,
+        output_path=pdf_filepath,
+    )
+    with open(pdf_filepath, "rb") as pdf_file:
+        pdf_raw = pdf_file.read()
+    os.remove(qr_filepath)
+    return {
+        'body': pdf_raw,
+        'filename': pdf_filepath,
+    }
+
+#------------------------------------------------------------------------------
+
+def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None):
+    if not pdf_filepath:
+        pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='id-card-')
+    if os.path.isfile(pdf_filepath):
+        os.remove(pdf_filepath)
+    qr_filepath = tempfile.mktemp(suffix='.png', prefix='id-card-qr-')
+    html_template = """
+<html>
+<head>
+    <title>Bitcoin.ai Ltd.</title>
+</head>
+<body>
+    <table border=1 cellspacing=0 cellpadding=5 >
+        <tr>
+            <td align=left colspan="2">
+                <img height=200 src="{photo_filepath}">
+                <img width=200 height=200 src="{qr_filepath}">
+            </td>
+        </tr>
+        <tr valign=top>
+            <td align=left colspan="1" width=320>
+                &nbsp;&nbsp;&nbsp;<font size=+3>{first_name} {last_name}</font>
+            </td>
+            <td align=right valign=bottom colspan="1">
+                <font size=-1>customer #{customer_id}</font>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    """
+    params = {
+        'customer_id': customer_info['customer_id'],
+        'first_name': customer_info['first_name'],
+        'last_name': customer_info['last_name'],
+        'photo_filepath': customer_photo_filepath or '',
+        'qr_filepath': qr_filepath,
+    }
+    render_qr.make_qr_file(customer_info['customer_id'], qr_filepath)
+    rendered_html = html_template.format(**params)
     pdfkit.from_string(
         input=rendered_html,
         output_path=pdf_filepath,

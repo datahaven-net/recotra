@@ -1,4 +1,5 @@
 from kivy.app import App
+from kivy.cache import Cache
 
 #------------------------------------------------------------------------------
 
@@ -60,6 +61,42 @@ kv = """
                         markup: True
                         text: fa_icon('camera')
                         on_release: root.on_customer_photo_button_clicked()
+
+                Widget:
+                    size_hint_y: None
+                    height: dp(30)
+
+                Label:
+                    text_size: self.size
+                    height: 30
+                    halign: "right"
+                    text: "ID / Passport:"
+
+                Image:
+                    id: customer_passport_picture_image
+                    size_hint: None, None
+                    pos_hint: {"right":1}
+                    size: 200, 150
+                    source: ''
+
+                    canvas.before:
+                        Color:
+                            rgba: (0, 0, 0, 1)
+                        Line:
+                            rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
+                            width: 2
+
+                    RoundedButton:
+                        width: 30
+                        height: 30
+                        x: self.parent.x + self.parent.width - 40
+                        y: self.parent.y + self.parent.height - 40
+                        font_size: '24'
+                        background_color: 0, 0, 0, 0
+                        color: 0.9, 0.9, 0.9, 1
+                        markup: True
+                        text: fa_icon('camera')
+                        on_release: root.on_customer_passport_button_clicked()
 
             BoxLayout:
                 orientation: 'vertical'
@@ -159,12 +196,15 @@ class AddCustomerScreen(screen.AppScreen):
         return self.scr_manager().get_screen('camera_take_picture_screen')
 
     def clean_input_fields(self):
+        Cache.remove('kv.image')
+        Cache.remove('kv.texture')
         self.ids.customer_first_name_input.text = ''
         self.ids.customer_last_name_input.text = ''
         self.ids.customer_phone_input.text = ''
         self.ids.customer_email_input.text = ''
         self.ids.customer_address_input.text = ''
         self.ids.customer_photo_picture_image.source = ''
+        self.ids.customer_passport_picture_image.source = ''
 
     def on_pre_enter(self, *args):
         if self.new_customer_id is None:
@@ -191,6 +231,11 @@ class AddCustomerScreen(screen.AppScreen):
 
     def on_customer_photo_picture_ready(self, *args):
         self.ids.customer_photo_picture_image.source = args[0]
+        self.scr_manager().current = 'add_customer_screen'
+        self.scr_manager().remove_widget(self.camera_screen)
+
+    def on_customer_passport_picture_ready(self, *args):
+        self.ids.customer_passport_picture_image.source = args[0]
         self.scr_manager().current = 'add_customer_screen'
         self.scr_manager().remove_widget(self.camera_screen)
 

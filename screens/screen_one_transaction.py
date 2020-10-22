@@ -2,10 +2,10 @@ import os
 
 #------------------------------------------------------------------------------
 
+from components.screen import AppScreen
+
 from lib import render_pdf
 from lib import system
-
-from components.screen import AppScreen
 
 from storage import local_storage
 
@@ -207,4 +207,4 @@ class OneTransactionScreen(AppScreen):
                 transaction_details=transaction_details,
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
-            system.open_file(buy_contract['filename'])
+            system.open_system_explorer(buy_contract['filename'])
