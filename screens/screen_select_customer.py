@@ -42,6 +42,7 @@ kv = """
 
 <SelectCustomerView>:
     viewclass: 'SelectCustomerRecord'
+
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
         default_size_hint: 1, None

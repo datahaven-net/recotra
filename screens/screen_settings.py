@@ -40,6 +40,14 @@ kv = """
     multiline: False
 
 
+<OptionFieldMultilineInput@TextInput>:
+    size_hint_x: None
+    size_hint_y: None
+    width: dp(360)
+    height: dp(50)
+    multiline: True
+
+
 <SettingsScreen>:
 
     BoxLayout:
@@ -126,6 +134,13 @@ kv = """
                         text: ""
                         on_text: root.on_field_modified('receiving_btc_address')
 
+                    OptionFieldLabel:
+                        text: "disclosure statement:"
+                    OptionFieldMultilineInput:
+                        id: disclosure_statement
+                        text: ""
+                        on_text: root.on_field_modified('disclosure_statement')
+
                     OptionHeaderLabel:
                         text: "access to live BTC/USD prices"
                     Widget:
@@ -189,6 +204,7 @@ class SettingsScreen(AppScreen):
         self.ids.business_address.text = cur_settings.get('business_address', '')
         self.ids.business_email.text = cur_settings.get('business_email', '')
         self.ids.business_phone.text = cur_settings.get('business_phone', '')
+        self.ids.disclosure_statement.text = cur_settings.get('disclosure_statement', '')
         self.ids.receiving_btc_address.text = cur_settings.get('receiving_btc_address', '')
         self.ids.coinmarketcap_api_key.text = cur_settings.get('coinmarketcap_api_key', '')
         self.ids.btc_usd_commission_percent.text = cur_settings.get('btc_usd_commission_percent', '0.0')
@@ -209,6 +225,7 @@ class SettingsScreen(AppScreen):
         cur_settings['business_address'] = self.ids.business_address.text
         cur_settings['business_email'] = self.ids.business_email.text
         cur_settings['business_phone'] = self.ids.business_phone.text
+        cur_settings['disclosure_statement'] = self.ids.disclosure_statement.text
         cur_settings['receiving_btc_address'] = self.ids.receiving_btc_address.text
         cur_settings['coinmarketcap_api_key'] = self.ids.coinmarketcap_api_key.text
         cur_settings['btc_usd_commission_percent'] = self.ids.btc_usd_commission_percent.text

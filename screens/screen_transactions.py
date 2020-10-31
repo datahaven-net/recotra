@@ -8,12 +8,14 @@ from storage import local_storage
 
 kv = """
 <TransactionRecord@SelectableRecord>:
+
     canvas.before:
         Color:
             rgba: (.9, .9, 1, 1) if self.selected else (1, 1, 1, 1)
         Rectangle:
             pos: self.pos
             size: self.size
+
     orientation: 'lr-tb'
     height: 70
     size_hint_y: None
@@ -27,6 +29,7 @@ kv = """
     amount_btc: 'amount_btc'
     price_btc: 'price_btc'
     date: 'date'
+
     Label:
         id: tr_id
         text: root.tr_id
@@ -88,6 +91,7 @@ kv = """
 
 <TransactionsView>:
     viewclass: 'TransactionRecord'
+
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
         default_size_hint: 1, None
@@ -98,14 +102,21 @@ kv = """
         touch_multiselect: False
 
 <TransactionsScreen>:
-    AnchorLayout:
-        anchor_x: 'left'
-        anchor_y: 'bottom'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        TransactionsView:
+            id: transactions_view
+            size_hint: 1, 1
+
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: 1, .08
+            size_hint: None, None
+            height: self.minimum_height
             padding: 10
             spacing: 2
+
             RoundedButton:
                 id: view_transaction_button
                 text: 'open'
@@ -113,15 +124,11 @@ kv = """
                 size_hint_x: None
                 disabled: True
                 on_release: root.on_view_transaction_button_clicked()
+
             RoundedButton:
                 text: 'print transactions'
                 width: 160
                 size_hint_x: None
-    AnchorLayout:
-        anchor_x: 'center'
-        anchor_y: 'top'
-        TransactionsView:
-            id: transactions_view
 """
 
 #------------------------------------------------------------------------------
@@ -130,6 +137,12 @@ class TransactionsView(list_view.SelectableRecycleView):
 
     def __init__(self, **kwargs):
         super(TransactionsView, self).__init__(**kwargs)
+        self.data = []
+
+    def on_selection_applied(self, item, index, is_selected, prev_selected):
+        self.parent.parent.ids.view_transaction_button.disabled = not is_selected
+
+    def populate(self):
         self.data = [{
             'tr_id': str(i['transaction_id']),
             'tr_type': '{}'.format('bought' if i['contract_type'] == 'purchase' else 'sold'),
@@ -143,9 +156,6 @@ class TransactionsView(list_view.SelectableRecycleView):
             'blockchain_status': '[color=#b0b070]{}[/color]'.format(i.get('blockchain_status', 'unconfirmed')),
         } for i in local_storage.load_transactions_list()]
 
-    def on_selection_applied(self, item, index, is_selected, prev_selected):
-        self.parent.parent.ids.view_transaction_button.disabled = not is_selected
-
 #------------------------------------------------------------------------------
 
 class TransactionsScreen(screen.AppScreen):
@@ -153,3 +163,6 @@ class TransactionsScreen(screen.AppScreen):
     def on_view_transaction_button_clicked(self):
         self.scr('one_transaction_screen').transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
         self.scr_manager().current = 'one_transaction_screen'
+
+    def on_enter(self, *args):
+        self.ids.transactions_view.populate()

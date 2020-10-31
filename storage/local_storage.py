@@ -85,7 +85,7 @@ def load_transactions_list(sort_by='transaction_id'):
         json_data = jsn.loads_text(src)
         result.append(json_data)
     if sort_by == 'transaction_id':
-        result.sort(key=lambda i: str(i.get('customer_id', '')))
+        result.sort(key=lambda i: -int(i.get('transaction_id', '0')))
     return result
 
 
