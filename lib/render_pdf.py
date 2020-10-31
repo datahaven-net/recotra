@@ -8,7 +8,7 @@ from lib import render_qr
 
 #------------------------------------------------------------------------------
 
-def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None):
+def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepath=None, qr_filepath=None):
     if not pdf_filepath:
         pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='btc-contract-')
     if os.path.isfile(pdf_filepath):
@@ -23,6 +23,7 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
     <title>Bitcoin.ai Ltd.</title>
 </head>
 <body>
+
     <table width=100%>
         <tr>
             <td align=right colspan="4">
@@ -32,7 +33,7 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
         </tr>
         <tr valign=top>
             <td align=left colspan="4">
-                <font size=+2><h1>BitCoin.ai Ltd.</h1></font>
+                <font size=+1><h1>BitCoin.ai Ltd.</h1></font>
             </td>
         </tr>
         <tr valign=top>
@@ -43,74 +44,50 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
                 <p>Transaction price: <b>${btc_price}</b> US / BTC</p>
                 <p>Dollar Amount: <b>${usd_amount}</b> US</p>
                 <p>BTC Amount: <b>{btc_amount}</b></p>
+                <p>Fee: {fee_percent}%</p>
                 <p>Date: {date}</p>
                 <p>Time: {time}</p>
                 <hr>
-                <br>
                 </font>
             </td>
         </tr>
         <tr>
             <td colspan="4" align=center>
                 <p>Where {sender} will send {btc_amount} BTC to:</p>
-                <font size=26>
+                <font size=20>
                     <code>
-                    {buyer[btc_address]}
-                </code>
+                        {buyer[btc_address]}
+                    </code>
                 </font>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4" align=center>
+                <br>
                 <img src="{qr_filepath}">
+                <br>
+                <br>
+                <hr>
+                <p align=left>{disclosure_statement}</p>
                 <br>
                 <br>
             </td>
         </tr>
     </table>
-    <table width=50% align=left>
+
+    <table width=100% align=left cellspacing=50>
         <tr>
-            <td align=right colspan="1">
-                <font size=+1>Signed:</font>
-                <br> 
-                <br>
-            </td>
-            <td align=left colspan="1">
+            <td align=left width=50%>
                 &nbsp;
-                <br>
                 <br>
                 <hr>
                 <font size=+1><b>Vincent Cate</b> for Bitcoin.ai Ltd.</font>
             </td>
-            <td colspan="2">
-                &nbsp;
-            </td>
-        </tr>
-        <tr>
-            <td>
+            <td align=left width=50%>
                 &nbsp;
                 <br>
-                <br>
-            </td>
-        </tr>
-        <tr>
-            <td align=right colspan="1">
-                &nbsp;
-                <br>
-                <br> 
-            </td>
-            <td align=left colspan="1">
-                &nbsp;
-                <br>
-                <br> 
                 <hr>
                 <font size=+1><b>{first_name} {last_name}</b></font>
             </td>
-            <td align=right colspan="2">
-                &nbsp;
-            </td>
         </tr>
     </table>
+
 </body>
 </html>
     """
@@ -125,8 +102,12 @@ def build_pdf_contract(transaction_details, pdf_filepath=None, qr_filepath=None)
         'last_name': seller['last_name'] if contract_type == 'purchase' else buyer['last_name'],
         'customer_id': seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id'],
         'sender': '{} {}'.format(seller['first_name'], seller['last_name']),
+        'fee_percent': '0.0',
+        'disclosure_statement': disclosure_statement,
     }
     params.update(transaction_details)
+    if str(params['fee_percent']).endswith('.0'):
+        params['fee_percent'] = str(params['fee_percent'])[:-2]
     render_qr.make_qr_file(transaction_details['buyer']['btc_address'], qr_filepath)
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
@@ -162,7 +143,7 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
                 <img width=200 height=200 src="{qr_filepath}">
             </td>
         </tr>
-        <tr valign=top>
+        <tr valign=top>    
             <td align=left colspan="1" width=320>
                 &nbsp;&nbsp;&nbsp;<font size=+3>{first_name} {last_name}</font>
             </td>

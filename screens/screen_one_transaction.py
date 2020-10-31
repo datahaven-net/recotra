@@ -201,10 +201,12 @@ class OneTransactionScreen(AppScreen):
         self.populate_fields(tran_details)
 
     def on_pdf_file_button_clicked(self):
+        cur_settings = local_storage.read_settings()
         transaction_details = local_storage.read_transaction(self.transaction_id)
         if transaction_details:
             buy_contract = render_pdf.build_pdf_contract(
                 transaction_details=transaction_details,
+                disclosure_statement=cur_settings.get('disclosure_statement') or '',
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
             system.open_system_explorer(buy_contract['filename'])
