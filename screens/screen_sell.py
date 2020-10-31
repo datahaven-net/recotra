@@ -216,8 +216,6 @@ class SellScreen(AppScreen):
     def on_receive_address_scan_qr_button_clicked(self, *args):
         self.scan_qr_screen = CameraScanQRScreen(
             name='camera_scan_qr_screen',
-            # image_width=320,
-            # image_height=240,
             scan_qr_callback=self.on_receive_address_scan_qr_ready,
             cancel_callback=self.on_receive_address_scan_qr_cancel,
         )
@@ -227,6 +225,11 @@ class SellScreen(AppScreen):
     def on_receive_address_scan_qr_ready(self, *args):
         self.scr_manager().current = 'sell_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
+        qr = args[0].strip()
+        if qr.lower().startswith('bitcoin:'):
+            qr = qr[8:]
+        if qr.count('?'):
+            qr, _, _ = qr.partition('?')
         self.ids.receive_address_input.text = args[0]
 
     def on_receive_address_scan_qr_cancel(self, *args):
