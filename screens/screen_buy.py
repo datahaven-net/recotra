@@ -13,6 +13,12 @@ from components.screen import AppScreen
 
 from storage import local_storage
 
+from screens.screen_camera_scan_qr import CameraScanQRScreen
+
+#------------------------------------------------------------------------------
+
+_Debug = True
+
 #------------------------------------------------------------------------------
 
 kv = """
@@ -43,11 +49,18 @@ kv = """
             spacing: 2
 
             RoundedButton:
-                id: save_customer_button
+                id: select_customer_button
                 text: "select customer"
                 width: 140
                 size_hint_x: None
                 on_release: root.on_select_customer_button_clicked()
+
+            RoundedButton:
+                id: scan_customer_id_button
+                text: "scan customer ID"
+                width: 140
+                size_hint_x: None
+                on_release: root.on_scan_customer_id_button_clicked()
 
             RoundedButton:
                 text: "clear"
@@ -187,10 +200,23 @@ class BuyScreen(AppScreen):
         self.ids.person_email_input.text = customer_info.get('email') or ''
         self.ids.person_address_input.text = customer_info.get('address') or ''
 
+    def select_customer(self, customer_id):
+        if _Debug:
+            print('select_customer', customer_id)
+        customer_info = local_storage.read_customer_info(customer_id)
+        if customer_info:
+            self.selected_customer_id = customer_id
+            self.selected_customer_info = customer_info
+            self.populate_customer_info_fields(self.selected_customer_info)
+
+    #------------------------------------------------------------------------------
+
     def on_pre_enter(self, *args):
         if self.selected_customer_id is None:
             self.clean_input_fields()
             self.populate_btc_usd_price()
+
+    #------------------------------------------------------------------------------
 
     def on_select_customer_button_clicked(self, *args):
         select_customer_screen = App.get_running_app().root.ids.scr_manager.get_screen('select_customer_screen')
@@ -199,19 +225,39 @@ class BuyScreen(AppScreen):
         App.get_running_app().root.ids.scr_manager.current = 'select_customer_screen'
 
     def on_customer_selected(self, selected_customer_id):
-        self.selected_customer_id = selected_customer_id
-        self.selected_customer_info = local_storage.read_customer_info(self.selected_customer_id)
-        self.populate_customer_info_fields(self.selected_customer_info)
+        self.select_customer(selected_customer_id)
         self.scr_manager().current = 'buy_screen'
 
-    def on_receive_address_scan_qr_ready(self, *args):
-        self.scr_manager().current = 'buy_screen'
-        self.scr_manager().remove_widget(self.scan_qr_screen)
-        self.ids.receive_address_input.text = args[0]
+    #------------------------------------------------------------------------------
 
-    def on_receive_address_scan_qr_cancel(self, *args):
+    def on_scan_customer_id_button_clicked(self, *args):
+        self.scan_customer_id_screen = CameraScanQRScreen(
+            name='camera_scan_customer_id_screen',
+            scan_qr_callback=self.on_customer_id_scan_qr_ready,
+            cancel_callback=self.on_customer_id_scan_qr_cancel,
+        )
+        self.scr_manager().add_widget(self.scan_customer_id_screen)
+        self.scr_manager().current = 'camera_scan_customer_id_screen'
+
+    def on_customer_id_scan_qr_ready(self, *args):
         self.scr_manager().current = 'buy_screen'
-        self.scr_manager().remove_widget(self.scan_qr_screen)
+        self.scr_manager().remove_widget(self.scan_customer_id_screen)
+        self.scan_customer_id_screen = None
+        inp = args[0].strip()
+        if _Debug:
+            print('on_customer_id_scan_qr_ready', inp)
+        try:
+            customer_id = int(inp)
+        except:
+            return
+        self.select_customer(customer_id)
+
+    def on_customer_id_scan_qr_cancel(self, *args):
+        self.scr_manager().current = 'buy_screen'
+        self.scr_manager().remove_widget(self.scan_customer_id_screen)
+        self.scan_customer_id_screen = None
+
+    #------------------------------------------------------------------------------
 
     def on_coinmarketcap_response(self, request, response):
         if response:
@@ -221,6 +267,8 @@ class BuyScreen(AppScreen):
                 btc_usd_price = None
             if btc_usd_price is not None:
                 self.ids.btc_price_input.text = '%.2f' % btc_usd_price
+
+    #------------------------------------------------------------------------------
 
     def on_usd_amount_input_changed(self, new_text):
         if not new_text:
@@ -271,6 +319,8 @@ class BuyScreen(AppScreen):
         except:
             return
         self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
+
+    #------------------------------------------------------------------------------
 
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
