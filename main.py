@@ -70,7 +70,7 @@ class BitCoinContractsApp(App):
         logging.getLogger().setLevel(logging.DEBUG)
 
         local_storage.init()
-        self.title = 'Regulatory Compliant Trader'
+        self.title = 'RECOTRA'
         self.icon = './icons/btcusd.ico'
         self.main_window = main_window.MainWindow()
         return self.main_window
