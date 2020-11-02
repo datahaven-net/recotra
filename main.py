@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 
 #------------------------------------------------------------------------------
@@ -17,7 +16,7 @@ from components import labels
 from components import list_view
 from components import main_window
 
-from screens import screen_buy, screen_edit_customer
+from screens import screen_buy
 from screens import screen_sell
 from screens import screen_customers
 from screens import screen_add_customer

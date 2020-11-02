@@ -39,33 +39,38 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         <tr valign=top>
             <td colspan="4">
                 <font size=+2>
-                <p>Customer {buying_selling} Bitcoin: <b>{first_name} {last_name}</b></p>
-                <p>Customer number: {customer_id}</p>
-                <p>Transaction price: <b>${btc_price}</b> US / BTC</p>
-                <p>Dollar Amount: <b>${usd_amount}</b> US</p>
-                <p>BTC Amount: <b>{btc_amount}</b></p>
-                <p>Fee: {fee_percent}%</p>
-                <p>Date: {date}</p>
-                <p>Time: {time}</p>
-                <hr>
+                <p>
+                    Customer {buying_selling} Bitcoin: <b>{first_name} {last_name}</b>
+                    <br>
+                    Customer number: {customer_id}
+                    <br>
+                    Transaction price: <b>${btc_price}</b> US / BTC
+                    <br>
+                    Dollar Amount: <b>${usd_amount}</b> US
+                    <br>
+                    BTC Amount: <b>{btc_amount}</b>
+                    <br>
+                    Fee: {fee_percent}%
+                    <br>
+                    Date: {date}
+                    <br>
+                    Time: {time}
+                </p>
                 </font>
+                <hr>
             </td>
         </tr>
         <tr>
             <td colspan="4" align=center>
-                <p>Where {sender} will send {btc_amount} BTC to:</p>
-                <font size=20>
+                <p>Where {sender} will send <b>{btc_amount} BTC</b> to:</p>
+                <font size=+2>
                     <code>
                         {buyer[btc_address]}
                     </code>
                 </font>
-                <br>
-                <img src="{qr_filepath}">
-                <br>
-                <br>
+                <img src="{qr_filepath}" width="600">
                 <hr>
                 <p align=left>{disclosure_statement}</p>
-                <br>
                 <br>
             </td>
         </tr>

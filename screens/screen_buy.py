@@ -11,8 +11,6 @@ from lib import coinmarketcap_client
 
 from components.screen import AppScreen
 
-from screens.screen_camera_scan_qr import CameraScanQRScreen
-
 from storage import local_storage
 
 #------------------------------------------------------------------------------
@@ -20,14 +18,14 @@ from storage import local_storage
 kv = """
 <BuyFieldLabel@RightAlignLabel>:
     size_hint_x: None
-    width: dp(200)
+    width: dp(150)
     valign: 'middle'
 
 
 <BuyFieldInput@TextInput>:
     size_hint_x: None
     size_hint_y: None
-    width: dp(360)
+    width: dp(510)
     height: self.minimum_height
     multiline: False
 

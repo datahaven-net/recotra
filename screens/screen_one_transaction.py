@@ -12,6 +12,23 @@ from storage import local_storage
 #------------------------------------------------------------------------------
 
 kv = """
+<TransactionFieldLabel@RightAlignLabel>:
+    size_hint_x: None
+    width: dp(200)
+    valign: 'middle'
+    color: (.5,.5,.5,1)
+
+
+<TransactionFieldHeader@TransactionFieldLabel>:
+    color: (0,0,0,1)
+
+
+<TransactionFieldValue@LeftAlignLabel>:
+    size_hint_x: None
+    width: dp(515)
+    valign: 'middle'
+
+
 <OneTransactionScreen>:
 
     BoxLayout:
@@ -26,7 +43,9 @@ kv = """
             scroll_type: ['bars']
 
             GridLayout:
+                size_hint_x: None
                 size_hint_y: None
+                width: self.minimum_width
                 height: self.minimum_height
                 cols: 2
                 padding: 10
@@ -34,112 +53,112 @@ kv = """
                 row_force_default: True
                 row_default_height: 40
 
-                RightAlignLabel:
+                TransactionFieldHeader:
                     id: contract_type_input
                     text: ""
                 Widget:
                     size: 1, 1
 
-                RightAlignLabel:
-                    text: "[size=20]Seller:[/size]"
+                TransactionFieldHeader:
+                    text: "[size=20]Seller[/size]"
                 Widget:
                     size: 1, 1
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "first name:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: seller_first_name_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "last name:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: seller_last_name_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "phone:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: seller_phone_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "e-mail:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: seller_email_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "street address:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: seller_address_input
                     text: ""
 
-                RightAlignLabel:
-                    text: "[size=20]Buyer:[/size]"
+                TransactionFieldHeader:
+                    text: "[size=20]Buyer[/size]"
                 Widget:
                     size: 1, 1
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "first name:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: buyer_first_name_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "last name:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: buyer_last_name_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "phone:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: buyer_phone_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "e-mail:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: buyer_email_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "street address:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: buyer_address_input
                     text: ""
 
-                RightAlignLabel:
-                    text: "[size=20]Contract details:[/size]"
+                TransactionFieldHeader:
+                    text: "[size=20]Contract details[/size]"
                 Widget:
                     size: 1, 1
 
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "amount (US $):"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: usd_amount_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "BTC price (US $ / BTC):"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: btc_price_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "BTC Amount:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: btc_amount_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "started:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: started_date_time_input
                     text: ""
 
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "spending BitCoin address:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: spending_btc_address_input
                     text: ""
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "receiving BitCoin address:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: receiving_btc_address_input
                     text: ""
 
-                RightAlignLabel:
+                TransactionFieldLabel:
                     text: "blockchain status:"
-                LeftAlignLabel:
+                TransactionFieldValue:
                     id: blockchain_status_input
                     text: ""
 
