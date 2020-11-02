@@ -13,7 +13,7 @@ kv = """
     Label:
         color: 0, 0, 0, 1 
         markup: True
-        text: '[size=36]Regulatory Compliant Trader[/size]'
+        text: '[size=72][b]RE[/b]gulatory\\n     [b]CO[/b]mpliant\\n          [b]TRA[/b]der[/size]'
 
 
 <ScreenManagement>:
