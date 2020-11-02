@@ -4,29 +4,35 @@ import datetime
 
 from kivy.app import App
 from kivy.clock import Clock
-from screens.screen_camera_scan_qr import CameraScanQRScreen
 
 #------------------------------------------------------------------------------
 
 from lib import coinmarketcap_client
+from lib import btc_util
 
 from components.screen import AppScreen
 
+from screens.screen_camera_scan_qr import CameraScanQRScreen
+
 from storage import local_storage
+
+#------------------------------------------------------------------------------
+
+_Debug = True
 
 #------------------------------------------------------------------------------
 
 kv = """
 <SellFieldLabel@RightAlignLabel>:
     size_hint_x: None
-    width: dp(200)
+    width: dp(150)
     valign: 'middle'
 
 
 <SellFieldInput@TextInput>:
     size_hint_x: None
     size_hint_y: None
-    width: dp(360)
+    width: dp(510)
     height: self.minimum_height
     multiline: False
 
@@ -225,12 +231,7 @@ class SellScreen(AppScreen):
     def on_receive_address_scan_qr_ready(self, *args):
         self.scr_manager().current = 'sell_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
-        qr = args[0].strip()
-        if qr.lower().startswith('bitcoin:'):
-            qr = qr[8:]
-        if qr.count('?'):
-            qr, _, _ = qr.partition('?')
-        self.ids.receive_address_input.text = args[0]
+        self.ids.receive_address_input.text = btc_util.clean_btc_address_input(args[0].strip())
 
     def on_receive_address_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'sell_screen'
