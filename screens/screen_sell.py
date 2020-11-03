@@ -67,7 +67,7 @@ kv = """
                 text: "clear"
                 width: 140
                 size_hint_x: None
-                on_release: root.clean_input_fields()
+                on_release: root.on_clear_button_clicked()
 
             RoundedButton:
                 text: "create contract"
@@ -289,6 +289,10 @@ class SellScreen(AppScreen):
         self.scan_qr_screen = None
 
     #------------------------------------------------------------------------------
+
+    def on_clear_button_clicked(self, *args):
+        self.clean_input_fields()
+        self.populate_btc_usd_price()
 
     def on_coinmarketcap_response(self, request, response):
         if response:
