@@ -120,14 +120,14 @@ kv = """
             RoundedButton:
                 id: view_transaction_button
                 text: 'open'
-                width: 160
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 disabled: True
                 on_release: root.on_view_transaction_button_clicked()
 
             RoundedButton:
                 text: 'print transactions'
-                width: 160
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 """
 

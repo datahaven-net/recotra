@@ -180,7 +180,7 @@ kv = """
 
             RoundedButton:
                 text: "Save Customer"
-                width: 120
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_add_customer_save_button_clicked()
 """
