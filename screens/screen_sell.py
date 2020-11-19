@@ -52,26 +52,26 @@ kv = """
             RoundedButton:
                 id: select_customer_button
                 text: "select customer"
-                width: 140
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_select_customer_button_clicked()
 
             RoundedButton:
                 id: scan_customer_id_button
                 text: "scan customer ID"
-                width: 140
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_scan_customer_id_button_clicked()
 
             RoundedButton:
                 text: "clear"
-                width: 140
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_clear_button_clicked()
 
             RoundedButton:
                 text: "create contract"
-                width: 140
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_start_transaction_button_clicked()
 

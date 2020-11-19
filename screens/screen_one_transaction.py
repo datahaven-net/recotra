@@ -170,7 +170,7 @@ kv = """
 
             RoundedButton:
                 text: 'print contract'
-                width: 160
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_pdf_file_button_clicked()
 """
