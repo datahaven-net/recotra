@@ -186,7 +186,7 @@ class SellScreen(AppScreen):
         self.ids.person_email_input.text = ''
         self.ids.person_address_input.text = ''
         self.ids.usd_amount_input.text = '0.0'
-        self.ids.btc_price_input.text = '0.0'
+        # self.ids.btc_price_input.text = '0.0'
         self.ids.btc_amount_input.text = '0.0'
         self.ids.receive_address_input.text = ''
 
@@ -217,7 +217,11 @@ class SellScreen(AppScreen):
             btc_price_current = float(self.ids.btc_price_input.text)
             factor = (100.0 + btc_usd_commission_percent) / 100.0
         except:
+            import traceback
+            traceback.print_exc()
             return
+        if _Debug:
+            print('populate_usd_amount_from_btc_amount', factor, btc_amount_current, btc_price_current)
         self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
 
     def populate_btc_amount_from_usd_amount(self):
@@ -228,6 +232,8 @@ class SellScreen(AppScreen):
             btc_price_current = float(self.ids.btc_price_input.text)
             factor = 100.0 / (100.0 + btc_usd_commission_percent)
         except:
+            import traceback
+            traceback.print_exc()
             return
         if btc_price_current:
             t = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
@@ -284,6 +290,8 @@ class SellScreen(AppScreen):
         try:
             customer_id = int(inp)
         except:
+            import traceback
+            traceback.print_exc()
             return
         self.select_customer(customer_id)
 
@@ -308,6 +316,8 @@ class SellScreen(AppScreen):
         self.scr_manager().remove_widget(self.scan_qr_screen)
         self.scan_qr_screen = None
         btc_scan = btc_util.parse_btc_url(args[0].strip())
+        if _Debug:
+            print('on_receive_address_scan_qr_ready', btc_scan)
         self.ids.receive_address_input.text = btc_scan['address']
         if 'amount' in btc_scan:
             self.ids.btc_amount_input.text = btc_scan['amount']
@@ -329,6 +339,8 @@ class SellScreen(AppScreen):
             try:
                 btc_usd_price = float(response['data'][0]['quote']['USD']['price'])
             except:
+                import traceback
+                traceback.print_exc()
                 btc_usd_price = None
             if btc_usd_price is not None:
                 self.ids.btc_price_input.text = '%.2f' % btc_usd_price

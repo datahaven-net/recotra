@@ -126,7 +126,7 @@ def load_customers_list(sort_by='customer_id'):
         json_data = jsn.loads_text(src)
         result.append(json_data)
     if sort_by == 'customer_id':
-        result.sort(key=lambda i: str(i.get('customer_id', '')))
+        result.sort(key=lambda i: int(i.get('customer_id', '')))
     return result
 
 

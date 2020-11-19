@@ -176,7 +176,7 @@ class BuyScreen(AppScreen):
         self.ids.person_email_input.text = ''
         self.ids.person_address_input.text = ''
         self.ids.usd_amount_input.text = '0.0'
-        self.ids.btc_price_input.text = '0.0'
+        # self.ids.btc_price_input.text = '0.0'
         self.ids.btc_amount_input.text = '0.0'
         cur_settings = local_storage.read_settings()
         self.ids.receive_address_input.text = cur_settings.get('receiving_btc_address', '')
