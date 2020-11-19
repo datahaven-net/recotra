@@ -135,6 +135,11 @@ kv = """
                     id: btc_price_input
                     text: ""
                 TransactionFieldLabel:
+                    text: "coinmarketcap.com price:"
+                TransactionFieldValue:
+                    id: world_btc_price_input
+                    text: ""
+                TransactionFieldLabel:
                     text: "BTC Amount:"
                 TransactionFieldValue:
                     id: btc_amount_input
@@ -201,7 +206,11 @@ class OneTransactionScreen(AppScreen):
 
         self.ids.usd_amount_input.text = tran_details['usd_amount'] or ''
         self.ids.btc_price_input.text = tran_details['btc_price'] or ''
+        self.ids.world_btc_price_input.text = tran_details['world_btc_price'] or ''
         self.ids.btc_amount_input.text = tran_details['btc_amount'] or ''
+        if self.ids.btc_amount_input.text:
+            self.ids.btc_amount_input.text = '{} BTC = {} mBTC'.format(
+                self.ids.btc_amount_input.text, str(float(self.ids.btc_amount_input.text) * 1000.0))
 
         if tran_details['contract_type'] == 'purchase':
             self.ids.receiving_btc_address_input.text = tran_details['buyer']['btc_address'] or ''
@@ -223,9 +232,9 @@ class OneTransactionScreen(AppScreen):
         cur_settings = local_storage.read_settings()
         transaction_details = local_storage.read_transaction(self.transaction_id)
         if transaction_details:
-            buy_contract = render_pdf.build_pdf_contract(
+            pdf_contract = render_pdf.build_pdf_contract(
                 transaction_details=transaction_details,
                 disclosure_statement=cur_settings.get('disclosure_statement') or '',
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
-            system.open_system_explorer(buy_contract['filename'])
+            system.open_system_explorer(pdf_contract['filename'])

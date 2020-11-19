@@ -24,7 +24,7 @@ _Debug = True
 kv = """
 <BuyFieldLabel@RightAlignLabel>:
     size_hint_x: None
-    width: dp(150)
+    width: dp(190)
     valign: 'middle'
 
 
@@ -319,7 +319,7 @@ class BuyScreen(AppScreen):
             btc_amount_current = float(self.ids.btc_amount_input.text)
             usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
             btc_price_current = float(self.ids.btc_price_input.text)
-            factor = (100.0 + usd_btc_commission_percent) / 100.0 
+            factor = (100.0 + usd_btc_commission_percent) / 100.0
         except:
             return
         self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
@@ -329,11 +329,16 @@ class BuyScreen(AppScreen):
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
         t_now = datetime.datetime.now()
+        usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
+        btc_price_current = float(self.ids.btc_price_input.text)
+        factor = (100.0 + usd_btc_commission_percent) / 100.0
+        contract_btc_price = str(round(btc_price_current * factor, 2))
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='purchase',
             usd_amount=self.ids.usd_amount_input.text,
-            btc_price=self.ids.btc_price_input.text,
+            world_btc_price=self.ids.btc_price_input.text,
+            btc_price=contract_btc_price,
             btc_amount=self.ids.btc_amount_input.text,
             fee_percent=str(float(cur_settings.get('usd_btc_commission_percent', '0.0'))),
             date=t_now.strftime("%b %d %Y"),

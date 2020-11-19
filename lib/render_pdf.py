@@ -6,6 +6,8 @@ import pdfkit  # @UnresolvedImport
 
 from lib import render_qr
 
+from storage import local_storage
+
 #------------------------------------------------------------------------------
 
 def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepath=None, qr_filepath=None):
@@ -44,13 +46,15 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                     <br>
                     Customer number: {customer_id}
                     <br>
-                    Transaction price: <b>${btc_price}</b> US / BTC
+                    Price at coinmarketcap.com: <b>${world_btc_price}</b> US / BTC
+                    <br>
+                    Price offset: {fee_percent}%
+                    <br>
+                    Price for this contract: <b>${btc_price}</b> US / BTC
                     <br>
                     Dollar Amount: <b>${usd_amount}</b> US
                     <br>
-                    BTC Amount: <b>{btc_amount}</b>
-                    <br>
-                    Fee: {fee_percent}%
+                    Bitcoin Amount: {btc_amount}
                     <br>
                     Date: {date}
                     <br>
@@ -82,7 +86,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                 &nbsp;
                 <br>
                 <hr>
-                <font size=+1><b>Vincent Cate</b> for Bitcoin.ai Ltd.</font>
+                <font size=+1><b>{business_owner_first_name} {business_owner_last_name}</b> for {business_company_name}</font>
             </td>
             <td align=left width=50%>
                 &nbsp;
@@ -96,6 +100,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
 </body>
 </html>
     """
+    cur_settings = local_storage.read_settings()
     contract_type = transaction_details['contract_type']
     buyer = transaction_details['buyer']
     seller = transaction_details['seller']
@@ -107,12 +112,20 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         'last_name': seller['last_name'] if contract_type == 'purchase' else buyer['last_name'],
         'customer_id': seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id'],
         'sender': '{} {}'.format(seller['first_name'], seller['last_name']),
+        'business_company_name': cur_settings.get('business_company_name') or '',
+        'business_owner_first_name': cur_settings.get('business_owner_first_name') or '',
+        'business_owner_last_name': cur_settings.get('business_owner_last_name') or '',
         'fee_percent': '0.0',
         'disclosure_statement': disclosure_statement,
     }
     params.update(transaction_details)
     if str(params['fee_percent']).endswith('.0'):
         params['fee_percent'] = str(params['fee_percent'])[:-2]
+    if 'world_btc_price' not in params:
+        params['world_btc_price'] = ''
+    if params['btc_amount']:
+        params['btc_amount'] = '<b>{} BTC</b>  = {} mBTC'.format(
+            params['btc_amount'], str(float(params['btc_amount']) * 1000.0))
     render_qr.make_qr_file(transaction_details['buyer']['btc_address'], qr_filepath)
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
