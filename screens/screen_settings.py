@@ -12,7 +12,7 @@ kv = """
 <OptionHeaderLabel@Label>:
     size_hint_x: None
     size_hint_y: None
-    width: dp(260)
+    width: dp(280)
     height: dp(50)
     valign: 'bottom'
     halign: 'right'
@@ -24,7 +24,7 @@ kv = """
 <OptionFieldLabel@Label>:
     size_hint_x: None
     size_hint_y: None
-    width: dp(260)
+    width: dp(280)
     height: dp(30)
     pos_hint: {'right': 1}
     valign: 'middle'
@@ -159,16 +159,18 @@ kv = """
                         size: 1, 1
 
                     OptionFieldLabel:
-                        text: "BTC sales commission (%):"
+                        text: "price offset when customer buying BTC:"
                     OptionFieldInput:
                         id: btc_usd_commission_percent
+                        hint_text: '2.5'
                         text: ""
                         on_text: root.on_field_modified('btc_usd_commission_percent')
 
                     OptionFieldLabel:
-                        text: "BTC purchase commission (%):"
+                        text: "price offset when customer selling BTC:"
                     OptionFieldInput:
                         id: usd_btc_commission_percent
+                        hint_text: '2.5'
                         text: ""
                         on_text: root.on_field_modified('usd_btc_commission_percent')
 

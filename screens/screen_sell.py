@@ -25,7 +25,7 @@ _Debug = True
 kv = """
 <SellFieldLabel@RightAlignLabel>:
     size_hint_x: None
-    width: dp(150)
+    width: dp(190)
     valign: 'middle'
 
 
@@ -164,8 +164,8 @@ kv = """
                         text: ""
                     RoundedButton:
                         size_hint: None, 1
-                        width: self.texture_size[0]
-                        text: "  scan  "
+                        width: self.texture_size[0] + dp(16)
+                        text: fa_icon('camera')
                         on_release: root.on_receive_address_scan_qr_button_clicked()
 """
 
@@ -208,6 +208,32 @@ class SellScreen(AppScreen):
         self.ids.person_phone_input.text = customer_info.get('phone') or ''
         self.ids.person_email_input.text = customer_info.get('email') or ''
         self.ids.person_address_input.text = customer_info.get('address') or ''
+
+    def populate_usd_amount_from_btc_amount(self):
+        cur_settings = local_storage.read_settings()
+        try:
+            btc_amount_current = float(self.ids.btc_amount_input.text)
+            btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
+            btc_price_current = float(self.ids.btc_price_input.text)
+            factor = (100.0 + btc_usd_commission_percent) / 100.0
+        except:
+            return
+        self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
+
+    def populate_btc_amount_from_usd_amount(self):
+        cur_settings = local_storage.read_settings()
+        try:
+            usd_amount_current = float(self.ids.usd_amount_input.text)
+            btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
+            btc_price_current = float(self.ids.btc_price_input.text)
+            factor = 100.0 / (100.0 + btc_usd_commission_percent)
+        except:
+            return
+        if btc_price_current:
+            t = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
+            if t.endswith('.'):
+                t += '0'
+            self.ids.btc_amount_input.text = t
 
     def select_customer(self, customer_id):
         if _Debug:
@@ -281,7 +307,11 @@ class SellScreen(AppScreen):
         self.scr_manager().current = 'sell_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
         self.scan_qr_screen = None
-        self.ids.receive_address_input.text = btc_util.clean_btc_address_input(args[0].strip())
+        btc_scan = btc_util.parse_btc_url(args[0].strip())
+        self.ids.receive_address_input.text = btc_scan['address']
+        if 'amount' in btc_scan:
+            self.ids.btc_amount_input.text = btc_scan['amount']
+            self.populate_usd_amount_from_btc_amount()
 
     def on_receive_address_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'sell_screen'
@@ -329,44 +359,29 @@ class SellScreen(AppScreen):
         self.populate_btc_amount_task = None
         if not self.ids.usd_amount_input.focused:
             return
-        cur_settings = local_storage.read_settings()
-        try:
-            usd_amount_current = float(self.ids.usd_amount_input.text)
-            btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
-            btc_price_current = float(self.ids.btc_price_input.text)
-            factor = 100.0 / (100.0 + btc_usd_commission_percent)
-        except:
-            return
-        if btc_price_current:
-            t = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
-            if t.endswith('.'):
-                t += '0'
-            self.ids.btc_amount_input.text = t
+        self.populate_btc_amount_from_usd_amount()
 
     def on_btc_amount_input_changed_earlier(self, *args):
         self.populate_usd_amount_task = None
         if not self.ids.btc_amount_input.focused:
             return
-        cur_settings = local_storage.read_settings()
-        try:
-            btc_amount_current = float(self.ids.btc_amount_input.text)
-            btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
-            btc_price_current = float(self.ids.btc_price_input.text)
-            factor = (100.0 + btc_usd_commission_percent) / 100.0 
-        except:
-            return
-        self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
+        self.populate_usd_amount_from_btc_amount()
 
     #------------------------------------------------------------------------------
 
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
         t_now = datetime.datetime.now()
+        btc_usd_commission_percent = float(cur_settings.get('btc_usd_commission_percent', '0.0'))
+        btc_price_current = float(self.ids.btc_price_input.text)
+        factor = (100.0 + btc_usd_commission_percent) / 100.0
+        contract_btc_price = str(round(btc_price_current * factor, 2))
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='sales',
             usd_amount=self.ids.usd_amount_input.text,
-            btc_price=self.ids.btc_price_input.text,
+            world_btc_price=self.ids.btc_price_input.text,
+            btc_price=contract_btc_price,
             btc_amount=self.ids.btc_amount_input.text,
             fee_percent=str(float(cur_settings.get('btc_usd_commission_percent', '0.0'))),
             date=t_now.strftime("%b %d %Y"),
