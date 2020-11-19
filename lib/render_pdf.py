@@ -66,7 +66,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         </tr>
         <tr>
             <td colspan="4" align=center>
-                <p>Where {sender} will send <b>{btc_amount} BTC</b> to:</p>
+                <p>Where {sender} will send {btc_amount} to:</p>
                 <font size=+2>
                     <code>
                         {buyer[btc_address]}
@@ -123,10 +123,19 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         params['fee_percent'] = str(params['fee_percent'])[:-2]
     if 'world_btc_price' not in params:
         params['world_btc_price'] = ''
+    qr_src_text = 'bitcoin:{}?label={}'.format(
+        transaction_details['buyer']['btc_address'],
+        cur_settings.get('business_company_name', '').replace(' ', '_'),
+    )
     if params['btc_amount']:
-        params['btc_amount'] = '<b>{} BTC</b>  = {} mBTC'.format(
+        qr_src_text = 'bitcoin:{}?amount={}&label={}'.format(
+            transaction_details['buyer']['btc_address'],
+            params['btc_amount'],
+            cur_settings.get('business_company_name', '').replace(' ', '_'),
+        )
+        params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
             params['btc_amount'], str(float(params['btc_amount']) * 1000.0))
-    render_qr.make_qr_file(transaction_details['buyer']['btc_address'], qr_filepath)
+    render_qr.make_qr_file(qr_src_text, qr_filepath)
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
         input=rendered_html,
