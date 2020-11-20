@@ -134,7 +134,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
             cur_settings.get('business_company_name', '').replace(' ', '_'),
         )
         params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
-            params['btc_amount'], str(float(params['btc_amount']) * 1000.0))
+            params['btc_amount'], str(round(float(params['btc_amount']) * 1000.0, 6)))
     render_qr.make_qr_file(qr_src_text, qr_filepath)
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
