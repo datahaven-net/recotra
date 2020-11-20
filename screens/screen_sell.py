@@ -314,6 +314,8 @@ class SellScreen(AppScreen):
         self.scr_manager().current = 'sell_screen'
         self.scr_manager().remove_widget(self.scan_qr_screen)
         self.scan_qr_screen = None
+        if _Debug:
+        	print('on_receive_address_scan_qr_ready', args)
         btc_scan = btc_util.parse_btc_url(args[0].strip())
         if _Debug:
             print('on_receive_address_scan_qr_ready', btc_scan)
