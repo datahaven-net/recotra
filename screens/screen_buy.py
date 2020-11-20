@@ -301,11 +301,11 @@ class BuyScreen(AppScreen):
             usd_amount_current = float(self.ids.usd_amount_input.text)
             usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
             btc_price_current = float(self.ids.btc_price_input.text)
-            factor = 100.0 / (100.0 + usd_btc_commission_percent)
+            rate_for_this_contract = btc_price_current * (1.0 + usd_btc_commission_percent / 100.0)
         except:
             return
         if btc_price_current:
-            t = ('%.6f' % round(factor * usd_amount_current / btc_price_current, 6)).rstrip('0')
+            t = ('%.6f' % round(usd_amount_current / rate_for_this_contract, 6)).rstrip('0')
             if t.endswith('.'):
                 t += '0'
             self.ids.btc_amount_input.text = t
@@ -319,10 +319,10 @@ class BuyScreen(AppScreen):
             btc_amount_current = float(self.ids.btc_amount_input.text)
             usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
             btc_price_current = float(self.ids.btc_price_input.text)
-            factor = (100.0 + usd_btc_commission_percent) / 100.0
+            rate_for_this_contract = btc_price_current * (1.0 + usd_btc_commission_percent / 100.0)
         except:
             return
-        self.ids.usd_amount_input.text = '%.2f' % round(factor * btc_amount_current * btc_price_current, 2)
+        self.ids.usd_amount_input.text = '%.2f' % round(btc_amount_current * rate_for_this_contract, 2)
 
     #------------------------------------------------------------------------------
 
