@@ -128,10 +128,9 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         cur_settings.get('business_company_name', '').replace(' ', '_'),
     )
     if params['btc_amount']:
-        qr_src_text = 'bitcoin:{}?amount={}&label={}'.format(
+        qr_src_text = 'bitcoin:{}?amount={}'.format(
             transaction_details['buyer']['btc_address'],
             params['btc_amount'],
-            cur_settings.get('business_company_name', '').replace(' ', '_'),
         )
         params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
             params['btc_amount'], str(round(float(params['btc_amount']) * 1000.0, 6)))
