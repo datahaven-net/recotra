@@ -201,3 +201,78 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
         'body': pdf_raw,
         'filename': pdf_filepath,
     }
+
+#------------------------------------------------------------------------------
+
+def build_transactions_report(selected_transactions, selected_month, selected_year, pdf_filepath=None):
+    if not pdf_filepath:
+        pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='transactions-')
+    html_template = """
+<html>
+<head>
+    <title>Bitcoin.ai Ltd.</title>
+</head>
+<body>
+    <h3>{selected_month} {selected_year}</h3>
+    <table border=1 cellspacing=0 cellpadding=5 >
+        <tr>
+            <th>Seller</th>
+            <th>Buyer</th>
+            <th>Amount BTC</th>
+            <th>Amount US $</th>
+            <th>Date</th>
+            <th>Receiving Address</th>
+        </tr>
+{table_content}
+    </table>
+<p>
+    Total BTC bought: {total_btc_bought} BTC for {total_usd_sold} $ US
+</p>
+<p>
+    Total BTC sold: {total_btc_sold} BTC for {total_usd_bought} $ US
+</p>
+</body>
+</html>
+    """
+    table_content = ''
+    total_btc_bought = 0.0
+    total_usd_bought = 0.0
+    total_btc_sold = 0.0
+    total_usd_sold = 0.0
+    for t in selected_transactions:
+        table_content += f'''
+        <tr>
+            <td nowrap>{t['seller']['first_name']} {t['seller']['last_name']}</td>
+            <td nowrap>{t['buyer']['first_name']} {t['buyer']['last_name']}</td>
+            <td nowrap>{t['btc_amount']}</td>
+            <td nowrap>{t['usd_amount']}</td>
+            <td nowrap>{t['date']}</td>
+            <td nowrap>{t['buyer']['btc_address']}</td>
+        </tr>
+        '''
+        if t['contract_type'] == 'purchase':
+            total_btc_sold += float(t['btc_amount'])
+            total_usd_bought += float(t['usd_amount'])
+        else:
+            total_btc_bought += float(t['btc_amount'])
+            total_usd_sold += float(t['usd_amount'])
+    params = {
+        'table_content': table_content,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+        'total_btc_bought': round(total_btc_bought, 6),
+        'total_usd_bought': round(total_usd_bought, 2),
+        'total_btc_sold': round(total_btc_sold, 6),
+        'total_usd_sold': round(total_usd_sold, 2),
+    }
+    rendered_html = html_template.format(**params)
+    pdfkit.from_string(
+        input=rendered_html,
+        output_path=pdf_filepath,
+    )
+    with open(pdf_filepath, "rb") as pdf_file:
+        pdf_raw = pdf_file.read()
+    return {
+        'body': pdf_raw,
+        'filename': pdf_filepath,
+    }
