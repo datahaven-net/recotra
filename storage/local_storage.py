@@ -29,6 +29,9 @@ def transactions_dir():
 def contracts_dir():
     return os.path.join(home_dir(), 'contracts')
 
+def reports_dir():
+    return os.path.join(home_dir(), 'reports')
+
 def temp_dir():
     return os.path.join(home_dir(), 'temp')
 
@@ -66,6 +69,8 @@ def create_home_dir():
         os.mkdir(customers_dir())
     if not os.path.isdir(contracts_dir()):
         os.mkdir(contracts_dir())
+    if not os.path.isdir(reports_dir()):
+        os.mkdir(reports_dir())
     if not os.path.isdir(temp_dir()):
         os.mkdir(temp_dir())
 
