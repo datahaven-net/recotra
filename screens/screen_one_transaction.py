@@ -231,10 +231,10 @@ class OneTransactionScreen(AppScreen):
         self.ids.buyer_email_input.text = tran_details['buyer']['email'] or ''
         self.ids.buyer_address_input.text = tran_details['buyer']['address'] or ''
 
-        self.ids.usd_amount_input.text = tran_details['usd_amount'] or ''
-        self.ids.btc_price_input.text = tran_details['btc_price'] or ''
-        self.ids.world_btc_price_input.text = tran_details['world_btc_price'] or ''
-        self.ids.btc_amount_input.text = tran_details['btc_amount'] or ''
+        self.ids.usd_amount_input.text = tran_details.get('usd_amount') or ''
+        self.ids.btc_price_input.text = tran_details.get('btc_price') or ''
+        self.ids.world_btc_price_input.text = tran_details.get('world_btc_price') or ''
+        self.ids.btc_amount_input.text = tran_details.get('btc_amount') or ''
         if self.ids.btc_amount_input.text:
             self.ids.btc_amount_input.text = '{} BTC = {} mBTC'.format(
                 self.ids.btc_amount_input.text, str(float(self.ids.btc_amount_input.text) * 1000.0))
