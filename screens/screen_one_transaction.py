@@ -6,6 +6,7 @@ from components.screen import AppScreen
 
 from lib import render_pdf
 from lib import system
+from lib import btc_util
 
 from storage import local_storage
 
@@ -50,14 +51,22 @@ kv = """
                 cols: 2
                 padding: 10
                 spacing: 2
-                row_force_default: True
-                row_default_height: 40
+                row_force_default: False
+                row_default_height: dp(22)
 
                 TransactionFieldHeader:
                     id: contract_type_input
-                    text: ""
+                    size_hint_y: None
+                    height: dp(60)
+                    valign: 'bottom'
+                    text: ''
                 Widget:
                     size: 1, 1
+
+                Widget:
+                    size: 1, dp(10)
+                Widget:
+                    size: 1, dp(10)
 
                 TransactionFieldHeader:
                     text: "[size=20]Seller[/size]"
@@ -67,27 +76,27 @@ kv = """
                     text: "first name:"
                 TransactionFieldValue:
                     id: seller_first_name_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "last name:"
                 TransactionFieldValue:
                     id: seller_last_name_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "phone:"
                 TransactionFieldValue:
                     id: seller_phone_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "e-mail:"
                 TransactionFieldValue:
                     id: seller_email_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "street address:"
                 TransactionFieldValue:
                     id: seller_address_input
-                    text: ""
+                    text: ''
 
                 TransactionFieldHeader:
                     text: "[size=20]Buyer[/size]"
@@ -97,27 +106,27 @@ kv = """
                     text: "first name:"
                 TransactionFieldValue:
                     id: buyer_first_name_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "last name:"
                 TransactionFieldValue:
                     id: buyer_last_name_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "phone:"
                 TransactionFieldValue:
                     id: buyer_phone_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "e-mail:"
                 TransactionFieldValue:
                     id: buyer_email_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "street address:"
                 TransactionFieldValue:
                     id: buyer_address_input
-                    text: ""
+                    text: ''
 
                 TransactionFieldHeader:
                     text: "[size=20]Contract details[/size]"
@@ -128,48 +137,55 @@ kv = """
                     text: "amount (US $):"
                 TransactionFieldValue:
                     id: usd_amount_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "BTC price (US $ / BTC):"
                 TransactionFieldValue:
                     id: btc_price_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "coinmarketcap.com price:"
                 TransactionFieldValue:
                     id: world_btc_price_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "BTC Amount:"
                 TransactionFieldValue:
                     id: btc_amount_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "started:"
                 TransactionFieldValue:
                     id: started_date_time_input
-                    text: ""
+                    text: ''
 
                 TransactionFieldLabel:
                     text: "spending BitCoin address:"
                 TransactionFieldValue:
                     id: spending_btc_address_input
-                    text: ""
+                    text: ''
                 TransactionFieldLabel:
                     text: "receiving BitCoin address:"
                 TransactionFieldValue:
                     id: receiving_btc_address_input
-                    text: ""
+                    text: ''
 
                 TransactionFieldLabel:
                     text: "blockchain status:"
                 TransactionFieldValue:
                     id: blockchain_status_input
-                    text: ""
+                    text: ''
+
+        LeftAlignLabel:
+            id: verify_status_label
+            size_hint: 1, None
+            height: dp(20)
+            text: ''
 
         BoxLayout:
             orientation: 'horizontal'
-            size_hint: 1, None
+            size_hint: None, None
+            height: self.minimum_height
             padding: 10
             spacing: 2
 
@@ -178,6 +194,17 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_pdf_file_button_clicked()
+
+            Widget:
+                size_hint: None, 1
+                width: dp(20)
+
+            RoundedButton:
+                id: verify_button
+                text: 'verify on blockchain'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_verify_button_clicked()
 """
 
 #------------------------------------------------------------------------------
@@ -187,7 +214,7 @@ class OneTransactionScreen(AppScreen):
     transaction_id = None
 
     def populate_fields(self, tran_details):
-        self.ids.contract_type_input.text = '[size=30]BTC %s Contract #%s[/size]' % (
+        self.ids.contract_type_input.text = '[size=22]BTC %s\nContract #%s[/size]' % (
             ('Purchase' if tran_details['contract_type'] == 'purchase' else 'Sales'),
             tran_details['transaction_id'],
         )
@@ -219,10 +246,15 @@ class OneTransactionScreen(AppScreen):
             self.ids.receiving_btc_address_input.text = tran_details['buyer']['btc_address'] or ''
             self.ids.spending_btc_address_input.text = ''  # tran_details['seller']['btc_address'] or ''
 
-        self.ids.blockchain_status_input.text = '[unconfirmed]'
+        self.ids.blockchain_status_input.text = '[color={}][{}][/color]'.format(
+            '#a0a060' if tran_details.get('blockchain_status') != 'confirmed' else '#60b060',
+            tran_details.get('blockchain_status', 'unconfirmed'),
+        )
         self.ids.started_date_time_input.text = '{} at {}'.format(tran_details['date'] or '', tran_details['time'] or '')
+        self.ids.verify_button.disabled = tran_details.get('blockchain_status', 'unconfirmed') == 'confirmed'
 
     def on_pre_enter(self, *args):
+        self.ids.verify_status_label.text = ''
         if self.transaction_id is None:
             return
         tran_details = local_storage.read_transaction(self.transaction_id)
@@ -238,3 +270,28 @@ class OneTransactionScreen(AppScreen):
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
             system.open_system_explorer(pdf_contract['filename'])
+
+    def on_verify_button_clicked(self):
+        transaction_details = local_storage.read_transaction(self.transaction_id)
+        if transaction_details.get('blockchain_status') == 'confirmed':
+            return
+        cur_settings = local_storage.read_settings()
+        self.ids.verify_button.disabled = True
+        self.ids.verify_status_label.text = '[color=#505050]requesting transactions from btc.com ...[/color]'
+        matching_transactions_count = btc_util.verify_contract(
+            contract_details=transaction_details,
+            price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', 0.0)),
+        )
+        self.ids.verify_button.disabled = False
+        st = ''
+        if matching_transactions_count == 0:
+            st = '[color=#505050]did not found any matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
+        elif matching_transactions_count > 1:
+            st = '[color=#F05050]found multiple matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
+        else:
+            st = '[color=#a0a060]found corresponding transaction of %s BTC for address %s[/color]' % (
+                transaction_details['btc_amount'], transaction_details['buyer']['btc_address'])
+            transaction_details['blockchain_status'] = 'confirmed'
+            local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+        self.ids.verify_status_label.text = st
+        self.populate_fields(transaction_details)

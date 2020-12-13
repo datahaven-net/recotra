@@ -362,6 +362,7 @@ class BuyScreen(AppScreen):
                 btc_address=cur_settings.get('receiving_btc_address', ''),
             ),
             company_name=cur_settings.get('business_company_name', ''),
+            blockchain_status='unconfirmed',
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)

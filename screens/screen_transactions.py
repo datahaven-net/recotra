@@ -125,7 +125,7 @@ kv = """
 
             RoundedButton:
                 id: view_transaction_button
-                text: 'open'
+                text: 'view contract'
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 disabled: True
@@ -133,7 +133,7 @@ kv = """
 
             Widget:
                 size_hint: None, 1
-                width: dp(10)
+                width: dp(20)
 
             RoundedSpinner:
                 id: select_month_button
@@ -177,7 +177,10 @@ class TransactionsView(list_view.SelectableRecycleView):
             'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
             'date': t['date'],
             'from_to': '{} -> {}'.format(t['seller']['btc_address'], t['buyer']['btc_address']),
-            'blockchain_status': '[color=#b0b070]{}[/color]'.format(t.get('blockchain_status', 'unconfirmed')),
+            'blockchain_status': '[color={}][{}][/color]'.format(
+                '#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060',
+                t.get('blockchain_status', 'unconfirmed'),
+            ),
         } for t in local_storage.load_transactions_list()]
 
 #------------------------------------------------------------------------------
@@ -203,6 +206,8 @@ class TransactionsScreen(screen.AppScreen):
             selected_transactions=selected_transactions,
             selected_month=selected_month,
             selected_year=selected_year,
-            pdf_filepath=os.path.join(local_storage.reports_dir(), 'transactions_1.pdf'),
+            pdf_filepath=os.path.join(local_storage.reports_dir(), 'transactions_{}_{}.pdf'.format(
+                selected_year, selected_month[:3].lower(),
+            )),
         )
         system.open_system_explorer(pdf_report['filename'])
