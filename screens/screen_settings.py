@@ -174,6 +174,19 @@ kv = """
                         text: ""
                         on_text: root.on_field_modified('usd_btc_commission_percent')
 
+                    OptionHeaderLabel:
+                        text: "contracts verification against live Blockchain:"
+                    Widget:
+                        size: 1, 1
+
+                    OptionFieldLabel:
+                        text: "price precision matching percent:"
+                    OptionFieldInput:
+                        id: price_precision_matching_percent
+                        hint_text: '1.0'
+                        text: ""
+                        on_text: root.on_field_modified('price_precision_matching_percent')
+
                 Widget:
                     size: 1, 1
                     size_hint: 0.5, 1
@@ -211,6 +224,7 @@ class SettingsScreen(AppScreen):
         self.ids.coinmarketcap_api_key.text = cur_settings.get('coinmarketcap_api_key', '')
         self.ids.btc_usd_commission_percent.text = cur_settings.get('btc_usd_commission_percent', '0.0')
         self.ids.usd_btc_commission_percent.text = cur_settings.get('usd_btc_commission_percent', '0.0')
+        self.ids.price_precision_matching_percent.text = cur_settings.get('price_precision_matching_percent', '1.0')
         self.ids.save_settings_button.disabled = True
 
     def on_enter(self, *args):
@@ -232,5 +246,6 @@ class SettingsScreen(AppScreen):
         cur_settings['coinmarketcap_api_key'] = self.ids.coinmarketcap_api_key.text
         cur_settings['btc_usd_commission_percent'] = self.ids.btc_usd_commission_percent.text
         cur_settings['usd_btc_commission_percent'] = self.ids.usd_btc_commission_percent.text
+        cur_settings['price_precision_matching_percent'] = self.ids.price_precision_matching_percent.text
         local_storage.write_settings(cur_settings)
         self.ids.save_settings_button.disabled = True

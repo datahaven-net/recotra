@@ -14,8 +14,6 @@ class AppScreen(Screen):
 
     def __init__(self, **kw):
         super(AppScreen, self).__init__(**kw)
-        if _Debug:
-            print('screen %r created' % self.title)
 
     def get_title(self):
         return self.title

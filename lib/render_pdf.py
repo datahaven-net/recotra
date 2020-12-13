@@ -75,7 +75,6 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                 <img src="{qr_filepath}" width="600">
                 <hr>
                 <p align=left>{disclosure_statement}</p>
-                <br>
             </td>
         </tr>
     </table>
