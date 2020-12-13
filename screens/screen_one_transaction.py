@@ -289,7 +289,7 @@ class OneTransactionScreen(AppScreen):
         elif matching_transactions_count > 1:
             st = '[color=#F05050]found multiple matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
         else:
-            st = '[color=#a0a060]found corresponding transaction of %s BTC for address %s[/color]' % (
+            st = '[color=#70a070]found corresponding transaction of %s BTC for address %s[/color]' % (
                 transaction_details['btc_amount'], transaction_details['buyer']['btc_address'])
             transaction_details['blockchain_status'] = 'confirmed'
             local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)

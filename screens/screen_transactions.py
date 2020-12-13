@@ -200,6 +200,8 @@ class TransactionsScreen(screen.AppScreen):
         selected_year = self.ids.select_year_button.text
         selected_transactions = []
         for t in local_storage.load_transactions_list():
+            if t.get('blockchain_status') != 'confirmed':
+                continue
             if t['date'].startswith(selected_month[:3]) and t['date'].endswith(selected_year):
                 selected_transactions.append(t)
         pdf_report = render_pdf.build_transactions_report(
@@ -207,7 +209,7 @@ class TransactionsScreen(screen.AppScreen):
             selected_month=selected_month,
             selected_year=selected_year,
             pdf_filepath=os.path.join(local_storage.reports_dir(), 'transactions_{}_{}.pdf'.format(
-                selected_year, selected_month[:3].lower(),
+                selected_year, selected_month,
             )),
         )
         system.open_system_explorer(pdf_report['filename'])
