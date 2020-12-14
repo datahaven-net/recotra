@@ -28,7 +28,10 @@ def parse_btc_url(inp):
 
 def fetch_transactions(btc_address):
     url = 'https://chain.api.btc.com/v3/address/{}/tx'.format(btc_address)
-    response = requests.get(url)
+    response = requests.get(url, headers={
+        'User-Agent': 'curl/7.68.0',
+        'Accept': '*/*',
+    })
     if _Debug:
         print('fetch_transactions', response.status_code, response.text)
     result = {}
