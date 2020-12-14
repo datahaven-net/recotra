@@ -29,13 +29,15 @@ def parse_btc_url(inp):
 def fetch_transactions(btc_address):
     url = 'https://chain.api.btc.com/v3/address/{}/tx'.format(btc_address)
     response = requests.get(url)
+    if _Debug:
+        print('fetch_transactions', response.status_code, response.text)
     result = {}
     json_response = response.json()
     if json_response:
         for tr in ((json_response.get('data', {}) or {}).get('list', []) or []):
             result[tr['hash']] = tr['balance_diff'] / 100000000.0
     if _Debug:
-        print(response.status_code, list(result.values()))
+        print('found such transactions:', list(result.values()))
     return result
 
 
@@ -51,5 +53,5 @@ def verify_contract(contract_details, price_precision_matching_percent=1.0):
         if expected_balance_diff_min <= balance_diff and balance_diff <= expected_balance_diff_max:
             matching_count += 1
     if _Debug:
-        print(matching_count, expected_balance_diff_min, expected_balance_diff_max, len(btc_transactions))
+        print('verify_contract', matching_count, expected_balance_diff_min, expected_balance_diff_max, len(btc_transactions))
     return matching_count
