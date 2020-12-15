@@ -2,7 +2,7 @@ import requests
 
 #------------------------------------------------------------------------------
 
-_Debug = True
+_Debug = False
 
 #------------------------------------------------------------------------------
 
@@ -32,15 +32,13 @@ def fetch_transactions(btc_address):
         'User-Agent': 'curl/7.68.0',
         'Accept': '*/*',
     })
-    if _Debug:
-        print('fetch_transactions', response.status_code, response.text)
     result = {}
     json_response = response.json()
     if json_response:
         for tr in ((json_response.get('data', {}) or {}).get('list', []) or []):
             result[tr['hash']] = tr['balance_diff'] / 100000000.0
     if _Debug:
-        print('found such transactions:', list(result.values()))
+        print('fetch_transactions', list(result.values()))
     return result
 
 
