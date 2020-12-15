@@ -225,10 +225,10 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
 {table_content}
     </table>
 <p>
-    Total BTC bought: {total_btc_bought} BTC for {total_usd_sold} $ US
+    Total BTC customers bought from Bitcoin.ai: <b>{total_btc_bought}</b>
 </p>
 <p>
-    Total BTC sold: {total_btc_sold} BTC for {total_usd_bought} $ US
+    Total BTC customers sold to Bitcoin.ai: <b>{total_btc_sold}</b>
 </p>
 </body>
 </html>
