@@ -1,3 +1,4 @@
+import os
 import platform
 import subprocess
 
@@ -7,12 +8,23 @@ def open_system_explorer(path):
     """
     Simple and portable way to show location or file on local disk to the user.
     """
-    if platform.system() == "Windows":
-        os.startfile(path)  # @UndefinedVariable
-    elif platform.system() == "Darwin":
-        subprocess.Popen(["open", "-R", path])
-    else:
-        subprocess.Popen(["xdg-open", path])
+    try:
+        if platform.system() == "Windows":
+            if os.path.isfile(path):
+                subprocess.Popen(['explorer', '/select,', '%s' % (path.replace('/', '\\'))])
+            else:
+                subprocess.Popen(['explorer', '%s' % (path.replace('/', '\\'))])
+        elif platform.system() == "Darwin":
+            subprocess.Popen(["open", "-R", path])
+        else:
+            subprocess.Popen(['sh', '-c', 'nautilus %s' % path])
+    except:
+        try:
+            import webbrowser
+            webbrowser.open(path)
+        except:
+            pass
+    return
 
 #------------------------------------------------------------------------------
 

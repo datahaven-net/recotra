@@ -7,8 +7,9 @@ from components import list_view
 
 from storage import local_storage
 
-from lib import render_pdf
 from lib import system
+from lib import render_pdf
+from lib import render_csv
 
 #------------------------------------------------------------------------------
 
@@ -138,20 +139,26 @@ kv = """
             RoundedSpinner:
                 id: select_month_button
                 width: dp(84)
-                text: 'January'
-                values: 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+                text: '-'
+                values: '-', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
 
             RoundedSpinner:
                 id: select_year_button
                 width: dp(60)
-                text: '2020'
-                values: '2021', '2020', '2019'
+                text: '-'
+                values: '-', '2021', '2020', '2019'
 
             RoundedButton:
-                text: 'print transactions'
+                text: 'PDF report'
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
-                on_release: root.on_print_transactions_button_clicked()
+                on_release: root.on_print_pdf_transactions_button_clicked()
+
+            RoundedButton:
+                text: 'CSV report'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_print_csv_transactions_button_clicked()
 
 """
 
@@ -195,21 +202,56 @@ class TransactionsScreen(screen.AppScreen):
         self.scr('one_transaction_screen').transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
         self.scr_manager().current = 'one_transaction_screen'
 
-    def on_print_transactions_button_clicked(self):
+    def on_print_pdf_transactions_button_clicked(self):
         selected_month = self.ids.select_month_button.text
         selected_year = self.ids.select_year_button.text
+        if selected_month != '-' and selected_year == '-':
+            return
         selected_transactions = []
         for t in local_storage.load_transactions_list():
             if t.get('blockchain_status') != 'confirmed':
                 continue
-            if t['date'].startswith(selected_month[:3]) and t['date'].endswith(selected_year):
-                selected_transactions.append(t)
+            if selected_year != '-' and not t['date'].endswith(selected_year):
+                continue
+            if selected_month != '-' and not t['date'].startswith(selected_month[:3]):
+                continue
+            selected_transactions.append(t)
+        output_filename = 'transactions'
+        if selected_year != '-':
+            output_filename += '_' + selected_year
+        if selected_month != '-':
+            output_filename += '_' + selected_month
+        output_filename += '.pdf'
         pdf_report = render_pdf.build_transactions_report(
             selected_transactions=selected_transactions,
             selected_month=selected_month,
             selected_year=selected_year,
-            pdf_filepath=os.path.join(local_storage.reports_dir(), 'transactions_{}_{}.pdf'.format(
-                selected_year, selected_month,
-            )),
+            pdf_filepath=os.path.join(local_storage.reports_dir(), output_filename),
         )
         system.open_system_explorer(pdf_report['filename'])
+
+    def on_print_csv_transactions_button_clicked(self):
+        selected_month = self.ids.select_month_button.text
+        selected_year = self.ids.select_year_button.text
+        if selected_month != '-' and selected_year == '-':
+            return
+        selected_transactions = []
+        for t in local_storage.load_transactions_list():
+            if t.get('blockchain_status') != 'confirmed':
+                continue
+            if selected_year != '-' and not t['date'].endswith(selected_year):
+                continue
+            if selected_month != '-' and not t['date'].startswith(selected_month[:3]):
+                continue
+            selected_transactions.append(t)
+        output_filename = 'transactions'
+        if selected_year != '-':
+            output_filename += '_' + selected_year
+        if selected_month != '-':
+            output_filename += '_' + selected_month
+        output_filename += '.csv'
+        csv_report_filename = render_csv.build_transactions_report(
+            selected_transactions=selected_transactions,
+            csv_filepath=os.path.join(local_storage.reports_dir(), output_filename),
+        )
+        system.open_system_explorer(csv_report_filename)
