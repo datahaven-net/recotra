@@ -228,7 +228,7 @@ class TransactionsScreen(screen.AppScreen):
             selected_year=selected_year,
             pdf_filepath=os.path.join(local_storage.reports_dir(), output_filename),
         )
-        system.open_system_explorer(pdf_report['filename'])
+        system.open_system_explorer(pdf_report['filename'], as_folder=True)
 
     def on_print_csv_transactions_button_clicked(self):
         selected_month = self.ids.select_month_button.text
@@ -254,4 +254,4 @@ class TransactionsScreen(screen.AppScreen):
             selected_transactions=selected_transactions,
             csv_filepath=os.path.join(local_storage.reports_dir(), output_filename),
         )
-        system.open_system_explorer(csv_report_filename)
+        system.open_system_explorer(csv_report_filename, as_folder=True)

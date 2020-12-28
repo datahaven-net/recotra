@@ -269,7 +269,7 @@ class OneTransactionScreen(AppScreen):
                 disclosure_statement=cur_settings.get('disclosure_statement') or '',
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
-            system.open_system_explorer(pdf_contract['filename'])
+            system.open_system_explorer(pdf_contract['filename'], as_folder=False)
 
     def on_verify_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)
