@@ -318,7 +318,7 @@ class EditCustomerScreen(screen.AppScreen):
             customer_photo_filepath=local_storage.customer_photo_filepath(self.customer_id),
             pdf_filepath=os.path.join(local_storage.customer_dir(self.customer_id), 'id_card.pdf'),
         )
-        system.open_system_explorer(id_card['filename'])
+        system.open_system_explorer(id_card['filename'], as_folder=False)
 
     def on_edit_customer_open_folder_button_clicked(self, *args):
         system.open_system_explorer(local_storage.customer_dir(self.customer_id))

@@ -4,20 +4,28 @@ import subprocess
 
 #------------------------------------------------------------------------------
 
-def open_system_explorer(path):
+def open_system_explorer(path, as_folder=True):
     """
     Simple and portable way to show location or file on local disk to the user.
     """
     try:
-        if platform.system() == "Windows":
-            if os.path.isfile(path):
-                subprocess.Popen(['explorer', '/select,', '%s' % (path.replace('/', '\\'))])
+        if as_folder:
+            if platform.system() == "Windows":
+                if os.path.isfile(path):
+                    subprocess.Popen(['explorer', '/select,', '%s' % (path.replace('/', '\\'))])
+                else:
+                    subprocess.Popen(['explorer', '%s' % (path.replace('/', '\\'))])
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", "-R", path])
             else:
-                subprocess.Popen(['explorer', '%s' % (path.replace('/', '\\'))])
-        elif platform.system() == "Darwin":
-            subprocess.Popen(["open", "-R", path])
+                subprocess.Popen(['sh', '-c', 'nautilus %s' % path])
         else:
-            subprocess.Popen(['sh', '-c', 'nautilus %s' % path])
+            if platform.system() == "Windows":
+                os.startfile(path)  # @UndefinedVariable
+            elif platform.system() == "Darwin":
+                subprocess.Popen(["open", "-R", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
     except:
         try:
             import webbrowser
