@@ -205,6 +205,17 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_verify_button_clicked()
+
+            Widget:
+                size_hint: None, 1
+                width: dp(20)
+
+            RoundedButton:
+                id: explore_button
+                text: 'explore on blockchain'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_explore_button_clicked()
 """
 
 #------------------------------------------------------------------------------
@@ -295,3 +306,9 @@ class OneTransactionScreen(AppScreen):
             local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
         self.ids.verify_status_label.text = st
         self.populate_fields(transaction_details)
+
+    def on_explore_button_clicked(self):
+        transaction_details = local_storage.read_transaction(self.transaction_id)
+        system.open_webbrowser(
+            url='https://www.blockchain.com/btc/address/' + transaction_details.get('buyer', {}).get('btc_address', ''),
+        )

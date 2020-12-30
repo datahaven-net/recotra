@@ -36,6 +36,15 @@ def open_system_explorer(path, as_folder=True):
 
 #------------------------------------------------------------------------------
 
+def open_webbrowser(url):
+    try:
+        import webbrowser
+        webbrowser.open(url)
+    except:
+        pass
+
+#------------------------------------------------------------------------------
+
 def copy_xclip(text, primary=False):
     DEFAULT_SELECTION='c'
     PRIMARY_SELECTION='p'
