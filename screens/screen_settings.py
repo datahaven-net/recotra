@@ -187,6 +187,22 @@ kv = """
                         text: ""
                         on_text: root.on_field_modified('price_precision_matching_percent')
 
+                    OptionFieldLabel:
+                        text: "transaction time offset - seconds before:"
+                    OptionFieldInput:
+                        id: time_matching_seconds_before
+                        hint_text: '3600'
+                        text: ""
+                        on_text: root.on_field_modified('time_matching_seconds_before')
+
+                    OptionFieldLabel:
+                        text: "transaction time offset - seconds after:"
+                    OptionFieldInput:
+                        id: time_matching_seconds_after
+                        hint_text: '21600'
+                        text: ""
+                        on_text: root.on_field_modified('time_matching_seconds_after')
+
                 Widget:
                     size: 1, 1
                     size_hint: 0.5, 1
@@ -225,6 +241,8 @@ class SettingsScreen(AppScreen):
         self.ids.btc_usd_commission_percent.text = cur_settings.get('btc_usd_commission_percent', '0.0')
         self.ids.usd_btc_commission_percent.text = cur_settings.get('usd_btc_commission_percent', '0.0')
         self.ids.price_precision_matching_percent.text = cur_settings.get('price_precision_matching_percent', '1.0')
+        self.ids.time_matching_seconds_before.text = cur_settings.get('time_matching_seconds_before', '0')
+        self.ids.time_matching_seconds_after.text = cur_settings.get('time_matching_seconds_after', '0')
         self.ids.save_settings_button.disabled = True
 
     def on_enter(self, *args):
@@ -247,5 +265,7 @@ class SettingsScreen(AppScreen):
         cur_settings['btc_usd_commission_percent'] = self.ids.btc_usd_commission_percent.text
         cur_settings['usd_btc_commission_percent'] = self.ids.usd_btc_commission_percent.text
         cur_settings['price_precision_matching_percent'] = self.ids.price_precision_matching_percent.text
+        cur_settings['time_matching_seconds_before'] = self.ids.time_matching_seconds_before.text
+        cur_settings['time_matching_seconds_after'] = self.ids.time_matching_seconds_after.text
         local_storage.write_settings(cur_settings)
         self.ids.save_settings_button.disabled = True
