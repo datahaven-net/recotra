@@ -60,9 +60,9 @@ def verify_contract(contract_details, price_precision_matching_percent=1.0, time
         block_local_time = datetime.datetime.fromtimestamp(0) + datetime.timedelta(seconds=block_time)
         diff_seconds = (block_local_time - contract_local_time).total_seconds()
         if _Debug:
-            print('    %s %r : %r +/- %r [%r : %r]' % (contract_details['contract_type'], balance_diff, block_local_time, diff_seconds, -time_matching_seconds_before, time_matching_seconds_after, ))
-        if contract_details['contract_type'] == 'sales':
-            balance_diff = tr_info[0] * -1.0
+            print('    %s %r : %r +/- %r [%r : %r]' % (
+                contract_details['contract_type'], balance_diff, block_local_time, diff_seconds,
+                -time_matching_seconds_before, time_matching_seconds_after, ))
         if time_matching_seconds_before:
             if diff_seconds < -time_matching_seconds_before:
                 continue
