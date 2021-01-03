@@ -230,6 +230,12 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
 <p>
     Total BTC customers sold to Bitcoin.ai: <b>{total_btc_sold}</b>
 </p>
+<p>
+    Total US $ customers bought from Bitcoin.ai: <b>{total_usd_bought}</b>
+</p>
+<p>
+    Total US $ customers sold to Bitcoin.ai: <b>{total_usd_sold}</b>
+</p>
 </body>
 </html>
     """
