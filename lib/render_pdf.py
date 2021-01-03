@@ -224,18 +224,26 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
         </tr>
 {table_content}
     </table>
-<p>
-    Total BTC customers bought from Bitcoin.ai: <b>{total_btc_bought}</b>
-</p>
-<p>
-    Total BTC customers sold to Bitcoin.ai: <b>{total_btc_sold}</b>
-</p>
-<p>
-    Total US $ customers bought from Bitcoin.ai: <b>{total_usd_bought}</b>
-</p>
-<p>
-    Total US $ customers sold to Bitcoin.ai: <b>{total_usd_sold}</b>
-</p>
+<br>
+<table>
+<tr><td>
+    <p>
+        Total BTC received: <b>{total_btc_bought}</b>
+    </p>
+    <p>
+        Total Dollars paid out: <b>{total_usd_sold}</b> US $
+    </p>
+</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>
+    <p>
+        Total BTC paid out: <b>{total_btc_sold}</b>
+    </p>
+    <p>
+        Total Dollars received: <b>{total_usd_bought}</b> US $
+    </p>
+</td></tr>
+</table>
 </body>
 </html>
     """
@@ -245,17 +253,19 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
     total_btc_sold = 0.0
     total_usd_sold = 0.0
     for t in selected_transactions:
+        seller = '' if t['contract_type'] == 'sales' else f"{t['seller']['first_name']} {t['seller']['last_name']}"
+        buyer = '' if t['contract_type'] == 'purchase' else f"{t['buyer']['first_name']} {t['buyer']['last_name']}"
         table_content += f'''
         <tr>
-            <td nowrap>{t['seller']['first_name']} {t['seller']['last_name']}</td>
-            <td nowrap>{t['buyer']['first_name']} {t['buyer']['last_name']}</td>
+            <td nowrap>{seller}</td>
+            <td nowrap>{buyer}</td>
             <td nowrap>{t['btc_amount']}</td>
             <td nowrap>{t['usd_amount']}</td>
             <td nowrap>{t['date']}</td>
             <td nowrap>{t['buyer']['btc_address']}</td>
         </tr>
         '''
-        if t['contract_type'] == 'purchase':
+        if t['contract_type'] == 'sales':
             total_btc_sold += float(t['btc_amount'])
             total_usd_bought += float(t['usd_amount'])
         else:
@@ -263,8 +273,8 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
             total_usd_sold += float(t['usd_amount'])
     params = {
         'table_content': table_content,
-        'selected_month': selected_month,
-        'selected_year': selected_year,
+        'selected_month': selected_month.replace('-', ''),
+        'selected_year': selected_year.replace('-', ''),
         'total_btc_bought': round(total_btc_bought, 6),
         'total_usd_bought': round(total_usd_bought, 2),
         'total_btc_sold': round(total_btc_sold, 6),
