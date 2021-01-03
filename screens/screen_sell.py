@@ -398,7 +398,7 @@ class SellScreen(AppScreen):
             btc_amount=self.ids.btc_amount_input.text,
             fee_percent=str(float(cur_settings.get('btc_usd_commission_percent', '0.0'))),
             date=t_now.strftime("%b %d %Y"),
-            time=t_now.strftime("%H:%M %p"),
+            time=t_now.strftime("%I:%M %p"),
             seller=dict(
                 customer_id=None,
                 first_name=cur_settings.get('business_owner_first_name', ''),
