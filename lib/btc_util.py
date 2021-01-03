@@ -38,7 +38,11 @@ def fetch_transactions(btc_address):
     json_response = response.json()
     if json_response:
         for tr in ((json_response.get('data', {}) or {}).get('list', []) or []):
-            result[tr['hash']] = (tr['balance_diff'] / 100000000.0, tr['block_time'], )
+            result[tr['hash']] = {
+                'balance_diff': tr['balance_diff'] / 100000000.0,
+                'block_time': tr['block_time'],
+                'hash': tr['hash'],
+            }
             if _Debug:
                 print('fetch_transactions', tr['balance_diff'] / 100000000.0, 'at', time.asctime(time.localtime(tr['block_time'])))
     if _Debug:
@@ -53,10 +57,10 @@ def verify_contract(contract_details, price_precision_matching_percent=1.0, time
     contract_local_time = datetime.datetime.strptime('{} {}'.format(contract_details['date'], contract_details['time']), '%b %d %Y %I:%M %p')
     if _Debug:
         print('verify_contract', contract_local_time, expected_balance_diff_min, expected_balance_diff_max, )
-    matching_count = 0
+    matching_transactions = []
     for tr_info in btc_transactions.values():
-        balance_diff = tr_info[0]
-        block_time = tr_info[1]
+        balance_diff = tr_info['balance_diff']
+        block_time = tr_info['block_time']
         block_local_time = datetime.datetime.fromtimestamp(0) + datetime.timedelta(seconds=block_time)
         diff_seconds = (block_local_time - contract_local_time).total_seconds()
         if _Debug:
@@ -70,7 +74,7 @@ def verify_contract(contract_details, price_precision_matching_percent=1.0, time
             if diff_seconds > time_matching_seconds_after:
                 continue
         if expected_balance_diff_min <= balance_diff and balance_diff <= expected_balance_diff_max:
-            matching_count += 1
+            matching_transactions.append(tr_info)
     if _Debug:
-        print('verify_contract', matching_count, len(btc_transactions))
-    return matching_count
+        print('verify_contract', len(matching_transactions), len(btc_transactions))
+    return matching_transactions

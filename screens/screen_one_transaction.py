@@ -289,7 +289,7 @@ class OneTransactionScreen(AppScreen):
         cur_settings = local_storage.read_settings()
         self.ids.verify_button.disabled = True
         self.ids.verify_status_label.text = '[color=#505050]requesting transactions from btc.com ...[/color]'
-        matching_transactions_count = btc_util.verify_contract(
+        matching_transactions = btc_util.verify_contract(
             contract_details=transaction_details,
             price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
             time_matching_seconds_before=float(cur_settings.get('time_matching_seconds_before', '0.0')),
@@ -297,14 +297,15 @@ class OneTransactionScreen(AppScreen):
         )
         self.ids.verify_button.disabled = False
         st = ''
-        if matching_transactions_count == 0:
+        if len(matching_transactions) == 0:
             st = '[color=#505050]did not found any matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
-        elif matching_transactions_count > 1:
+        elif len(matching_transactions) > 1:
             st = '[color=#F05050]found multiple matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
         else:
             st = '[color=#70a070]found corresponding transaction of %s BTC for address %s[/color]' % (
                 transaction_details['btc_amount'], transaction_details['buyer']['btc_address'])
             transaction_details['blockchain_status'] = 'confirmed'
+            transaction_details['blockchain_tx_info'] = matching_transactions[0]
             local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
         self.ids.verify_status_label.text = st
         self.populate_fields(transaction_details)
