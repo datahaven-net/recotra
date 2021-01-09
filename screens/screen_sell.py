@@ -315,14 +315,14 @@ class SellScreen(AppScreen):
         self.scr_manager().remove_widget(self.scan_qr_screen)
         self.scan_qr_screen = None
         if _Debug:
-        	print('on_receive_address_scan_qr_ready', args)
+            print('on_receive_address_scan_qr_ready', args)
         btc_scan = btc_util.parse_btc_url(args[0].strip())
         if _Debug:
             print('on_receive_address_scan_qr_ready', btc_scan)
         self.ids.receive_address_input.text = btc_scan['address']
-        if 'amount' in btc_scan:
-            self.ids.btc_amount_input.text = btc_scan['amount']
-            self.populate_usd_amount_from_btc_amount()
+        # if 'amount' in btc_scan:
+        #     self.ids.btc_amount_input.text = btc_scan['amount']
+        #     self.populate_usd_amount_from_btc_amount()
 
     def on_receive_address_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'sell_screen'
