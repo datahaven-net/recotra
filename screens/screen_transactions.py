@@ -2,6 +2,11 @@ import os
 
 #------------------------------------------------------------------------------
 
+from kivy.clock import Clock
+from kivy.properties import ListProperty  # @UnresolvedImport
+
+#------------------------------------------------------------------------------
+
 from components import screen
 from components import list_view
 
@@ -10,6 +15,11 @@ from storage import local_storage
 from lib import system
 from lib import render_pdf
 from lib import render_csv
+from lib import btc_util
+
+#------------------------------------------------------------------------------
+
+_Debug = True
 
 #------------------------------------------------------------------------------
 
@@ -160,6 +170,13 @@ kv = """
                 size_hint_x: None
                 on_release: root.on_print_csv_transactions_button_clicked()
 
+            RoundedButton:
+                id: verify_contracts_button
+                text: 'verify contracts'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_verfy_transactions_button_clicked()
+
 """
 
 #------------------------------------------------------------------------------
@@ -167,7 +184,7 @@ kv = """
 class TransactionsView(list_view.SelectableRecycleView):
 
     def __init__(self, **kwargs):
-        super(TransactionsView, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.data = []
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
@@ -194,6 +211,8 @@ class TransactionsView(list_view.SelectableRecycleView):
 
 class TransactionsScreen(screen.AppScreen):
 
+    transactions_to_be_verified = ListProperty([])
+    verification_progress = 0 
 
     def on_enter(self, *args):
         self.ids.transactions_view.populate()
@@ -255,3 +274,40 @@ class TransactionsScreen(screen.AppScreen):
             csv_filepath=os.path.join(local_storage.reports_dir(), output_filename),
         )
         system.open_system_explorer(csv_report_filename, as_folder=True)
+
+    def on_verfy_transactions_button_clicked(self):
+        self.ids.verify_contracts_button.disabled = True
+        self.verification_progress = 0
+        for transaction_details in local_storage.load_transactions_list():
+            if transaction_details.get('blockchain_status') == 'confirmed':
+                continue
+            self.transactions_to_be_verified.append(transaction_details)
+            if len(self.transactions_to_be_verified) >= 10:
+                break
+        Clock.schedule_once(self.verify_next_transaction, 0)
+
+    def verify_next_transaction(self, *args):
+        if not self.transactions_to_be_verified:
+            self.ids.verify_contracts_button.disabled = False
+            return
+        transaction_details = self.transactions_to_be_verified.pop(0)
+        self.verification_progress += 1
+        if _Debug:
+            print('verify_next_transaction %r  progress is %r' % (
+                transaction_details['transaction_id'], self.verification_progress))
+        cur_settings = local_storage.read_settings()
+        matching_transactions = btc_util.verify_contract(
+            contract_details=transaction_details,
+            price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
+            time_matching_seconds_before=float(cur_settings.get('time_matching_seconds_before', '0.0')),
+            time_matching_seconds_after=float(cur_settings.get('time_matching_seconds_after', '0.0')),
+        )
+        if len(matching_transactions) == 1:
+            transaction_details['blockchain_status'] = 'confirmed'
+            transaction_details['blockchain_tx_info'] = matching_transactions[0]
+            local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+            for transaction_item in self.ids.transactions_view.data:
+                if transaction_item['tr_id'] == transaction_details['transaction_id']:
+                    transaction_item['blockchain_status'] = '[color={}][{}][/color]'.format('#60b060', 'confirmed')
+                    self.ids.transactions_view.refresh_from_data()
+        Clock.schedule_once(self.verify_next_transaction, 5.0)
