@@ -25,6 +25,19 @@ def parse_btc_url(inp):
             result[key] = value
     return result
 
+#------------------------------------------------------------------------------
+
+def clean_btc_amount(inp):
+    if not inp:
+        return '0.0'
+    if isinstance(inp, float):
+        inp = str(inp)
+    if isinstance(inp, int):
+        inp = str(inp)
+    inp = inp.replace(',', '.')
+    if inp.count('.') >= 2:
+        inp = '.'.join(inp.split('.')[:2])
+    return inp
 
 #------------------------------------------------------------------------------
 

@@ -6,6 +6,7 @@ import platform
 
 from lib import jsn
 from lib import strng
+from lib import btc_util
 
 #------------------------------------------------------------------------------
 
@@ -88,6 +89,7 @@ def load_transactions_list(sort_by='transaction_id'):
         src = ReadTextFile(transaction_filepath(transaction_id))
         src = src or ('{"transaction_id": %s' % transaction_id)
         json_data = jsn.loads_text(src)
+        json_data['btc_amount'] = btc_util.clean_btc_amount(json_data['btc_amount'])
         result.append(json_data)
     if sort_by == 'transaction_id':
         result.sort(key=lambda i: -int(i.get('transaction_id', '0')))
@@ -118,6 +120,7 @@ def read_transaction(transaction_id):
     if not src:
         return None
     json_data = jsn.loads_text(src)
+    json_data['btc_amount'] = btc_util.clean_btc_amount(json_data['btc_amount'])
     return json_data
 
 #------------------------------------------------------------------------------
