@@ -8,6 +8,7 @@ from kivy.clock import Clock
 #------------------------------------------------------------------------------
 
 from lib import coinmarketcap_client
+from lib import btc_util
 
 from components.screen import AppScreen
 
@@ -316,7 +317,7 @@ class BuyScreen(AppScreen):
             return
         cur_settings = local_storage.read_settings()
         try:
-            btc_amount_current = float(self.ids.btc_amount_input.text)
+            btc_amount_current = float(btc_util.clean_btc_amount(self.ids.btc_amount_input.text))
             usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
             btc_price_current = float(self.ids.btc_price_input.text)
             rate_for_this_contract = btc_price_current * (1.0 + usd_btc_commission_percent / 100.0)
@@ -339,7 +340,7 @@ class BuyScreen(AppScreen):
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
             btc_price=contract_btc_price,
-            btc_amount=self.ids.btc_amount_input.text,
+            btc_amount=btc_util.clean_btc_amount(self.ids.btc_amount_input.text),
             fee_percent=str(float(cur_settings.get('usd_btc_commission_percent', '0.0'))),
             date=t_now.strftime("%b %d %Y"),
             time=t_now.strftime("%I:%M %p"),
