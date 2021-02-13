@@ -1,10 +1,12 @@
 from kivy.app import App
 from kivy.properties import ObjectProperty  # @UnresolvedImport
+from kivy.uix.textinput import TextInput
 
 #------------------------------------------------------------------------------
 
 from components.screen import AppScreen
 from storage import local_storage
+from lib import btc_util
 
 #------------------------------------------------------------------------------
 
@@ -35,7 +37,7 @@ kv = """
 <OptionFieldInput@TextInput>:
     size_hint_x: None
     size_hint_y: None
-    width: dp(360)
+    width: dp(380)
     height: self.minimum_height
     multiline: False
 
@@ -43,8 +45,16 @@ kv = """
 <OptionFieldMultilineInput@TextInput>:
     size_hint_x: None
     size_hint_y: None
-    width: dp(360)
+    width: dp(380)
     height: dp(50)
+    multiline: True
+    
+
+<OptionFieldBTCAddressListInput>:
+    size_hint_x: None
+    size_hint_y: None
+    width: dp(380)
+    height: dp(100)
     multiline: True
 
 
@@ -128,8 +138,8 @@ kv = """
                         on_text: root.on_field_modified('business_phone')
 
                     OptionFieldLabel:
-                        text: "BitCoin address:"
-                    OptionFieldInput:
+                        text: "receiving BitCoin addresses:"
+                    OptionFieldBTCAddressListInput:
                         id: receiving_btc_address
                         text: ""
                         on_text: root.on_field_modified('receiving_btc_address')
@@ -225,6 +235,27 @@ kv = """
 
 #------------------------------------------------------------------------------
 
+class OptionFieldBTCAddressListInput(TextInput):
+
+    def insert_text(self, substring, from_undo=False):
+        if substring.count('\n') == 0: 
+            return super().insert_text(substring, from_undo)
+        if substring.count('\n') == 1 and len(substring) == 1:
+            return super().insert_text(substring, from_undo)
+        newsubstring = ''
+        for line in substring.split('\n'):
+            words = line.split()
+            btc_address = ''
+            for word in words:
+                if btc_util.validate_btc_address(word):
+                    btc_address = word
+                    break
+            if not btc_address:
+                continue
+            newsubstring += btc_address + '\n'
+        return super().insert_text(newsubstring, from_undo)
+
+
 class SettingsScreen(AppScreen):
 
     def populate(self, *args):
@@ -236,7 +267,7 @@ class SettingsScreen(AppScreen):
         self.ids.business_email.text = cur_settings.get('business_email', '')
         self.ids.business_phone.text = cur_settings.get('business_phone', '')
         self.ids.disclosure_statement.text = cur_settings.get('disclosure_statement', '')
-        self.ids.receiving_btc_address.text = cur_settings.get('receiving_btc_address', '')
+        self.ids.receiving_btc_address.text = '\n'.join(cur_settings.get('receiving_btc_address_list', []))
         self.ids.coinmarketcap_api_key.text = cur_settings.get('coinmarketcap_api_key', '')
         self.ids.btc_usd_commission_percent.text = cur_settings.get('btc_usd_commission_percent', '0.0')
         self.ids.usd_btc_commission_percent.text = cur_settings.get('usd_btc_commission_percent', '0.0')
@@ -260,7 +291,7 @@ class SettingsScreen(AppScreen):
         cur_settings['business_email'] = self.ids.business_email.text
         cur_settings['business_phone'] = self.ids.business_phone.text
         cur_settings['disclosure_statement'] = self.ids.disclosure_statement.text
-        cur_settings['receiving_btc_address'] = self.ids.receiving_btc_address.text
+        cur_settings['receiving_btc_address_list'] = list(filter(None, self.ids.receiving_btc_address.text.split('\n')))
         cur_settings['coinmarketcap_api_key'] = self.ids.coinmarketcap_api_key.text
         cur_settings['btc_usd_commission_percent'] = self.ids.btc_usd_commission_percent.text
         cur_settings['usd_btc_commission_percent'] = self.ids.usd_btc_commission_percent.text
