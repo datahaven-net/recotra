@@ -27,9 +27,10 @@ venv:
 	@$(PIP) install -r $(REQUIREMENTS_TXT)
 
 install_python37:
-	@sudo apt update
-	@sudo apt install software-properties-common
-	@sudo add-apt-repository ppa:deadsnakes/ppa
+	@sudo apt update || echo "failed to run apt update"
+	@sudo apt install software-properties-common || echo "failed to install software-properties-common"
+	@sudo add-apt-repository ppa:deadsnakes/ppa || echo "failed to run add-apt-repository"
+	@sudo apt update || echo "failed to run apt update"
 	@sudo apt install python3.7
 	@sudo apt install python3.7-venv
 	@sudo apt install python3.7-dev
