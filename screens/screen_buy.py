@@ -18,7 +18,7 @@ from screens.screen_camera_scan_qr import CameraScanQRScreen
 
 #------------------------------------------------------------------------------
 
-_Debug = True
+_Debug = False
 
 #------------------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ kv = """
                     text: "receiving BitCoin address:"
                 BuyFieldInput:
                     id: receive_address_input
-                    text: "<automatically populated from settings>"
+                    text: ""
 """
 
 #------------------------------------------------------------------------------
@@ -177,10 +177,21 @@ class BuyScreen(AppScreen):
         self.ids.person_email_input.text = ''
         self.ids.person_address_input.text = ''
         self.ids.usd_amount_input.text = '0.0'
-        # self.ids.btc_price_input.text = '0.0'
         self.ids.btc_amount_input.text = '0.0'
+        self.ids.receive_address_input.text = ''
+
+    def populate_next_btc_address(self):
         cur_settings = local_storage.read_settings()
-        self.ids.receive_address_input.text = cur_settings.get('receiving_btc_address', '')
+        recent_btc_address = cur_settings.get('recent_btc_address')
+        receiving_btc_address_list = cur_settings.get('receiving_btc_address_list', [])
+        if receiving_btc_address_list:
+            recent_pos = -1
+            if recent_btc_address and recent_btc_address in receiving_btc_address_list:
+                recent_pos = receiving_btc_address_list.index(recent_btc_address)
+            recent_pos += 1
+            if recent_pos >= len(receiving_btc_address_list):
+                recent_pos = 0
+            self.ids.receive_address_input.text = receiving_btc_address_list[recent_pos]
 
     def populate_btc_usd_price(self):
         cur_settings = local_storage.read_settings()
@@ -216,6 +227,7 @@ class BuyScreen(AppScreen):
         if self.selected_customer_id is None:
             self.clean_input_fields()
             self.populate_btc_usd_price()
+            self.populate_next_btc_address()
 
     #------------------------------------------------------------------------------
 
@@ -265,6 +277,8 @@ class BuyScreen(AppScreen):
         self.populate_btc_usd_price()
 
     def on_coinmarketcap_response(self, request, response):
+        if _Debug:
+            print('on_coinmarketcap_response', response)
         if response:
             try:
                 btc_usd_price = float(response['data'][0]['quote']['USD']['price'])
@@ -360,12 +374,15 @@ class BuyScreen(AppScreen):
                 address=cur_settings.get('business_address', ''),
                 email=cur_settings.get('business_email', ''),
                 phone=cur_settings.get('business_phone', ''),
-                btc_address=cur_settings.get('receiving_btc_address', ''),
+                btc_address=self.ids.receive_address_input.text,
             ),
             company_name=cur_settings.get('business_company_name', ''),
             blockchain_status='unconfirmed',
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)
+        cur_settings['recent_btc_address'] = self.ids.receive_address_input.text
+        local_storage.write_settings(cur_settings)
+        self.clean_input_fields()
         self.scr('one_transaction_screen').transaction_id = new_transaction_details['transaction_id']
         self.scr_manager().current = 'one_transaction_screen'

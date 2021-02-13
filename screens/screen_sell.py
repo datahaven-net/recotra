@@ -406,20 +406,21 @@ class SellScreen(AppScreen):
                 address=cur_settings.get('business_address', ''),
                 email=cur_settings.get('business_email', ''),
                 phone=cur_settings.get('business_phone', ''),
-                btc_address=cur_settings.get('receiving_btc_address', ''),
+                btc_address=(cur_settings.get('receiving_btc_address_list', ['', ]) or ['', ])[0],
             ),
             buyer=dict(
                 customer_id=self.selected_customer_id,
                 first_name=self.ids.person_first_name_input.text,
                 last_name=self.ids.person_last_name_input.text,
-                btc_address=self.ids.receive_address_input.text,
                 address=self.ids.person_address_input.text,
                 email=self.ids.person_email_input.text,
                 phone=self.ids.person_phone_input.text,
+                btc_address=self.ids.receive_address_input.text,
             ),
             company_name=cur_settings.get('business_company_name', ''),
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)
+        self.clean_input_fields()
         self.scr('one_transaction_screen').transaction_id = new_transaction_details['transaction_id']
         self.scr_manager().current = 'one_transaction_screen'

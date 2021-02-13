@@ -31,7 +31,8 @@ from storage import local_storage
 #------------------------------------------------------------------------------ 
 
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')  # disable multi-touch
-Config.set('graphics', 'resizable', True)
+# Config.set('graphics', 'resizable', True)
+# Config.set('kivy', 'window_icon', './icons/btcusd.ico')
 
 Window.clearcolor = (1, 1, 1, 1)
 
