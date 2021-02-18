@@ -11,6 +11,9 @@ from kivy.logger import Logger, LOG_LEVELS
 
 #------------------------------------------------------------------------------
 
+from lib import coinmarketcap_client
+from lib import btc_util
+
 from components import buttons
 from components import labels
 from components import list_view
@@ -76,8 +79,30 @@ class BitCoinContractsApp(App):
         self.main_window = main_window.MainWindow()
         return self.main_window
 
+    def on_start(self):
+        cur_settings = local_storage.read_settings()
+        coinmarketcap_api_key = cur_settings.get('coinmarketcap_api_key', '')
+        if coinmarketcap_api_key:
+            coinmarketcap_client.cryptocurrency_listings(
+                api_key=coinmarketcap_api_key,
+                start=1,
+                limit=1,
+                convert='USD',
+                cb=self.on_coinmarketcap_response,
+            )
+
     def on_stop(self):
         self.root.ids.scr_manager.get_screen('customers_screen').clear_selected_items()
+
+    def on_coinmarketcap_response(self, request, response):
+        if response:
+            try:
+                btc_usd_price = float(response['data'][0]['quote']['USD']['price'])
+            except:
+                btc_usd_price = None
+            if btc_usd_price is not None:
+                btc_util.LatestKnownBTCPrice = btc_usd_price
+                print('Latest known BTC price is : %r' % btc_util.LatestKnownBTCPrice)
 
 #------------------------------------------------------------------------------
 
