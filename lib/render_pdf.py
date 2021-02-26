@@ -10,7 +10,7 @@ from storage import local_storage
 
 #------------------------------------------------------------------------------
 
-def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepath=None, qr_filepath=None):
+def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepath=None, qr_filepath=None, face_photo_filepath=None):
     if not pdf_filepath:
         pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='btc-contract-')
     if os.path.isfile(pdf_filepath):
@@ -39,7 +39,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
             </td>
         </tr>
         <tr valign=top>
-            <td colspan="4">
+            <td colspan="3">
                 <font size=+2>
                 <p>
                     Customer {buying_selling} Bitcoin: <b>{first_name} {last_name}</b>
@@ -61,6 +61,13 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                     Time: {time}
                 </p>
                 </font>
+            </td>
+            <td colspan="1">
+                <img src="{face_photo_filepath}" width="150">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4">
                 <hr>
             </td>
         </tr>
@@ -103,13 +110,17 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
     contract_type = transaction_details['contract_type']
     buyer = transaction_details['buyer']
     seller = transaction_details['seller']
+    customer_id = seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id']
+    if not face_photo_filepath:
+        face_photo_filepath = local_storage.customer_photo_filepath(customer_id)
     params = {
         'qr_filepath': qr_filepath,
+        'face_photo_filepath': face_photo_filepath,
         'contract_type_str': contract_type.upper(),
         'buying_selling': 'selling' if contract_type == 'purchase' else 'buying',
         'first_name': seller['first_name'] if contract_type == 'purchase' else buyer['first_name'],
         'last_name': seller['last_name'] if contract_type == 'purchase' else buyer['last_name'],
-        'customer_id': seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id'],
+        'customer_id': customer_id,
         'sender': '{} {}'.format(seller['first_name'], seller['last_name']),
         'business_company_name': cur_settings.get('business_company_name') or '',
         'business_owner_first_name': cur_settings.get('business_owner_first_name') or '',
