@@ -46,52 +46,61 @@ kv = """
     amount_btc: 'amount_btc'
     price_btc: 'price_btc'
     date: 'date'
+    void: 'void'
 
     Label:
         id: tr_id
         text: root.tr_id
         size_hint: None, 0.36
         width: 40
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: buyer
         text: root.buyer
         bold: True
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: tr_type
         text: root.tr_type
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: amount_btc
         text: root.amount_btc
         markup: True
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: seller
         text: root.seller
         markup: True
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: price_btc
         text: root.price_btc
         markup: True
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: amount_usd
         text: root.amount_usd
         markup: True
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: date
         text: root.date
         size_hint: None, 0.36
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: from_to
         text: root.from_to
@@ -99,11 +108,13 @@ kv = """
         font_size: 12
         size_hint: None, 0.3
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: blockchain_status
         text: root.blockchain_status
         size_hint: None, 0.3
         width: self.texture_size[0] + 10
+        color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
 
 
 <TransactionsView>:
@@ -142,6 +153,14 @@ kv = """
                 disabled: True
                 on_release: root.on_view_transaction_button_clicked()
 
+            RoundedButton:
+                id: disable_transaction_button
+                text: 'mark as "void"'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                disabled: True
+                on_release: root.on_disable_transaction_button_clicked()
+
             Widget:
                 size_hint: None, 1
                 width: dp(20)
@@ -170,6 +189,10 @@ kv = """
                 size_hint_x: None
                 on_release: root.on_print_csv_transactions_button_clicked()
 
+            Widget:
+                size_hint: None, 1
+                width: dp(20)
+
             RoundedButton:
                 id: verify_contracts_button
                 text: 'verify contracts'
@@ -189,6 +212,11 @@ class TransactionsView(list_view.SelectableRecycleView):
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
         self.parent.parent.ids.view_transaction_button.disabled = not is_selected
+        if is_selected:
+            if item.blockchain_status.count('unconfirmed') and item.void != '1':
+                self.parent.parent.ids.disable_transaction_button.disabled = False
+        else:
+            self.parent.parent.ids.disable_transaction_button.disabled = True
 
     def populate(self):
         self.data = [{
@@ -205,6 +233,7 @@ class TransactionsView(list_view.SelectableRecycleView):
                 '#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060',
                 t.get('blockchain_status', 'unconfirmed'),
             ),
+            'void': '1' if t.get('void') else '',
         } for t in local_storage.load_transactions_list()]
 
 #------------------------------------------------------------------------------
@@ -220,6 +249,15 @@ class TransactionsScreen(screen.AppScreen):
     def on_view_transaction_button_clicked(self):
         self.scr('one_transaction_screen').transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
         self.scr_manager().current = 'one_transaction_screen'
+
+    def on_disable_transaction_button_clicked(self):
+        transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
+        tr = local_storage.read_transaction(transaction_id)
+        if not tr:
+            return
+        tr['void'] = True
+        local_storage.write_transaction(transaction_id, tr)
+        self.ids.transactions_view.populate()
 
     def on_print_pdf_transactions_button_clicked(self):
         selected_month = self.ids.select_month_button.text
@@ -280,6 +318,8 @@ class TransactionsScreen(screen.AppScreen):
         self.verification_progress = 0
         for transaction_details in local_storage.load_transactions_list():
             if transaction_details.get('blockchain_status') == 'confirmed':
+                continue
+            if transaction_details.get('void'):
                 continue
             self.transactions_to_be_verified.append(transaction_details)
             if len(self.transactions_to_be_verified) >= 10:
