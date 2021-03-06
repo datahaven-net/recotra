@@ -230,8 +230,8 @@ class TransactionsView(list_view.SelectableRecycleView):
             'date': t['date'],
             'from_to': '{} -> {}'.format(t['seller']['btc_address'], t['buyer']['btc_address']),
             'blockchain_status': '[color={}][{}][/color]'.format(
-                '#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060',
-                t.get('blockchain_status', 'unconfirmed'),
+                '#d07050' if t.get('void') else ('#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060'),
+                'void' if t.get('void') else (t.get('blockchain_status', 'unconfirmed')),
             ),
             'void': '1' if t.get('void') else '',
         } for t in local_storage.load_transactions_list()]
