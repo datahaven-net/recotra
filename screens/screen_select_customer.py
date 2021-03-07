@@ -18,7 +18,7 @@ kv = """
             pos: self.pos
             size: self.size
     orientation: 'lr-tb'
-    height: 70
+    height: dp(70)
     size_hint_y: None
     customer_id: 'customer_id'
     first_name: 'first_name'
@@ -27,18 +27,18 @@ kv = """
         id: customer_id
         text: root.customer_id
         size_hint: None, 0.5
-        width: 40
+        width: dp(40)
     Label:
         id: first_name
         text: root.first_name
         bold: True
         size_hint: None, 0.5
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
     Label:
         id: last_name
         text: root.last_name
         size_hint: None, 0.5
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
 
 <SelectCustomerView>:
     viewclass: 'SelectCustomerRecord'
@@ -63,12 +63,12 @@ kv = """
             orientation: 'horizontal'
             size_hint: None, None
             height: self.minimum_height
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
             RoundedButton:
                 id: customer_select_button
                 text: 'select'
-                width: 120
+                width: dp(120)
                 size_hint_x: None
                 disabled: True
                 on_press: root.on_customer_select_button_clicked()
@@ -84,9 +84,7 @@ class SelectCustomerView(SelectableRecycleView):
 
     def populate(self):
         self.data = []
-        for customer_info in local_storage.make_customers_ui_data(
-                customers_list=local_storage.load_customers_list(sort_by='customer_id'),
-            ):
+        for customer_info in local_storage.make_customers_ui_data(local_storage.load_customers_list(sort_by='customer_id')):
             self.data.append(customer_info)
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
@@ -100,7 +98,7 @@ class SelectCustomerScreen(AppScreen):
     customer_select_button = ObjectProperty(None, allownone=True)
     customer_selected_callback = None
 
-    def on_pre_enter(self, *args):
+    def on_enter(self, *args):
         self.ids.select_customer_view.populate()
 
     def clear_selected_items(self):

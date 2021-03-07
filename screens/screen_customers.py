@@ -20,7 +20,7 @@ kv = """
             size: self.size
 
     orientation: 'lr-tb'
-    height: 70
+    height: dp(70)
     size_hint_y: None
     customer_id: 'customer_id'
     first_name: 'first_name'
@@ -30,20 +30,20 @@ kv = """
         id: customer_id
         text: root.customer_id
         size_hint: None, 0.5
-        width: 40
+        width: dp(40)
 
     Label:
         id: first_name
         text: root.first_name
         bold: True
         size_hint: None, 0.5
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
 
     Label:
         id: last_name
         text: root.last_name
         size_hint: None, 0.5
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
 
 <CustomersView>:
     viewclass: 'CustomerRecord'
@@ -72,20 +72,20 @@ kv = """
             orientation: 'horizontal'
             size_hint: None, None
             height: self.minimum_height
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 id: customer_add_button
                 text: 'add'
-                width: 120
+                width: dp(120)
                 size_hint_x: None
                 on_press: root.on_customers_add_button_clicked()
 
             RoundedButton:
                 id: customer_edit_button
                 text: 'modify'
-                width: 120
+                width: dp(120)
                 size_hint_x: None
                 disabled: True
                 on_press: root.on_customers_edit_button_clicked()
@@ -93,7 +93,7 @@ kv = """
             RoundedButton:
                 id: customer_delete_button
                 text: 'erase'
-                width: 120
+                width: dp(120)
                 size_hint_x: None
                 disabled: True
                 on_press: root.on_customers_delete_button_clicked()
@@ -109,9 +109,7 @@ class CustomersView(SelectableRecycleView):
 
     def populate(self):
         self.data = []
-        for customer_info in local_storage.make_customers_ui_data(
-                customers_list=local_storage.load_customers_list(sort_by='customer_id'),
-            ):
+        for customer_info in local_storage.make_customers_ui_data(local_storage.load_customers_list(sort_by='customer_id')):
             self.data.append(customer_info)
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):

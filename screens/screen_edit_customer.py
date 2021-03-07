@@ -10,12 +10,17 @@ from kivy.cache import Cache
 from components import screen
 from components.webfont import fa_icon
 
-from screens import screen_camera_take_picture
-
 from lib import render_pdf
 from lib import system
 
 from storage import local_storage
+
+from screens import screen_camera_take_picture
+from screens.screen_camera_scan_qr import CameraScanQRScreen
+
+#------------------------------------------------------------------------------
+
+_Debug = True
 
 #------------------------------------------------------------------------------
 
@@ -56,7 +61,7 @@ kv = """
                             rgba: (0, 0, 0, 1)
                         Line:
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
-                            width: 2
+                            width: dp(2)
 
                     Button:
                         width: dp(30)
@@ -100,7 +105,7 @@ kv = """
                             rgba: (0, 0, 0, 1)
                         Line:
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
-                            width: 2
+                            width: dp(2)
 
                     Button:
                         width: dp(30)
@@ -127,8 +132,8 @@ kv = """
                 pos_hint: {'top': 1}
                 size_hint_y: None
                 height: self.minimum_height
-                padding: 20
-                spacing: 10
+                padding: dp(20)
+                spacing: dp(10)
 
                 Label:
                     text_size: self.size
@@ -139,8 +144,8 @@ kv = """
                     id: customer_first_name_input
                     text: ""
                     right: self.width
-                    width: 250
-                    height: 30
+                    width: dp(340)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -152,8 +157,8 @@ kv = """
                 TextInput:
                     id: customer_last_name_input
                     text: ""
-                    width: 250
-                    height: 30
+                    width: dp(340)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -165,8 +170,8 @@ kv = """
                 TextInput:
                     id: customer_phone_input
                     text: ""
-                    width: 250
-                    height: 30
+                    width: dp(340)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -178,8 +183,8 @@ kv = """
                 TextInput:
                     id: customer_email_input
                     text: ""
-                    width: 250
-                    height: 30
+                    width: dp(340)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -191,38 +196,57 @@ kv = """
                 TextInput:
                     id: customer_address_input
                     text: ""
-                    width: 250
-                    height: 90
+                    width: dp(340)
+                    height: dp(90)
+                    size_hint_x: None
+                    size_hint_y: None
+
+                Label:
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                    text: "ATM ID:"
+                TextInput:
+                    id: customer_atm_id_input
+                    text: ""
+                    width: dp(340)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 text: "save customer"
-                width: dp(160)
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_edit_customer_save_button_clicked()
 
             RoundedButton:
+                text: "scan ATM ID"
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_edit_customer_scan_atm_id_button_clicked()
+
+            RoundedButton:
                 text: "print user ID card"
-                width: dp(160)
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_edit_customer_print_card_button_clicked()
 
             RoundedButton:
                 text: "open folder"
-                width: dp(160)
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_edit_customer_open_folder_button_clicked()
 
             RoundedButton:
                 text: "copy location"
-                width: dp(160)
+                width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_edit_customer_copy_location_button_clicked()
 """
@@ -246,6 +270,7 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.customer_phone_input.text = customer_info.get('phone') or ''
         self.ids.customer_email_input.text = customer_info.get('email') or ''
         self.ids.customer_address_input.text = customer_info.get('address') or ''
+        self.ids.customer_atm_id_input.text = customer_info.get('atm_id') or ''
         self.ids.customer_photo_picture_image.source = ''
         self.ids.customer_photo_picture_image.source = local_storage.customer_photo_filepath(self.customer_id)
         self.ids.customer_photo_filepath_label.text = local_storage.customer_photo_filepath(self.customer_id)
@@ -253,7 +278,18 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.customer_passport_picture_image.source = local_storage.customer_passport_filepath(self.customer_id)
         self.ids.customer_passport_picture_filepath_label.text = local_storage.customer_passport_filepath(self.customer_id)
 
-    def on_pre_enter(self, *args):
+    def save_info(self):
+        local_storage.write_customer_info(dict(
+            customer_id=self.customer_id,
+            first_name=self.ids.customer_first_name_input.text,
+            last_name=self.ids.customer_last_name_input.text,
+            phone=self.ids.customer_phone_input.text,
+            email=self.ids.customer_email_input.text,
+            address=self.ids.customer_address_input.text,
+            atm_id=self.ids.customer_atm_id_input.text,
+        ))
+
+    def on_enter(self, *args):
         self.populate_input_fields()
 
     def on_customer_photo_button_clicked(self, *args):
@@ -301,16 +337,33 @@ class EditCustomerScreen(screen.AppScreen):
         self.scr_manager().remove_widget(self.camera_screen)
 
     def on_edit_customer_save_button_clicked(self, *args):
-        local_storage.write_customer_info(dict(
-            customer_id=self.customer_id,
-            first_name=self.ids.customer_first_name_input.text,
-            last_name=self.ids.customer_last_name_input.text,
-            phone=self.ids.customer_phone_input.text,
-            email=self.ids.customer_email_input.text,
-            address=self.ids.customer_address_input.text,
-        ))
+        self.save_info()
         self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
         self.scr_manager().current = 'customers_screen'
+
+    def on_edit_customer_scan_atm_id_button_clicked(self, *args):
+        self.scan_atm_id_screen = CameraScanQRScreen(
+            name='camera_scan_atm_id_screen',
+            scan_qr_callback=self.on_edit_customer_atm_id_scan_qr_ready,
+            cancel_callback=self.on_edit_customer_atm_id_scan_qr_cancel,
+        )
+        self.scr_manager().add_widget(self.scan_atm_id_screen)
+        self.scr_manager().current = 'camera_scan_atm_id_screen'
+
+    def on_edit_customer_atm_id_scan_qr_ready(self, *args):
+        if _Debug:
+            print('on_edit_customer_customer_id_scan_qr_ready', args)
+        atm_id = args[0].strip().replace('customer://', '')
+        self.ids.customer_atm_id_input.text = atm_id
+        self.save_info()
+        self.scr_manager().current = 'edit_customer_screen'
+        self.scr_manager().remove_widget(self.scan_atm_id_screen)
+        self.scan_atm_id_screen = None
+
+    def on_edit_customer_atm_id_scan_qr_cancel(self, *args):
+        self.scr_manager().current = 'edit_customer_screen'
+        self.scr_manager().remove_widget(self.scan_atm_id_screen)
+        self.scan_atm_id_screen = None
 
     def on_edit_customer_print_card_button_clicked(self, *args):
         id_card = render_pdf.build_id_card(

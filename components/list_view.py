@@ -10,7 +10,7 @@ from kivy.uix.recycleboxlayout import RecycleBoxLayout
 
 kv = """
 <SelectableRecycleView>:
-    bar_width: 15
+    bar_width: dp(15)
     bar_color: .2,.5,.8,1
     bar_inactive_color: .1,.4,.7,1
     effect_cls: "ScrollEffect"

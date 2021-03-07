@@ -65,7 +65,7 @@ kv = """
         size_hint: 1, 1
 
         ScrollView:
-            bar_width: 15
+            bar_width: dp(15)
             bar_color: .2,.5,.8,1
             bar_inactive_color: .1,.4,.7,1
             effect_cls: "ScrollEffect"
@@ -87,8 +87,8 @@ kv = """
                     height: self.minimum_height
                     pos_hint: {'center_x': 0.5, 'top': 1}
                     cols: 2
-                    padding: 10
-                    spacing: 10
+                    padding: dp(10)
+                    spacing: dp(10)
     
                     OptionHeaderLabel:
                         text: "company business details"
@@ -228,13 +228,13 @@ kv = """
         BoxLayout:
             orientation: 'horizontal'
             size_hint: 1, None
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 id: save_settings_button
                 size_hint_x: None
-                width: 120
+                width: dp(120)
                 text: ' save '
                 disabled: True
                 on_release: root.on_save_button_clicked()

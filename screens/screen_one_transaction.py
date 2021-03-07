@@ -37,7 +37,7 @@ kv = """
         size_hint: 1, 1
 
         ScrollView:
-            bar_width: 15
+            bar_width: dp(15)
             bar_color: .2,.5,.8,1
             bar_inactive_color: .1,.4,.7,1
             effect_cls: "ScrollEffect"
@@ -49,8 +49,8 @@ kv = """
                 width: self.minimum_width
                 height: self.minimum_height
                 cols: 2
-                padding: 10
-                spacing: 2
+                padding: dp(10)
+                spacing: dp(2)
                 row_force_default: False
                 row_default_height: dp(22)
 
@@ -186,8 +186,8 @@ kv = """
             orientation: 'horizontal'
             size_hint: None, None
             height: self.minimum_height
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 text: 'print contract'
@@ -264,7 +264,7 @@ class OneTransactionScreen(AppScreen):
         self.ids.started_date_time_input.text = '{} at {}'.format(tran_details['date'] or '', tran_details['time'] or '')
         self.ids.verify_button.disabled = tran_details.get('blockchain_status', 'unconfirmed') == 'confirmed'
 
-    def on_pre_enter(self, *args):
+    def on_enter(self, *args):
         self.ids.verify_status_label.text = ''
         if self.transaction_id is None:
             return
