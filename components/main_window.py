@@ -78,8 +78,8 @@ kv = """
             orientation: 'horizontal'
             size_hint: None, None
             height: self.minimum_height
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 text: 'Customer Buying BTC'

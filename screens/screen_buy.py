@@ -18,7 +18,7 @@ from screens.screen_camera_scan_qr import CameraScanQRScreen
 
 #------------------------------------------------------------------------------
 
-_Debug = False
+_Debug = True
 
 #------------------------------------------------------------------------------
 
@@ -46,8 +46,8 @@ kv = """
         BoxLayout:
             orientation: 'horizontal'
             size_hint: 1, .08
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 id: select_customer_button
@@ -85,8 +85,8 @@ kv = """
             width: self.minimum_width
             height: self.minimum_height
             cols: 1
-            padding: 10
-            spacing: 10
+            padding: dp(10)
+            spacing: dp(10)
 
             Label:
                 size_hint: 1, None
@@ -100,8 +100,8 @@ kv = """
                 width: self.minimum_width
                 height: self.minimum_height
                 cols: 2
-                padding: 10
-                spacing: 10
+                padding: dp(10)
+                spacing: dp(10)
 
                 BuyFieldLabel:
                     text: "first name:"
@@ -223,7 +223,7 @@ class BuyScreen(AppScreen):
 
     #------------------------------------------------------------------------------
 
-    def on_pre_enter(self, *args):
+    def on_enter(self, *args):
         if self.selected_customer_id is None:
             self.clean_input_fields()
             self.populate_btc_usd_price()
@@ -259,12 +259,41 @@ class BuyScreen(AppScreen):
         inp = args[0].strip()
         if _Debug:
             print('on_customer_id_scan_qr_ready', inp)
-        try:
-            customer_id = int(inp)
-        except:
-            return
-        self.select_customer(customer_id)
-
+        inp = inp.replace('customer://', '')
+        atm_id = None
+        customer_id = None
+        if inp.count(':'):
+            customer_id, _, atm_id = inp.partition(':')
+        else:
+            if inp.count('-'):
+                atm_id = inp
+            else:
+                customer_id = inp
+        if _Debug:
+            print('on_customer_id_scan_qr_ready customer_id=%r atm_id=%r' % (customer_id, atm_id, ))
+        if customer_id:
+            try:
+                customer_id = int(customer_id)
+            except:
+                if _Debug:
+                    print('on_customer_id_scan_qr_ready failed to parse customer ID: %r' % inp)
+                return
+        if atm_id is not None:
+            for customer_info in local_storage.load_customers_list():
+                if customer_info.get('atm_id') == atm_id:
+                    customer_id = customer_info.get('customer_id')
+                    try:
+                        customer_id = int(customer_id)
+                    except:
+                        if _Debug:
+                            print('on_customer_id_scan_qr_ready failed to read customer ID found from atm ID: %r' % customer_info)
+                        return
+                    if _Debug:
+                        print('on_customer_id_scan_qr_ready found customer %d by atm ID: %r' % (customer_id, atm_id, ))
+                    break
+        if customer_id is not None:
+            self.select_customer(customer_id)
+            
     def on_customer_id_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_customer_id_screen)

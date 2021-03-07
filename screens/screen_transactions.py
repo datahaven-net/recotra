@@ -34,7 +34,7 @@ kv = """
             size: self.size
 
     orientation: 'lr-tb'
-    height: 70
+    height: dp(70)
     size_hint_y: None
     tr_id: 'tr_id'
     tr_type: 'tr_type'
@@ -52,54 +52,54 @@ kv = """
         id: tr_id
         text: root.tr_id
         size_hint: None, 0.36
-        width: 40
+        width: dp(40)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: buyer
         text: root.buyer
         bold: True
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: tr_type
         text: root.tr_type
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: amount_btc
         text: root.amount_btc
         markup: True
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: seller
         text: root.seller
         markup: True
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: price_btc
         text: root.price_btc
         markup: True
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: amount_usd
         text: root.amount_usd
         markup: True
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: date
         text: root.date
         size_hint: None, 0.36
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: from_to
@@ -107,13 +107,13 @@ kv = """
         font_name: 'DejaVuSans'
         font_size: 12
         size_hint: None, 0.3
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: blockchain_status
         text: root.blockchain_status
         size_hint: None, 0.3
-        width: self.texture_size[0] + 10
+        width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
 
 
@@ -142,8 +142,8 @@ kv = """
             orientation: 'horizontal'
             size_hint: None, None
             height: self.minimum_height
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 id: view_transaction_button

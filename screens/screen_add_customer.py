@@ -27,12 +27,12 @@ kv = """
                 pos_hint: {"top":1}
                 size_hint_y: None
                 height: self.minimum_height
-                padding: 20
-                spacing: 10
+                padding: dp(20)
+                spacing: dp(10)
 
                 Label:
                     text_size: self.size
-                    height: 30
+                    height: dp(30)
                     halign: "right"
                     text: "Photo:"
 
@@ -48,11 +48,11 @@ kv = """
                             rgba: (0, 0, 0, 1)
                         Line:
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
-                            width: 2
+                            width: dp(2)
 
                     RoundedButton:
-                        width: 30
-                        height: 30
+                        width: dp(30)
+                        height: dp(30)
                         x: self.parent.x + self.parent.width - 40
                         y: self.parent.y + self.parent.height - 40
                         font_size: '24'
@@ -68,7 +68,7 @@ kv = """
 
                 Label:
                     text_size: self.size
-                    height: 30
+                    height: dp(30)
                     halign: "right"
                     text: "ID / Passport:"
 
@@ -84,11 +84,11 @@ kv = """
                             rgba: (0, 0, 0, 1)
                         Line:
                             rectangle: (self.x-2, self.y-2, self.width+4, self.height+4) 
-                            width: 2
+                            width: dp(2)
 
                     RoundedButton:
-                        width: 30
-                        height: 30
+                        width: dp(30)
+                        height: dp(30)
                         x: self.parent.x + self.parent.width - 40
                         y: self.parent.y + self.parent.height - 40
                         font_size: '24'
@@ -103,8 +103,8 @@ kv = """
                 pos_hint: {'top': 1}
                 size_hint_y: None
                 height: self.minimum_height
-                padding: 20
-                spacing: 10
+                padding: dp(20)
+                spacing: dp(10)
 
                 Label:
                     text_size: self.size
@@ -115,8 +115,8 @@ kv = """
                     id: customer_first_name_input
                     text: ""
                     right: self.width
-                    width: 250
-                    height: 30
+                    width: dp(250)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -128,8 +128,8 @@ kv = """
                 TextInput:
                     id: customer_last_name_input
                     text: ""
-                    width: 250
-                    height: 30
+                    width: dp(250)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -141,8 +141,8 @@ kv = """
                 TextInput:
                     id: customer_phone_input
                     text: ""
-                    width: 250
-                    height: 30
+                    width: dp(250)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -154,8 +154,8 @@ kv = """
                 TextInput:
                     id: customer_email_input
                     text: ""
-                    width: 250
-                    height: 30
+                    width: dp(250)
+                    height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
 
@@ -167,16 +167,16 @@ kv = """
                 TextInput:
                     id: customer_address_input
                     text: ""
-                    width: 250
-                    height: 90
+                    width: dp(250)
+                    height: dp(90)
                     size_hint_x: None
                     size_hint_y: None
 
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
-            padding: 10
-            spacing: 2
+            padding: dp(10)
+            spacing: dp(2)
 
             RoundedButton:
                 text: "Save Customer"
@@ -206,7 +206,7 @@ class AddCustomerScreen(screen.AppScreen):
         self.ids.customer_photo_picture_image.source = ''
         self.ids.customer_passport_picture_image.source = ''
 
-    def on_pre_enter(self, *args):
+    def on_enter(self, *args):
         if self.new_customer_id is None:
             self.new_customer_id = local_storage.create_new_customer_info()
             self.clean_input_fields()
@@ -247,6 +247,7 @@ class AddCustomerScreen(screen.AppScreen):
             phone=self.ids.customer_phone_input.text,
             email=self.ids.customer_email_input.text,
             address=self.ids.customer_address_input.text,
+            atm_id='',
         ))
         self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
         self.scr_manager().current = 'customers_screen'

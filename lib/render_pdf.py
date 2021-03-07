@@ -198,7 +198,8 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
         'photo_filepath': customer_photo_filepath or '',
         'qr_filepath': qr_filepath,
     }
-    render_qr.make_qr_file(customer_info['customer_id'], qr_filepath)
+    qr_text = '{}:{}'.format(customer_info['customer_id'], customer_info.get('atm_id'))
+    render_qr.make_qr_file(qr_text, qr_filepath)
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
         input=rendered_html,
