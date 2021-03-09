@@ -68,7 +68,7 @@ kv = """
                         height: dp(30)
                         x: self.parent.x + self.parent.width - 40
                         y: self.parent.y + self.parent.height - 40
-                        font_size: '24'
+                        font_size: sp(24)
                         background_color: 0, 0, 0, 0
                         color: 0.9, 0.9, 0.9, 1
                         markup: True
@@ -112,7 +112,7 @@ kv = """
                         height: dp(30)
                         x: self.parent.x + self.parent.width - 40
                         y: self.parent.y + self.parent.height - 40
-                        font_size: '24'
+                        font_size: sp(24)
                         background_color: 0, 0, 0, 0
                         color: 0.9, 0.9, 0.9, 1
                         markup: True

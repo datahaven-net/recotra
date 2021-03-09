@@ -105,7 +105,7 @@ kv = """
         id: from_to
         text: root.from_to
         font_name: 'DejaVuSans'
-        font_size: 12
+        font_size: sp(12)
         size_hint: None, 0.3
         width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
