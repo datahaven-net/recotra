@@ -172,19 +172,28 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
     <title>Bitcoin.ai Ltd.</title>
 </head>
 <body>
-    <table border=1 cellspacing=0 cellpadding=5 >
-        <tr>
-            <td align=left colspan="2">
-                <img height=200 src="{photo_filepath}">
-                <img width=200 height=200 src="{qr_filepath}">
+    <table border=1 cellspacing=0 cellpadding=3 width=400>
+        <tr valign=top>
+            <td align=left colspan="1">
+                <table border=0 cellspacing=0 cellpadding=0 height=100%>
+                    <tr valign=top>
+                        <td>
+                            <img height=120 src="{photo_filepath}" />
+                            <br>
+                        </td>
+                    </tr>
+                    <tr valign=bottom>
+                        <td align=left valign=bottom>
+                            <br>
+                            {first_name} <br>
+                            {last_name} <br>
+                            <font size=-1>customer #{customer_id}</font>
+                        </td>
+                    </tr>
+                </table>
             </td>
-        </tr>
-        <tr valign=top>    
-            <td align=left colspan="1" width=320>
-                &nbsp;&nbsp;&nbsp;<font size=+3>{first_name} {last_name}</font>
-            </td>
-            <td align=right valign=bottom colspan="1">
-                <font size=-1>customer #{customer_id}</font>
+            <td align=left colspan="1" width=220>
+                <img width=220 height=220 src="{qr_filepath}">
             </td>
         </tr>
     </table>

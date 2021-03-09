@@ -20,7 +20,7 @@ kv = """
     halign: 'right'
     pos_hint: {'right': 1}
     text_size: self.size
-    font_size: 18
+    font_size: sp(18)
     
 
 <OptionFieldLabel@Label>:
