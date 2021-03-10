@@ -187,7 +187,8 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
                             <font size=+2>
                             <br>
                             {first_name} <br>
-                            {last_name}
+                            {last_name} <br>
+                            {customer_id}
                             </font>
                         </td>
                     </tr>
