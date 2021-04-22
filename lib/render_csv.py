@@ -12,9 +12,11 @@ def build_transactions_report(selected_transactions, csv_filepath=None, delimite
         ])
         dw.writeheader()
         for t in selected_transactions:
+            seller = '' if t['contract_type'] == 'sales' else f"{t['seller']['first_name']} {t['seller']['last_name']}"
+            buyer = '' if t['contract_type'] == 'purchase' else f"{t['buyer']['first_name']} {t['buyer']['last_name']}"
             dw.writerow({
-                'Seller': f"{t['seller']['first_name']} {t['seller']['last_name']}".replace(delimiter, ''),
-                'Buyer': f"{t['buyer']['first_name']} {t['buyer']['last_name']}".replace(delimiter, ''),
+                'Seller': f"{seller}".replace(delimiter, ''),
+                'Buyer': f"{buyer}".replace(delimiter, ''),
                 'Amount BTC': f"{t['btc_amount']}".replace(delimiter, ''),
                 'Amount US $': f"{t['usd_amount']}".replace(delimiter, ''),
                 'Date': f"{t['date']}".replace(delimiter, ''),

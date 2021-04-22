@@ -21,7 +21,7 @@ kv = """
     pos_hint: {'right': 1}
     text_size: self.size
     font_size: sp(18)
-    
+
 
 <OptionFieldLabel@Label>:
     size_hint_x: None
@@ -48,7 +48,7 @@ kv = """
     width: dp(380)
     height: dp(50)
     multiline: True
-    
+
 
 <OptionFieldBTCAddressListInput>:
     size_hint_x: None
@@ -89,26 +89,26 @@ kv = """
                     cols: 2
                     padding: dp(10)
                     spacing: dp(10)
-    
+
                     OptionHeaderLabel:
                         text: "company business details"
                     Widget:
                         size: 1, 1
-    
+
                     OptionFieldLabel:
                         text: "company name:"
                     OptionFieldInput:
                         id: business_company_name
                         text: ""
                         on_text: root.on_field_modified('business_company_name')
-    
+
                     OptionFieldLabel:
                         text: "owner first name:"
                     OptionFieldInput:
                         id: business_owner_first_name
                         text: ""
                         on_text: root.on_field_modified('business_owner_first_name')
-    
+
                     OptionFieldLabel:
                         text: "owner last name:"
                     OptionFieldInput:
@@ -155,7 +155,7 @@ kv = """
                         text: "access to live BTC/USD prices"
                     Widget:
                         size: 1, 1
-    
+
                     OptionFieldLabel:
                         text: "CoinMarketCap API key:"
                     OptionFieldInput:
@@ -221,6 +221,14 @@ kv = """
                         text: ""
                         on_text: root.on_field_modified('time_matching_seconds_after')
 
+                    OptionFieldLabel:
+                        text: "skip contracts older than number of days:"
+                    OptionFieldInput:
+                        id: contract_expiration_period_days
+                        hint_text: '90'
+                        text: ""
+                        on_text: root.on_field_modified('contract_expiration_period_days')
+
                 Widget:
                     size: 1, 1
                     size_hint: 0.5, 1
@@ -283,6 +291,7 @@ class SettingsScreen(AppScreen):
         self.ids.price_precision_fixed_amount.text = cur_settings.get('price_precision_fixed_amount', '1.0')
         self.ids.time_matching_seconds_before.text = cur_settings.get('time_matching_seconds_before', '0')
         self.ids.time_matching_seconds_after.text = cur_settings.get('time_matching_seconds_after', '0')
+        self.ids.contract_expiration_period_days.text = cur_settings.get('contract_expiration_period_days', '0')
         self.ids.save_settings_button.disabled = True
 
     def on_enter(self, *args):
@@ -308,5 +317,6 @@ class SettingsScreen(AppScreen):
         cur_settings['price_precision_fixed_amount'] = self.ids.price_precision_fixed_amount.text
         cur_settings['time_matching_seconds_before'] = self.ids.time_matching_seconds_before.text
         cur_settings['time_matching_seconds_after'] = self.ids.time_matching_seconds_after.text
+        cur_settings['contract_expiration_period_days'] = self.ids.contract_expiration_period_days.text
         local_storage.write_settings(cur_settings)
         self.ids.save_settings_button.disabled = True
