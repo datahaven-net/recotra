@@ -1,4 +1,5 @@
 import os
+import datetime
 
 #------------------------------------------------------------------------------
 
@@ -314,6 +315,11 @@ class TransactionsScreen(screen.AppScreen):
         system.open_system_explorer(csv_report_filename, as_folder=True)
 
     def on_verfy_transactions_button_clicked(self):
+        cur_settings = local_storage.read_settings()
+        try:
+            contract_expiration_period_days = int(cur_settings.get('contract_expiration_period_days'))
+        except:
+            contract_expiration_period_days = 0
         self.ids.verify_contracts_button.disabled = True
         self.verification_progress = 0
         for transaction_details in local_storage.load_transactions_list():
@@ -321,6 +327,13 @@ class TransactionsScreen(screen.AppScreen):
                 continue
             if transaction_details.get('void'):
                 continue
+            if contract_expiration_period_days:
+                contract_local_time = datetime.datetime.strptime(
+                    '{} {}'.format(transaction_details['date'], transaction_details['time']),
+                    '%b %d %Y %I:%M %p')
+                t_now = datetime.datetime.now()
+                if (t_now - contract_local_time).days > contract_expiration_period_days:
+                    continue
             self.transactions_to_be_verified.append(transaction_details)
             if len(self.transactions_to_be_verified) >= 10:
                 break
