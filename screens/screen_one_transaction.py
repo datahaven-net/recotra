@@ -3,6 +3,7 @@ import os
 #------------------------------------------------------------------------------
 
 from components.screen import AppScreen
+from components import dialogs
 
 from lib import render_pdf
 from lib import system
@@ -166,9 +167,21 @@ kv = """
                     text: ''
                 TransactionFieldLabel:
                     text: "receiving BitCoin address:"
-                TransactionFieldValue:
-                    id: receiving_btc_address_input
-                    text: ''
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint: None, None
+                    width: dp(545)
+                    height: self.minimum_height
+                    CloseButton:
+                        size_hint: None, None
+                        width: dp(20)
+                        height: dp(20)
+                        text: fa_icon('edit')
+                        font_size: sp(10)
+                        on_release: root.on_receiving_btc_address_change_button_clicked()
+                    TransactionFieldValue:
+                        id: receiving_btc_address_input
+                        text: ''
 
                 TransactionFieldLabel:
                     text: "blockchain status:"
@@ -316,3 +329,19 @@ class OneTransactionScreen(AppScreen):
         system.open_webbrowser(
             url='https://www.blockchain.com/btc/address/' + transaction_details.get('buyer', {}).get('btc_address', ''),
         )
+
+    def on_receiving_btc_address_change_button_clicked(self):
+        transaction_details = local_storage.read_transaction(self.transaction_id)
+        if transaction_details.get('blockchain_status') == 'confirmed':
+            return
+        dlg = dialogs.BTCAddressDialog(
+            btc_address=self.ids.receiving_btc_address_input.text,
+            callback=self.on_receiving_btc_address_changed,
+        )
+        dlg.open()
+
+    def on_receiving_btc_address_changed(self, txt):
+        self.ids.receiving_btc_address_input.text = txt
+        transaction_details = local_storage.read_transaction(self.transaction_id)
+        transaction_details['buyer']['btc_address'] = txt
+        local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
