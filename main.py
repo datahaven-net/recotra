@@ -17,6 +17,7 @@ from lib import btc_util
 from components import buttons
 from components import labels
 from components import list_view
+from components import dialogs
 from components import main_window
 
 from screens import screen_buy
@@ -51,6 +52,7 @@ kv = """
     labels.kv,
     buttons.kv,
     list_view.kv,
+    dialogs.kv,
     screen_buy.kv,
     screen_sell.kv,
     screen_customers.kv,
@@ -72,7 +74,6 @@ class BitCoinContractsApp(App):
         level = LOG_LEVELS.get('debug')
         Logger.setLevel(level=level)
         logging.getLogger().setLevel(logging.DEBUG)
-
         local_storage.init()
         self.title = 'RECOTRA'
         self.icon = './icons/btcusd.ico'
