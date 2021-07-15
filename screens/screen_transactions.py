@@ -56,9 +56,9 @@ kv = """
         width: dp(40)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
-        id: buyer
-        text: root.buyer
-        bold: True
+        id: seller
+        text: root.seller
+        markup: True
         size_hint: None, 0.36
         width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
@@ -76,9 +76,9 @@ kv = """
         width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
-        id: seller
-        text: root.seller
-        markup: True
+        id: buyer
+        text: root.buyer
+        bold: True
         size_hint: None, 0.36
         width: self.texture_size[0] + dp(10)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
@@ -222,9 +222,9 @@ class TransactionsView(list_view.SelectableRecycleView):
     def populate(self):
         self.data = [{
             'tr_id': str(t['transaction_id']),
-            'tr_type': '{}'.format('bought' if t['contract_type'] == 'purchase' else 'sold'),
+            'tr_type': 'sold',
             'buyer': '[b]{} {}[/b]'.format(t['buyer']['first_name'], t['buyer']['last_name']),
-            'amount_btc': '[b]{}[/b] BTC {}'.format(t['btc_amount'], 'from' if t['contract_type'] == 'purchase' else 'to'),
+            'amount_btc': '[b]{}[/b] BTC to'.format(t['btc_amount']),
             'seller': '[b]{} {}[/b]'.format(t['seller']['first_name'], t['seller']['last_name']),
             'price_btc': 'at [b]{}[/b] $/BTC'.format(t['btc_price']),
             'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
