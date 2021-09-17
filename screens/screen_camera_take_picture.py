@@ -1,3 +1,4 @@
+import os
 import cv2
 
 #------------------------------------------------------------------------------
@@ -26,7 +27,7 @@ class CameraTakePictureScreen(screen.AppScreen):
         self.image_width = kw.pop('image_width', 640)
         self.image_height = kw.pop('image_height', 480)
         super(CameraTakePictureScreen, self).__init__(**kw)
-        
+
         self.container = FloatLayout(
             size_hint=(None, None, ),
             pos_hint={'center_x':0.5, 'center_y': 0.5, },
@@ -63,7 +64,7 @@ class CameraTakePictureScreen(screen.AppScreen):
         )
         self.container.add_widget(btn2)
 
-        self.camera_capture = cv2.VideoCapture(0)  # @UndefinedVariable
+        self.camera_capture = cv2.VideoCapture(int(os.environ.get('DEV_VIDEO_INDEX', '0')))  # @UndefinedVariable
         self.camera_capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.image_width)  # @UndefinedVariable
         self.camera_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.image_height)  # @UndefinedVariable
         self.fps = self.camera_capture.get(cv2.CAP_PROP_FPS)  # @UndefinedVariable
