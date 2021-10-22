@@ -69,7 +69,13 @@ def fetch_transactions(btc_address):
         return {}
     result = {}
     if json_response:
-        for tr in ((json_response.get('data', {}) or {}).get('list', []) or []):
+        try:
+            tr_list = ((json_response.get('data', {}) or {}).get('list', []) or [])
+        except Exception as exc:
+            if _Debug:
+                print(exc, json_response)
+            return {}
+        for tr in tr_list:
             result[tr['hash']] = {
                 'balance_diff': tr['balance_diff'] / 100000000.0,
                 'block_time': tr['block_time'],
