@@ -191,7 +191,9 @@ class BuyScreen(AppScreen):
             recent_pos += 1
             if recent_pos >= len(receiving_btc_address_list):
                 recent_pos = 0
-            self.ids.receive_address_input.text = receiving_btc_address_list[recent_pos]
+            self.ids.receive_address_input.text = receiving_btc_address_list[recent_pos].strip()
+        if not self.ids.receive_address_input.text:
+            self.ids.receive_address_input.text = recent_btc_address
 
     def populate_btc_usd_price(self):
         cur_settings = local_storage.read_settings()
