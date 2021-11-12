@@ -419,6 +419,7 @@ class SellScreen(AppScreen):
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='sales',
+            lightning=self.ids.receive_address_input.text.lower().startswith('lnbc'),
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
             btc_price=contract_btc_price,
@@ -445,6 +446,8 @@ class SellScreen(AppScreen):
                 btc_address=self.ids.receive_address_input.text,
             ),
             company_name=cur_settings.get('business_company_name', ''),
+            blockchain_status='unconfirmed',
+            confirmed_time=None,
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)

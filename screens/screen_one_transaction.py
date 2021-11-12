@@ -1,4 +1,9 @@
 import os
+import datetime
+
+#------------------------------------------------------------------------------
+
+from kivy.metrics import dp
 
 #------------------------------------------------------------------------------
 
@@ -58,7 +63,7 @@ kv = """
                 TransactionFieldHeader:
                     id: contract_type_input
                     size_hint_y: None
-                    height: dp(60)
+                    height: dp(80)
                     valign: 'bottom'
                     text: ''
                 Widget:
@@ -238,8 +243,9 @@ class OneTransactionScreen(AppScreen):
     transaction_id = None
 
     def populate_fields(self, tran_details):
-        self.ids.contract_type_input.text = '[size=22]BTC %s\nContract #%s[/size]' % (
-            ('Purchase' if tran_details['contract_type'] == 'purchase' else 'Sales'),
+        self.ids.contract_type_input.text = '[size=20]BTC%s\n%s contract\n#%s[/size]' % (
+            ' Lightning' if tran_details.get('lightning') else '',
+            ('purchase' if tran_details['contract_type'] == 'purchase' else 'sales'),
             tran_details['transaction_id'],
         )
 
@@ -270,6 +276,13 @@ class OneTransactionScreen(AppScreen):
             self.ids.receiving_btc_address_input.text = tran_details['buyer']['btc_address'] or ''
             self.ids.spending_btc_address_input.text = ''  # tran_details['seller']['btc_address'] or ''
 
+        if tran_details.get('lightning'):
+            self.ids.receiving_btc_address_input.size_hint_y = None
+            self.ids.receiving_btc_address_input.height = dp(80)
+        else:
+            self.ids.receiving_btc_address_input.size_hint_y = None
+            self.ids.receiving_btc_address_input.height = dp(20)
+
         self.ids.blockchain_status_input.text = '[color={}][{}][/color]'.format(
             '#a0a060' if tran_details.get('blockchain_status') != 'confirmed' else '#60b060',
             tran_details.get('blockchain_status', 'unconfirmed'),
@@ -299,36 +312,47 @@ class OneTransactionScreen(AppScreen):
         transaction_details = local_storage.read_transaction(self.transaction_id)
         if transaction_details.get('blockchain_status') == 'confirmed':
             return
+        if transaction_details.get('void'):
+            return
         cur_settings = local_storage.read_settings()
-        self.ids.verify_button.disabled = True
-        self.ids.verify_status_label.text = '[color=#505050]requesting transactions from btc.com ...[/color]'
-        matching_transactions = btc_util.verify_contract(
-            contract_details=transaction_details,
-            price_precision_fixed_amount=float(cur_settings.get('price_precision_fixed_amount', '0.0')),
-            price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
-            time_matching_seconds_before=float(cur_settings.get('time_matching_seconds_before', '0.0')),
-            time_matching_seconds_after=float(cur_settings.get('time_matching_seconds_after', '0.0')),
-        )
-        self.ids.verify_button.disabled = False
         st = ''
-        if len(matching_transactions) == 0:
-            st = '[color=#505050]did not found any matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
-        elif len(matching_transactions) > 1:
-            st = '[color=#F05050]found multiple matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
-        else:
-            st = '[color=#70a070]found corresponding transaction of %s BTC for address %s[/color]' % (
-                transaction_details['btc_amount'], transaction_details['buyer']['btc_address'])
+        if transaction_details.get('lightning'):
             transaction_details['blockchain_status'] = 'confirmed'
-            transaction_details['blockchain_tx_info'] = matching_transactions[0]
+            transaction_details['confirmed_time'] = datetime.datetime.now().strftime("%b %d %Y %I:%M %p")
+            st = '[color=#70a070]automatically confirm lightning transaction of %s BTC for address %s...[/color]' % (
+                transaction_details['btc_amount'], transaction_details['buyer']['btc_address'][:40])
             local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+        else:
+            self.ids.verify_button.disabled = True
+            self.ids.verify_status_label.text = '[color=#505050]requesting transactions from btc.com ...[/color]'
+            matching_transactions = btc_util.verify_contract(
+                contract_details=transaction_details,
+                price_precision_fixed_amount=float(cur_settings.get('price_precision_fixed_amount', '0.0')),
+                price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
+                time_matching_seconds_before=float(cur_settings.get('time_matching_seconds_before', '0.0')),
+                time_matching_seconds_after=float(cur_settings.get('time_matching_seconds_after', '0.0')),
+            )
+            self.ids.verify_button.disabled = False
+            if len(matching_transactions) == 0:
+                st = '[color=#505050]did not found any matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
+            elif len(matching_transactions) > 1:
+                st = '[color=#F05050]found multiple matching transactions for BTC address %s[/color]' % transaction_details['buyer']['btc_address']
+            else:
+                st = '[color=#70a070]found corresponding transaction of %s BTC for address %s[/color]' % (
+                    transaction_details['btc_amount'], transaction_details['buyer']['btc_address'])
+                transaction_details['blockchain_status'] = 'confirmed'
+                transaction_details['blockchain_tx_info'] = matching_transactions[0]
+                transaction_details['confirmed_time'] = datetime.datetime.now().strftime("%b %d %Y %I:%M %p")
+                local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
         self.ids.verify_status_label.text = st
         self.populate_fields(transaction_details)
 
     def on_explore_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)
-        system.open_webbrowser(
-            url='https://www.blockchain.com/btc/address/' + transaction_details.get('buyer', {}).get('btc_address', ''),
-        )
+        if not transaction_details.get('lightning'):
+            system.open_webbrowser(
+                url='https://www.blockchain.com/btc/address/' + transaction_details.get('buyer', {}).get('btc_address', ''),
+            )
 
     def on_receiving_btc_address_change_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)
@@ -344,4 +368,5 @@ class OneTransactionScreen(AppScreen):
         self.ids.receiving_btc_address_input.text = txt
         transaction_details = local_storage.read_transaction(self.transaction_id)
         transaction_details['buyer']['btc_address'] = txt
+        transaction_details['lightning'] = txt.lower().startswith('lnbc'),
         local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)

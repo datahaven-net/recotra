@@ -295,7 +295,7 @@ class BuyScreen(AppScreen):
                     break
         if customer_id is not None:
             self.select_customer(customer_id)
-            
+
     def on_customer_id_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_customer_id_screen)
@@ -382,6 +382,7 @@ class BuyScreen(AppScreen):
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='purchase',
+            lightning=self.ids.receive_address_input.text.lower().startswith('lnbc'),
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
             btc_price=contract_btc_price,
@@ -409,6 +410,7 @@ class BuyScreen(AppScreen):
             ),
             company_name=cur_settings.get('business_company_name', ''),
             blockchain_status='unconfirmed',
+            confirmed_time=None,
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)

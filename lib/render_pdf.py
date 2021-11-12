@@ -42,7 +42,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
             <td colspan="3">
                 <font size=+2>
                 <p>
-                    Customer {buying_selling} Bitcoin: <b>{first_name} {last_name}</b>
+                    Customer {buying_selling} Bitcoin{ln}: <b>{first_name} {last_name}</b>
                     <br>
                     Customer number: {customer_id}
                     <br>
@@ -59,6 +59,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                     Date: {date}
                     <br>
                     Time: {time}
+                    {ln_extra}
                 </p>
                 </font>
             </td>
@@ -74,13 +75,13 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         <tr>
             <td colspan="4" align=center>
                 <p>Where {sender} will send {btc_amount} to:</p>
-                <font size=+2>
+                <p align=left><font size=+2>
                     <code>
-                        {buyer[btc_address]}
+                        {buyer_btc_address}
                     </code>
-                </font>
+                </font></p>
                 <img src="{qr_filepath}" width="600">
-                <hr>
+                <br>
                 <p align=left>{disclosure_statement}</p>
             </td>
         </tr>
@@ -88,17 +89,19 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
 
     <table width=100% align=left cellspacing=50>
         <tr>
-            <td align=left width=50%>
+            <td align=left width=50% valign=top>
                 &nbsp;
                 <br>
                 <hr>
                 <font size=+1><b>{business_owner_first_name} {business_owner_last_name}</b> for {business_company_name}</font>
+                {ln_empty_space}
             </td>
-            <td align=left width=50%>
+            <td align=left width=50% valign=top>
                 &nbsp;
                 <br>
                 <hr>
                 <font size=+1><b>{first_name} {last_name}</b></font>
+                {ln_signature}
             </td>
         </tr>
     </table>
@@ -113,6 +116,14 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
     customer_id = seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id']
     if not face_photo_filepath:
         face_photo_filepath = local_storage.customer_photo_filepath(customer_id)
+    ln_extra = ''
+    ln_signature = ''
+    if transaction_details.get('lightning'):
+        if contract_type == 'purchase':
+            if transaction_details.get('confirmed_time'):
+                ln_extra = '<br>Received: {}'.format(transaction_details['confirmed_time'])
+        else:
+            ln_signature = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
     params = {
         'qr_filepath': qr_filepath,
         'face_photo_filepath': face_photo_filepath,
@@ -127,6 +138,11 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         'business_owner_last_name': cur_settings.get('business_owner_last_name') or '',
         'fee_percent': '0.0',
         'disclosure_statement': disclosure_statement,
+        'ln': ' Lightning' if transaction_details.get('lightning') else '',
+        'ln_extra': ln_extra,
+        'ln_signature': ln_signature,
+        'ln_empty_space': '<br><br><br><br>' if transaction_details.get('lightning') else '',
+        'buyer_btc_address': buyer['btc_address'],
     }
     params.update(transaction_details)
     if str(params['fee_percent']).endswith('.0'):
@@ -144,6 +160,12 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         )
         params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
             params['btc_amount'], str(round(float(params['btc_amount']) * 1000.0, 6)))
+    if transaction_details.get('lightning'):
+        params['buyer_btc_address'] = '{}\n{}\n{}'.format(
+            params['buyer_btc_address'][:90],
+            params['buyer_btc_address'][90:180],
+            params['buyer_btc_address'][180:],
+        )
     render_qr.make_qr_file(qr_src_text, qr_filepath)
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
