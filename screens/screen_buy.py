@@ -191,7 +191,9 @@ class BuyScreen(AppScreen):
             recent_pos += 1
             if recent_pos >= len(receiving_btc_address_list):
                 recent_pos = 0
-            self.ids.receive_address_input.text = receiving_btc_address_list[recent_pos]
+            self.ids.receive_address_input.text = receiving_btc_address_list[recent_pos].strip()
+        if not self.ids.receive_address_input.text:
+            self.ids.receive_address_input.text = recent_btc_address
 
     def populate_btc_usd_price(self):
         cur_settings = local_storage.read_settings()
@@ -293,7 +295,7 @@ class BuyScreen(AppScreen):
                     break
         if customer_id is not None:
             self.select_customer(customer_id)
-            
+
     def on_customer_id_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_customer_id_screen)
@@ -380,6 +382,7 @@ class BuyScreen(AppScreen):
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='purchase',
+            lightning=self.ids.receive_address_input.text.lower().startswith('lnbc'),
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
             btc_price=contract_btc_price,
@@ -407,6 +410,7 @@ class BuyScreen(AppScreen):
             ),
             company_name=cur_settings.get('business_company_name', ''),
             blockchain_status='unconfirmed',
+            confirmed_time=None,
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)

@@ -1,5 +1,3 @@
-from kivy.app import App
-from kivy.properties import ObjectProperty  # @UnresolvedImport
 from kivy.uix.textinput import TextInput
 
 #------------------------------------------------------------------------------

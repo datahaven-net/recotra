@@ -229,7 +229,10 @@ class TransactionsView(list_view.SelectableRecycleView):
             'price_btc': 'at [b]{}[/b] $/BTC'.format(t['btc_price']),
             'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
             'date': t['date'],
-            'from_to': '{} -> {}'.format(t['seller']['btc_address'], t['buyer']['btc_address']),
+            'from_to': '{} -> {}'.format(
+                t['seller']['btc_address'],
+                (t['buyer']['btc_address'][:35] + '...') if t.get('lightning') else t['buyer']['btc_address'],
+            ),
             'blockchain_status': '[color={}][{}][/color]'.format(
                 '#d07050' if t.get('void') else ('#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060'),
                 'void' if t.get('void') else (t.get('blockchain_status', 'unconfirmed')),
@@ -348,18 +351,29 @@ class TransactionsScreen(screen.AppScreen):
         if _Debug:
             print('verify_next_transaction %r  progress is %r' % (
                 transaction_details['transaction_id'], self.verification_progress))
+        confirmed = False
         cur_settings = local_storage.read_settings()
-        matching_transactions = btc_util.verify_contract(
-            contract_details=transaction_details,
-            price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
-            price_precision_fixed_amount=float(cur_settings.get('price_precision_fixed_amount', '0.0')),
-            time_matching_seconds_before=float(cur_settings.get('time_matching_seconds_before', '0.0')),
-            time_matching_seconds_after=float(cur_settings.get('time_matching_seconds_after', '0.0')),
-        )
-        if len(matching_transactions) == 1:
-            transaction_details['blockchain_status'] = 'confirmed'
-            transaction_details['blockchain_tx_info'] = matching_transactions[0]
-            local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+        if transaction_details.get('lightning'):
+            if not transaction_details.get('void'):
+                transaction_details['blockchain_status'] = 'confirmed'
+                transaction_details['confirmed_time'] = datetime.datetime.now().strftime("%b %d %Y %I:%M %p")
+                local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+                confirmed = True
+        else:
+            matching_transactions = btc_util.verify_contract(
+                contract_details=transaction_details,
+                price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
+                price_precision_fixed_amount=float(cur_settings.get('price_precision_fixed_amount', '0.0')),
+                time_matching_seconds_before=float(cur_settings.get('time_matching_seconds_before', '0.0')),
+                time_matching_seconds_after=float(cur_settings.get('time_matching_seconds_after', '0.0')),
+            )
+            if len(matching_transactions) == 1:
+                transaction_details['blockchain_status'] = 'confirmed'
+                transaction_details['blockchain_tx_info'] = matching_transactions[0]
+                transaction_details['confirmed_time'] = datetime.datetime.now().strftime("%b %d %Y %I:%M %p")
+                local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+                confirmed = True
+        if confirmed:
             for transaction_item in self.ids.transactions_view.data:
                 if transaction_item['tr_id'] == transaction_details['transaction_id']:
                     transaction_item['blockchain_status'] = '[color={}][{}][/color]'.format('#60b060', 'confirmed')

@@ -1,9 +1,8 @@
 from kivy.properties import StringProperty, ColorProperty, NumericProperty  # @UnresolvedImport
 
-from kivy.core.text import Label as CoreLabel
 from kivy.core.text.markup import MarkupLabel as CoreMarkupLabel
 from kivy.uix.image import Image
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Rectangle
 
 from components.webfont import fa_icon
 
@@ -20,7 +19,6 @@ class FaImage(Image):
         self.fa_font_size = kwargs.get('fa_font_size', 12)
         super(FaImage, self).__init__(**kwargs)
 
-    
     def render(self):
         mylabel = CoreMarkupLabel(text=fa_icon(self.fa_name), font_size=self.fa_font_size, color=self.fa_icon_color)
         mylabel.refresh()
