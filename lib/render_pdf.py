@@ -302,6 +302,16 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
     for t in selected_transactions:
         seller = '' if t['contract_type'] == 'sales' else f"{t['seller']['first_name']} {t['seller']['last_name']}"
         buyer = '' if t['contract_type'] == 'purchase' else f"{t['buyer']['first_name']} {t['buyer']['last_name']}"
+        btc_addr = t['buyer']['btc_address']
+        if t.get('lightning'):
+            btc_addr = '{}<br>{}<br>{}<br>{}<br>{}'.format(
+                btc_addr[:60],
+                btc_addr[60:120],
+                btc_addr[120:180],
+                btc_addr[180:240],
+                btc_addr[240:],
+            )
+
         table_content += f'''
         <tr>
             <td nowrap>{seller}</td>
@@ -309,7 +319,7 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
             <td nowrap>{t['btc_amount']}</td>
             <td nowrap>{t['usd_amount']}</td>
             <td nowrap>{t['date']}</td>
-            <td nowrap>{t['buyer']['btc_address']}</td>
+            <td nowrap>{btc_addr}</td>
         </tr>
         '''
         if t['contract_type'] == 'sales':
