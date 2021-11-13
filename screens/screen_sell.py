@@ -291,15 +291,15 @@ class SellScreen(AppScreen):
     #------------------------------------------------------------------------------
 
     def on_enter(self, *args):
+        if self.populated_customer_id_qr_scan:
+            self.populate_customer_id(self.populated_customer_id_qr_scan)
+            self.populated_customer_id_qr_scan = None
         if self.selected_customer_id is None:
             self.clean_input_fields()
         self.populate_btc_usd_price()
         if self.populated_receive_address_qr_scan:
             self.ids.receive_address_input.text = btc_util.parse_btc_url(self.populated_receive_address_qr_scan)['address']
             self.populated_receive_address_qr_scan = None
-        if self.populated_customer_id_qr_scan:
-            self.populate_customer_id(self.populated_customer_id_qr_scan)
-            self.populated_customer_id_qr_scan = None
 
     #------------------------------------------------------------------------------
 
