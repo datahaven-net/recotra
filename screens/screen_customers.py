@@ -113,7 +113,7 @@ class CustomersView(SelectableRecycleView):
             self.data.append(customer_info)
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
-        cust_screen = App.get_running_app().root.ids.scr_manager.get_screen('customers_screen')
+        cust_screen =  App.get_running_app().root.ids.scr_manager.get_screen('customers_screen')
         cust_screen.customer_delete_button.disabled = not is_selected
         cust_screen.customer_edit_button.disabled = not is_selected
 
@@ -133,15 +133,15 @@ class CustomersScreen(AppScreen):
         self.clear_selected_items()
 
     def on_customers_add_button_clicked(self, *args):
-        add_customer_screen = App.get_running_app().root.ids.scr_manager.get_screen('add_customer_screen')
+        add_customer_screen = self.scr_manager().get_screen('add_customer_screen')
         add_customer_screen.new_customer_id = None
-        App.get_running_app().root.ids.scr_manager.current = 'add_customer_screen'
+        self.scr_manager().current = 'add_customer_screen'
         self.clear_selected_items()
 
     def on_customers_edit_button_clicked(self, *args):
         edit_customer_screen = App.get_running_app().root.ids.scr_manager.get_screen('edit_customer_screen')
         edit_customer_screen.customer_id = self.ids.customers_view.selected_item.customer_id
-        App.get_running_app().root.ids.scr_manager.current = 'edit_customer_screen'
+        self.scr_manager().current = 'edit_customer_screen'
         self.clear_selected_items()
 
     def on_customers_delete_button_clicked(self, *args):
