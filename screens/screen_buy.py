@@ -155,9 +155,20 @@ kv = """
 
                 BuyFieldLabel:
                     text: "receiving BitCoin address:"
-                BuyFieldInput:
-                    id: receive_address_input
-                    text: ""
+                BoxLayout:
+                    orientation: 'horizontal'
+                    size_hint_y: None
+                    height: self.minimum_height
+                    BuyFieldInput:
+                        id: receive_address_input
+                        text: ""
+                    RoundedButton:
+                        size_hint: None, 1
+                        width: self.texture_size[0] + dp(16)
+                        text: fa_icon('camera')
+                        on_release: root.on_receive_address_scan_qr_button_clicked()
+
+
 """
 
 #------------------------------------------------------------------------------
@@ -168,8 +179,12 @@ class BuyScreen(AppScreen):
     selected_customer_info = None
     populate_usd_amount_task = None
     populate_btc_amount_task = None
+    populated_receive_address_qr_scan = None
+    populated_customer_id_qr_scan = None
 
     def clean_input_fields(self):
+        if _Debug:
+            print('clean_input_fields')
         self.selected_customer_id = None
         self.ids.person_first_name_input.text = ''
         self.ids.person_last_name_input.text = ''
@@ -181,6 +196,8 @@ class BuyScreen(AppScreen):
         self.ids.receive_address_input.text = ''
 
     def populate_next_btc_address(self):
+        if self.ids.receive_address_input.text:
+            return
         cur_settings = local_storage.read_settings()
         recent_btc_address = cur_settings.get('recent_btc_address')
         receiving_btc_address_list = cur_settings.get('receiving_btc_address_list', [])
@@ -214,6 +231,42 @@ class BuyScreen(AppScreen):
         self.ids.person_email_input.text = customer_info.get('email') or ''
         self.ids.person_address_input.text = customer_info.get('address') or ''
 
+    def populate_customer_id(self, inp):
+        inp = inp.replace('customer://', '')
+        atm_id = None
+        customer_id = None
+        if inp.count(':'):
+            customer_id, _, atm_id = inp.partition(':')
+        else:
+            if inp.count('-'):
+                atm_id = inp
+            else:
+                customer_id = inp
+        if _Debug:
+            print('populate_customer_id customer_id=%r atm_id=%r' % (customer_id, atm_id, ))
+        if customer_id:
+            try:
+                customer_id = int(customer_id)
+            except:
+                if _Debug:
+                    print('populate_customer_id failed to parse customer ID: %r' % inp)
+                return
+        if atm_id is not None:
+            for customer_info in local_storage.load_customers_list():
+                if customer_info.get('atm_id') == atm_id:
+                    customer_id = customer_info.get('customer_id')
+                    try:
+                        customer_id = int(customer_id)
+                    except:
+                        if _Debug:
+                            print('populate_customer_id failed to read customer ID found from atm ID: %r' % customer_info)
+                        return
+                    if _Debug:
+                        print('populate_customer_id found customer %d by atm ID: %r' % (customer_id, atm_id, ))
+                    break
+        if customer_id is not None:
+            self.select_customer(customer_id)
+
     def select_customer(self, customer_id):
         if _Debug:
             print('select_customer', customer_id)
@@ -226,18 +279,24 @@ class BuyScreen(AppScreen):
     #------------------------------------------------------------------------------
 
     def on_enter(self, *args):
+        if self.populated_customer_id_qr_scan:
+            self.populate_customer_id(self.populated_customer_id_qr_scan)
+            self.populated_customer_id_qr_scan = None
         if self.selected_customer_id is None:
             self.clean_input_fields()
-            self.populate_btc_usd_price()
             self.populate_next_btc_address()
+        self.populate_btc_usd_price()
+        if self.populated_receive_address_qr_scan:
+            self.ids.receive_address_input.text = btc_util.parse_btc_url(self.populated_receive_address_qr_scan)['address']
+            self.populated_receive_address_qr_scan = None
 
     #------------------------------------------------------------------------------
 
     def on_select_customer_button_clicked(self, *args):
-        select_customer_screen = App.get_running_app().root.ids.scr_manager.get_screen('select_customer_screen')
+        select_customer_screen = self.scr_manager().get_screen('select_customer_screen')
         select_customer_screen.customer_selected_callback = self.on_customer_selected
         select_customer_screen.clear_selected_items()
-        App.get_running_app().root.ids.scr_manager.current = 'select_customer_screen'
+        self.scr_manager().current = 'select_customer_screen'
 
     def on_customer_selected(self, selected_customer_id):
         self.select_customer(selected_customer_id)
@@ -255,51 +314,41 @@ class BuyScreen(AppScreen):
         self.scr_manager().current = 'camera_scan_customer_id_screen'
 
     def on_customer_id_scan_qr_ready(self, *args):
+        self.populated_customer_id_qr_scan = args[0].strip()
+        if _Debug:
+            print('on_customer_id_scan_qr_ready', self.populated_customer_id_qr_scan)
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_customer_id_screen)
         self.scan_customer_id_screen = None
-        inp = args[0].strip()
-        if _Debug:
-            print('on_customer_id_scan_qr_ready', inp)
-        inp = inp.replace('customer://', '')
-        atm_id = None
-        customer_id = None
-        if inp.count(':'):
-            customer_id, _, atm_id = inp.partition(':')
-        else:
-            if inp.count('-'):
-                atm_id = inp
-            else:
-                customer_id = inp
-        if _Debug:
-            print('on_customer_id_scan_qr_ready customer_id=%r atm_id=%r' % (customer_id, atm_id, ))
-        if customer_id:
-            try:
-                customer_id = int(customer_id)
-            except:
-                if _Debug:
-                    print('on_customer_id_scan_qr_ready failed to parse customer ID: %r' % inp)
-                return
-        if atm_id is not None:
-            for customer_info in local_storage.load_customers_list():
-                if customer_info.get('atm_id') == atm_id:
-                    customer_id = customer_info.get('customer_id')
-                    try:
-                        customer_id = int(customer_id)
-                    except:
-                        if _Debug:
-                            print('on_customer_id_scan_qr_ready failed to read customer ID found from atm ID: %r' % customer_info)
-                        return
-                    if _Debug:
-                        print('on_customer_id_scan_qr_ready found customer %d by atm ID: %r' % (customer_id, atm_id, ))
-                    break
-        if customer_id is not None:
-            self.select_customer(customer_id)
 
     def on_customer_id_scan_qr_cancel(self, *args):
         self.scr_manager().current = 'buy_screen'
         self.scr_manager().remove_widget(self.scan_customer_id_screen)
         self.scan_customer_id_screen = None
+
+    #------------------------------------------------------------------------------
+
+    def on_receive_address_scan_qr_button_clicked(self, *args):
+        self.scan_qr_screen = CameraScanQRScreen(
+            name='camera_scan_qr_screen',
+            scan_qr_callback=self.on_buy_receive_address_scan_qr_ready,
+            cancel_callback=self.on_buy_receive_address_scan_qr_cancel,
+        )
+        self.scr_manager().add_widget(self.scan_qr_screen)
+        self.scr_manager().current = 'camera_scan_qr_screen'
+
+    def on_buy_receive_address_scan_qr_ready(self, *args):
+        self.populated_receive_address_qr_scan = args[0].strip()
+        if _Debug:
+            print('on_buy_receive_address_scan_qr_ready', self.populated_receive_address_qr_scan)
+        self.scr_manager().current = 'buy_screen'
+        self.scr_manager().remove_widget(self.scan_qr_screen)
+        self.scan_qr_screen = None
+
+    def on_buy_receive_address_scan_qr_cancel(self, *args):
+        self.scr_manager().current = 'buy_screen'
+        self.scr_manager().remove_widget(self.scan_qr_screen)
+        self.scan_qr_screen = None
 
     #------------------------------------------------------------------------------
 

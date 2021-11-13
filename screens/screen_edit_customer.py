@@ -255,9 +255,6 @@ class EditCustomerScreen(screen.AppScreen):
 
     customer_id = None
 
-    def scr_manager(self):
-        return App.get_running_app().root.ids.scr_manager
-
     def take_pic_screen(self):
         return self.scr_manager().get_screen('camera_take_picture_screen')
 
