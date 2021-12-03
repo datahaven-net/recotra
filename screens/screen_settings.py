@@ -183,7 +183,7 @@ kv = """
                         on_text: root.on_field_modified('usd_btc_commission_percent')
 
                     OptionHeaderLabel:
-                        text: "contracts verification against live Blockchain:"
+                        text: "contracts verification against live Blockchain"
                     Widget:
                         size: 1, 1
 
@@ -226,6 +226,18 @@ kv = """
                         hint_text: '90'
                         text: ""
                         on_text: root.on_field_modified('contract_expiration_period_days')
+
+                    OptionHeaderLabel:
+                        text: "paper contracts"
+                    Widget:
+                        size: 1, 1
+
+                    OptionFieldLabel:
+                        text: "QR code size (pixels)"
+                    OptionFieldInput:
+                        id: qr_code_size
+                        text: ""
+                        on_text: root.on_field_modified('qr_code_size')
 
                 Widget:
                     size: 1, 1
@@ -290,6 +302,7 @@ class SettingsScreen(AppScreen):
         self.ids.time_matching_seconds_before.text = cur_settings.get('time_matching_seconds_before', '0')
         self.ids.time_matching_seconds_after.text = cur_settings.get('time_matching_seconds_after', '0')
         self.ids.contract_expiration_period_days.text = cur_settings.get('contract_expiration_period_days', '0')
+        self.ids.qr_code_size.text = cur_settings.get('qr_code_size', '600')
         self.ids.save_settings_button.disabled = True
 
     def on_enter(self, *args):
@@ -316,5 +329,6 @@ class SettingsScreen(AppScreen):
         cur_settings['time_matching_seconds_before'] = self.ids.time_matching_seconds_before.text
         cur_settings['time_matching_seconds_after'] = self.ids.time_matching_seconds_after.text
         cur_settings['contract_expiration_period_days'] = self.ids.contract_expiration_period_days.text
+        cur_settings['qr_code_size'] = self.ids.qr_code_size.text
         local_storage.write_settings(cur_settings)
         self.ids.save_settings_button.disabled = True

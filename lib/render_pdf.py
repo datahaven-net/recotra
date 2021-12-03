@@ -80,7 +80,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                         {buyer_btc_address}
                     </code>
                 </font></p>
-                <img src="{qr_filepath}" width="600">
+                <img src="{qr_filepath}" width="{qr_code_size}" height="{qr_code_size}">
                 <br>
                 <p align=left>{disclosure_statement}</p>
             </td>
@@ -124,6 +124,10 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                 ln_extra = '<br>Received: {}'.format(transaction_details['confirmed_time'])
         else:
             ln_signature = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
+    try:
+        qr_code_size = int(cur_settings['qr_code_size'])
+    except:
+        qr_code_size = 600
     params = {
         'qr_filepath': qr_filepath,
         'face_photo_filepath': face_photo_filepath,
@@ -141,25 +145,30 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         'ln': ' Lightning' if transaction_details.get('lightning') else '',
         'ln_extra': ln_extra,
         'ln_signature': ln_signature,
-        'ln_empty_space': '<br><br><br><br>' if transaction_details.get('lightning') else '',
+        'ln_empty_space': '<br><br>' if transaction_details.get('lightning') else '',
         'buyer_btc_address': buyer['btc_address'],
+        'qr_code_size': qr_code_size,
     }
     params.update(transaction_details)
     if str(params['fee_percent']).endswith('.0'):
         params['fee_percent'] = str(params['fee_percent'])[:-2]
     if 'world_btc_price' not in params:
         params['world_btc_price'] = ''
-    qr_src_text = 'bitcoin:{}?label={}'.format(
-        transaction_details['buyer']['btc_address'],
-        cur_settings.get('business_company_name', '').replace(' ', '_'),
-    )
-    if params['btc_amount']:
-        qr_src_text = 'bitcoin:{}?amount={}'.format(
+    qr_src_text = ''
+    if transaction_details.get('lightning'):
+        qr_src_text = transaction_details['buyer']['btc_address']
+    else:
+        qr_src_text = 'bitcoin:{}?label={}'.format(
             transaction_details['buyer']['btc_address'],
-            params['btc_amount'],
+            cur_settings.get('business_company_name', '').replace(' ', '_'),
         )
-        params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
-            params['btc_amount'], str(round(float(params['btc_amount']) * 1000.0, 6)))
+        if params['btc_amount']:
+            qr_src_text = 'bitcoin:{}?amount={}'.format(
+                transaction_details['buyer']['btc_address'],
+                params['btc_amount'],
+            )
+            params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
+                params['btc_amount'], str(round(float(params['btc_amount']) * 1000.0, 6)))
     if transaction_details.get('lightning'):
         params['buyer_btc_address'] = '{}\n{}\n{}'.format(
             params['buyer_btc_address'][:90],
