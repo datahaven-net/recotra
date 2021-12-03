@@ -230,7 +230,7 @@ class TransactionsView(list_view.SelectableRecycleView):
             'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
             'date': t['date'],
             'from_to': '{} -> {}'.format(
-                t['seller']['btc_address'],
+                (t['seller']['btc_address'][:35] + '...') if t.get('lightning') else t['seller']['btc_address'],
                 (t['buyer']['btc_address'][:35] + '...') if t.get('lightning') else t['buyer']['btc_address'],
             ),
             'blockchain_status': '[color={}][{}][/color]'.format(
