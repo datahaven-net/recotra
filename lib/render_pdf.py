@@ -159,6 +159,9 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
     qr_src_text = ''
     if transaction_details.get('lightning'):
         qr_src_text = transaction_details['buyer']['btc_address']
+        if params['btc_amount']:
+            params['btc_amount'] = '<b>{} BTC</b>  ( {} mBTC )'.format(
+                params['btc_amount'], str(round(float(params['btc_amount']) * 1000.0, 6)))
     else:
         qr_src_text = 'bitcoin:{}?label={}'.format(
             transaction_details['buyer']['btc_address'],
