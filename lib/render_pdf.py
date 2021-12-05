@@ -94,14 +94,14 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                 <br>
                 <hr>
                 <font size=+1><b>{business_owner_first_name} {business_owner_last_name}</b> for {business_company_name}</font>
-                {ln_empty_space}
+                {ln_signature_business}
             </td>
             <td align=left width=50% valign=top>
                 &nbsp;
                 <br>
                 <hr>
                 <font size=+1><b>{first_name} {last_name}</b></font>
-                {ln_signature}
+                {ln_signature_customer}
             </td>
         </tr>
     </table>
@@ -117,13 +117,14 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
     if not face_photo_filepath:
         face_photo_filepath = local_storage.customer_photo_filepath(customer_id)
     ln_extra = ''
-    ln_signature = ''
+    ln_signature_customer = ''
+    ln_signature_business = ''
     if transaction_details.get('lightning'):
+        ln_extra = '<br>Received: {} {}'.format(transaction_details['date'], transaction_details['time'])
         if contract_type == 'purchase':
-            if transaction_details.get('confirmed_time'):
-                ln_extra = '<br>Received: {}'.format(transaction_details['confirmed_time'])
+            ln_signature_business = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
         else:
-            ln_signature = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
+            ln_signature_customer = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
     try:
         qr_code_size = int(cur_settings['qr_code_size'])
     except:
@@ -144,7 +145,8 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         'disclosure_statement': disclosure_statement,
         'ln': ' Lightning' if transaction_details.get('lightning') else '',
         'ln_extra': ln_extra,
-        'ln_signature': ln_signature,
+        'ln_signature_customer': ln_signature_customer,
+        'ln_signature_business': ln_signature_business,
         'ln_empty_space': '<br><br>' if transaction_details.get('lightning') else '',
         'buyer_btc_address': buyer['btc_address'],
         'qr_code_size': qr_code_size,
@@ -173,7 +175,10 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         params['buyer_btc_address'] = '{}\n{}\n{}'.format(
             params['buyer_btc_address'][:90],
             params['buyer_btc_address'][90:180],
-            params['buyer_btc_address'][180:],
+            params['buyer_btc_address'][180:270],
+            params['buyer_btc_address'][270:360],
+            params['buyer_btc_address'][360:450],
+            params['buyer_btc_address'][450:],
         )
     render_qr.make_qr_file(qr_src_text, qr_filepath)
     rendered_html = html_template.format(**params)
