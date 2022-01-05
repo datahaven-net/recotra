@@ -428,10 +428,11 @@ class BuyScreen(AppScreen):
         btc_price_current = float(self.ids.btc_price_input.text)
         factor = (100.0 + usd_btc_commission_percent) / 100.0
         contract_btc_price = str(round(btc_price_current * factor, 2))
+        is_lightning = self.ids.receive_address_input.text.lower().startswith('lnbc')
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='purchase',
-            lightning=self.ids.receive_address_input.text.lower().startswith('lnbc'),
+            lightning=is_lightning,
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
             btc_price=contract_btc_price,
@@ -463,7 +464,8 @@ class BuyScreen(AppScreen):
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)
-        cur_settings['recent_btc_address'] = self.ids.receive_address_input.text
+        if not is_lightning:
+            cur_settings['recent_btc_address'] = self.ids.receive_address_input.text
         local_storage.write_settings(cur_settings)
         self.clean_input_fields()
         self.scr('one_transaction_screen').transaction_id = new_transaction_details['transaction_id']
