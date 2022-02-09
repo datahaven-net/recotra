@@ -176,7 +176,7 @@ kv = """
                 id: select_year_button
                 width: dp(60)
                 text: '-'
-                values: '-', '2021', '2020', '2019'
+                values: '-', '2022', '2021', '2020', '2019'
 
             RoundedButton:
                 text: 'PDF report'
