@@ -234,6 +234,18 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_explore_button_clicked()
+
+            Widget:
+                size_hint: None, 1
+                width: dp(20)
+
+            RoundedButton:
+                id: confirm_button
+                text: 'mark as confirmed'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_confirm_button_clicked()
+
 """
 
 #------------------------------------------------------------------------------
@@ -307,6 +319,29 @@ class OneTransactionScreen(AppScreen):
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
             system.open_system_explorer(pdf_contract['filename'], as_folder=False)
+
+    def on_confirm_button_clicked(self):
+        transaction_details = local_storage.read_transaction(self.transaction_id)
+        if transaction_details.get('blockchain_status') == 'confirmed':
+            return
+        if transaction_details.get('void'):
+            return
+        st = ''
+        if transaction_details.get('lightning'):
+            transaction_details['blockchain_status'] = 'confirmed'
+            transaction_details['confirmed_time'] = datetime.datetime.now().strftime("%b %d %Y %I:%M %p")
+            st = '[color=#70a070]confirmed lightning transaction of %s BTC for address %s...[/color]' % (
+                transaction_details['btc_amount'], transaction_details['buyer']['btc_address'][:40])
+        else:
+            self.ids.verify_button.disabled = True
+            st = '[color=#a07070]manually marked transaction of %s BTC for address %s as "confirmed"[/color]' % (
+                transaction_details['btc_amount'], transaction_details['buyer']['btc_address'])
+            transaction_details['blockchain_status'] = 'confirmed'
+            transaction_details['blockchain_tx_info'] = None
+            transaction_details['confirmed_time'] = datetime.datetime.now().strftime("%b %d %Y %I:%M %p")
+        local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
+        self.ids.verify_status_label.text = st
+        self.populate_fields(transaction_details)
 
     def on_verify_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)

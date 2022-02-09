@@ -267,7 +267,7 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
 
 #------------------------------------------------------------------------------
 
-def build_transactions_report(selected_transactions, selected_month, selected_year, pdf_filepath=None):
+def build_transactions_report_old(selected_transactions, selected_month, selected_year, pdf_filepath=None):
     if not pdf_filepath:
         pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='transactions-')
     html_template = """
@@ -353,6 +353,128 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
         'total_usd_bought': round(total_usd_bought, 2),
         'total_btc_sold': round(total_btc_sold, 6),
         'total_usd_sold': round(total_usd_sold, 2),
+    }
+    rendered_html = html_template.format(**params)
+    pdfkit.from_string(
+        input=rendered_html,
+        output_path=pdf_filepath,
+    )
+    with open(pdf_filepath, "rb") as pdf_file:
+        pdf_raw = pdf_file.read()
+    return {
+        'body': pdf_raw,
+        'filename': pdf_filepath,
+    }
+
+#------------------------------------------------------------------------------
+
+def build_transactions_report(selected_transactions, selected_month, selected_year, pdf_filepath=None):
+    if not pdf_filepath:
+        pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='transactions-')
+    html_template = """
+<html>
+<head>
+    <title>Bitcoin.ai Ltd.</title>
+</head>
+<body>
+    <h3>{selected_month} {selected_year}</h3>
+    <table border=1 cellspacing=0 cellpadding=5 >
+        <tr>
+            <th>Customer</th>
+            <th>Transaction type</th>
+            <th>Amount BTC</th>
+            <th>Amount US $</th>
+            <th>BTC price</th>
+            <th>Date</th>
+            <th>Receiving Address</th>
+        </tr>
+{table_content}
+    </table>
+<br>
+<table>
+<tr>
+<td>
+    <p>
+        Total BTC received: <b>{total_btc_bought}</b>
+    </p>
+    <p>
+        Total Dollars paid out: <b>{total_usd_sold}</b> US $
+    </p>
+</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>
+    <p>
+        Total BTC paid out: <b>{total_btc_sold}</b>
+    </p>
+    <p>
+        Total Dollars received: <b>{total_usd_bought}</b> US $
+    </p>
+</td>
+<td>&nbsp;&nbsp;&nbsp;</td>
+<td>
+    <p>
+        Total BTC change: <b>{total_btc_change}</b>
+    </p>
+    <p>
+        Total Dollars change: <b>{total_usd_change}</b> US $
+    </p>
+</td>
+</tr>
+</table>
+</body>
+</html>
+    """
+    table_content = ''
+    total_btc_bought = 0.0
+    total_usd_bought = 0.0
+    total_btc_sold = 0.0
+    total_usd_sold = 0.0
+    total_btc_change = 0.0
+    total_usd_change = 0.0
+    for t in selected_transactions:
+        customer_name = f"{t['buyer']['first_name']} {t['buyer']['last_name']}" if t['contract_type'] == 'sales' else f"{t['seller']['first_name']} {t['seller']['last_name']}"
+        tr_type = "customer buying BTC" if t['contract_type'] == 'sales' else "customer selling BTC"
+        btc_change = -float(t['btc_amount']) if t['contract_type'] == 'sales' else float(t['btc_amount'])
+        usd_change = float(t['usd_amount']) if t['contract_type'] == 'sales' else -float(t['usd_amount'])
+        btc_addr = t['buyer']['btc_address']
+        if t.get('lightning'):
+            btc_addr = '{}<br>{}<br>{}<br>{}<br>{}'.format(
+                btc_addr[:60],
+                btc_addr[60:120],
+                btc_addr[120:180],
+                btc_addr[180:240],
+                btc_addr[240:],
+            )
+
+        table_content += f'''
+        <tr>
+            <td nowrap>{customer_name}</td>
+            <td nowrap>{tr_type}</td>
+            <td nowrap>{btc_change}</td>
+            <td nowrap>{usd_change}</td>
+            <td nowrap>{t['btc_price']}</td>
+            <td nowrap>{t['date']}</td>
+            <td nowrap>{btc_addr}</td>
+        </tr>
+        '''
+        if t['contract_type'] == 'sales':
+            total_btc_sold += float(t['btc_amount'])
+            total_usd_bought += float(t['usd_amount'])
+        else:
+            total_btc_bought += float(t['btc_amount'])
+            total_usd_sold += float(t['usd_amount'])
+        total_btc_change += btc_change
+        total_usd_change += usd_change
+    params = {
+        'table_content': table_content,
+        'selected_month': selected_month.replace('-', ''),
+        'selected_year': selected_year.replace('-', ''),
+        'total_btc_bought': round(total_btc_bought, 6),
+        'total_usd_bought': round(total_usd_bought, 2),
+        'total_btc_sold': round(total_btc_sold, 6),
+        'total_usd_sold': round(total_usd_sold, 2),
+        'total_btc_change': round(total_btc_change, 6),
+        'total_usd_change': round(total_usd_change, 2),
     }
     rendered_html = html_template.format(**params)
     pdfkit.from_string(
