@@ -2,7 +2,6 @@ import datetime
 
 #------------------------------------------------------------------------------
 
-from kivy.app import App
 from kivy.clock import Clock
 
 #------------------------------------------------------------------------------
@@ -11,6 +10,7 @@ from lib import coinmarketcap_client
 from lib import btc_util
 
 from components.screen import AppScreen
+from components import dialogs
 
 from storage import local_storage
 
@@ -18,7 +18,7 @@ from screens.screen_camera_scan_qr import CameraScanQRScreen
 
 #------------------------------------------------------------------------------
 
-_Debug = True
+_Debug = False
 
 #------------------------------------------------------------------------------
 
@@ -422,8 +422,26 @@ class BuyScreen(AppScreen):
     #------------------------------------------------------------------------------
 
     def on_start_transaction_button_clicked(self):
-        cur_settings = local_storage.read_settings()
+        bought, sold = local_storage.calculate_customer_transactions_this_month(self.selected_customer_id)
+        if _Debug:
+            print('sold: %r   bought: %r' % (sold, bought, ))
+        limit_transactions = float(self.selected_customer_info.get('limit_transactions', '0') or '0')
+        if limit_transactions:
+            usd_amount = float(self.ids.usd_amount_input.text)
+            if sold + usd_amount > limit_transactions:
+                msg = 'Customer {} {} is only authorized for ${} per month.\n'.format(
+                    self.ids.person_first_name_input.text,
+                    self.ids.person_last_name_input.text,
+                    limit_transactions,
+                )
+                msg += 'At the moment, the customer has sold BTC for ${} in total.'.format(sold)
+                dialogs.show_one_button_dialog(
+                    title='Transactions amount limit exceeded',
+                    message=msg,
+                )
+                return
         t_now = datetime.datetime.now()
+        cur_settings = local_storage.read_settings()
         usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
         btc_price_current = float(self.ids.btc_price_input.text)
         factor = (100.0 + usd_btc_commission_percent) / 100.0

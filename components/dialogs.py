@@ -1,4 +1,10 @@
+from kivy.metrics import dp
+from kivy.uix.button import Button
+from kivy.uix.label import Label
 from kivy.uix.popup import Popup
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 
 
 kv = """
@@ -34,6 +40,7 @@ kv = """
                 on_press: root._cancel()
 """
 
+#------------------------------------------------------------------------------
 
 class BTCAddressDialog(Popup):
 
@@ -49,3 +56,34 @@ class BTCAddressDialog(Popup):
 
     def _cancel(self):
         self.dismiss()
+
+#------------------------------------------------------------------------------
+
+def show_one_button_dialog(title, message, dialog_size=(dp(400), dp(200), ), button_text='close'):
+    layout = BoxLayout(
+        orientation='vertical',
+        padding=dp(5),
+    )
+    popupLabel = Label(
+        text=message,
+        text_size=(dialog_size[0]-dp(20), None, ),
+        height=dialog_size[1]-dp(50),
+        size_hint=(1, None, ),
+        color=(1, 1, 1, 1, ),
+        valign='top',
+    )
+    closeButton = Button(
+        text=button_text,
+        size_hint=(None, None, ),
+        size=(dp(45), dp(20), ),
+    )
+    layout.add_widget(popupLabel)
+    layout.add_widget(closeButton)
+    popup = Popup(
+        title=title,
+        content=layout,
+        size_hint=(None, None, ),
+        size=dialog_size,
+    )
+    popup.open()
+    closeButton.bind(on_press=popup.dismiss)

@@ -1,5 +1,6 @@
 from io import open
 import os
+import datetime
 import platform
 
 #------------------------------------------------------------------------------
@@ -212,6 +213,33 @@ def make_customers_ui_data(customers_list):
         'email': i.get('email', ''),
         'address': i.get('address', ''),
     } for i in customers_list]
+
+#------------------------------------------------------------------------------
+
+def calculate_customer_transactions_this_month(customer_id):
+    t_now = datetime.datetime.now()
+    customer_sold_this_month = 0
+    customer_bought_this_month = 0
+    for t in load_transactions_list():
+        if t.get('blockchain_status') != 'confirmed':
+            continue
+        selected = False
+        if t['buyer']['customer_id'] and int(t['buyer']['customer_id']) == int(customer_id):
+            selected = True
+        if t['seller']['customer_id'] and int(t['seller']['customer_id']) == int(customer_id):
+            selected = True
+        if not selected:
+            continue
+        contract_local_time = datetime.datetime.strptime('{} {}'.format(t['date'], t['time']), '%b %d %Y %I:%M %p')
+        if contract_local_time.year != t_now.year:
+            continue
+        if contract_local_time.month != t_now.month:
+            continue
+        if t['contract_type'] == 'purchase':
+            customer_sold_this_month += float(t['usd_amount'])
+        else:
+            customer_bought_this_month += float(t['usd_amount'])
+    return customer_bought_this_month, customer_sold_this_month
 
 #------------------------------------------------------------------------------
 
