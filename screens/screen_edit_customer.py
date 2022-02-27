@@ -2,13 +2,11 @@ import os
 
 #------------------------------------------------------------------------------
 
-from kivy.app import App
 from kivy.cache import Cache
 
 #------------------------------------------------------------------------------
 
 from components import screen
-from components.webfont import fa_icon
 
 from lib import render_pdf
 from lib import system
@@ -20,7 +18,7 @@ from screens.screen_camera_scan_qr import CameraScanQRScreen
 
 #------------------------------------------------------------------------------
 
-_Debug = True
+_Debug = False
 
 #------------------------------------------------------------------------------
 
@@ -214,6 +212,24 @@ kv = """
                     size_hint_x: None
                     size_hint_y: None
 
+                Label:
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                    text: ""
+                Label:
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                    text: "Transactions limit per month in dollars:"
+                TextInput:
+                    id: customer_limit_transactions_input
+                    text: ""
+                    width: dp(340)
+                    height: dp(30)
+                    size_hint_x: None
+                    size_hint_y: None
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
@@ -268,6 +284,7 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.customer_email_input.text = customer_info.get('email') or ''
         self.ids.customer_address_input.text = customer_info.get('address') or ''
         self.ids.customer_atm_id_input.text = customer_info.get('atm_id') or ''
+        self.ids.customer_limit_transactions_input.text = customer_info.get('limit_transactions') or '5000'
         self.ids.customer_photo_picture_image.source = ''
         self.ids.customer_photo_picture_image.source = local_storage.customer_photo_filepath(self.customer_id)
         self.ids.customer_photo_filepath_label.text = local_storage.customer_photo_filepath(self.customer_id)
@@ -284,6 +301,7 @@ class EditCustomerScreen(screen.AppScreen):
             email=self.ids.customer_email_input.text,
             address=self.ids.customer_address_input.text,
             atm_id=self.ids.customer_atm_id_input.text,
+            limit_transactions=self.ids.customer_limit_transactions_input.text,
         ))
 
     def on_enter(self, *args):
