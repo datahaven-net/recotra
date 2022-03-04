@@ -5,6 +5,7 @@ from kivy.properties import ObjectProperty  # @UnresolvedImport
 
 from components.screen import AppScreen
 from components.list_view import SelectableRecycleView
+from components.webfont import fa_icon
 from storage import local_storage
 
 #------------------------------------------------------------------------------
@@ -64,6 +65,30 @@ kv = """
             height: self.minimum_height
             padding: dp(10)
             spacing: dp(2)
+
+            RoundedButton:
+                id: sort_by_id_button
+                size_hint: None, None
+                width: self.texture_size[0] + dp(20)
+                height: dp(30)
+                text: 'ID ' + fa_icon('sort-numeric-down')
+                on_press: root.on_sort_by_id_button_clicked()
+
+            RoundedButton:
+                id: sort_by_name_button
+                size_hint: None, None
+                width: self.texture_size[0] + dp(20)
+                height: dp(30)
+                text: 'First Name ' + fa_icon('')
+                on_press: root.on_sort_by_name_button_clicked()
+
+            RoundedButton:
+                id: sort_by_last_name_button
+                size_hint: None, None
+                width: self.texture_size[0] + dp(20)
+                height: dp(30)
+                text: 'Last Name ' + fa_icon('')
+                on_press: root.on_sort_by_last_name_button_clicked()
 
             Widget:
 
@@ -129,6 +154,7 @@ class SelectCustomerScreen(AppScreen):
 
     customer_select_button = ObjectProperty(None, allownone=True)
     customer_selected_callback = None
+    sort_by = 'customer_id_down'
 
     def clear_selected_items(self):
         self.ids.select_customer_view.clear_selection()
@@ -148,6 +174,18 @@ class SelectCustomerScreen(AppScreen):
                     new_data.append(d)
         else:
             new_data = list(self.ids.select_customer_view.data_copy)
+        if self.sort_by == 'customer_id_down':
+            new_data.sort(key=lambda d: d['customer_id'], reverse=False)
+        elif self.sort_by == 'customer_id_up':
+            new_data.sort(key=lambda d: d['customer_id'], reverse=True)
+        elif self.sort_by == 'name_down':
+            new_data.sort(key=lambda d: d['first_name'].lower(), reverse=False)
+        elif self.sort_by == 'name_up':
+            new_data.sort(key=lambda d: d['first_name'].lower(), reverse=True)
+        elif self.sort_by == 'last_name_down':
+            new_data.sort(key=lambda d: d['last_name'].lower(), reverse=False)
+        elif self.sort_by == 'last_name_up':
+            new_data.sort(key=lambda d: d['last_name'].lower(), reverse=True)
         self.ids.select_customer_view.data = new_data
 
     def on_enter(self, *args):
@@ -166,4 +204,49 @@ class SelectCustomerScreen(AppScreen):
         self.populate_search_results()
 
     def on_search_button_text_changed(self, *args):
+        self.populate_search_results()
+
+    def on_sort_by_id_button_clicked(self, *args):
+        self.ids.sort_by_id_button.text = 'ID ' + fa_icon('')
+        self.ids.sort_by_name_button.text = 'First Name ' + fa_icon('')
+        self.ids.sort_by_last_name_button.text = 'Last Name ' + fa_icon('')
+        if self.sort_by == 'customer_id_down':
+            self.sort_by = 'customer_id_up'
+            self.ids.sort_by_id_button.text = 'ID ' + fa_icon('sort-numeric-up')
+        elif self.sort_by == 'customer_id_up':
+            self.sort_by = 'customer_id_down'
+            self.ids.sort_by_id_button.text = 'ID ' + fa_icon('sort-numeric-down')
+        else:
+            self.sort_by = 'customer_id_down'
+            self.ids.sort_by_id_button.text = 'ID ' + fa_icon('sort-numeric-down')
+        self.populate_search_results()
+
+    def on_sort_by_name_button_clicked(self, *args):
+        self.ids.sort_by_id_button.text = 'ID ' + fa_icon('')
+        self.ids.sort_by_name_button.text = 'First Name ' + fa_icon('')
+        self.ids.sort_by_last_name_button.text = 'Last Name ' + fa_icon('')
+        if self.sort_by == 'name_down':
+            self.sort_by = 'name_up'
+            self.ids.sort_by_name_button.text = 'First Name ' + fa_icon('sort-alpha-up')
+        elif self.sort_by == 'name_up':
+            self.sort_by = 'name_down'
+            self.ids.sort_by_name_button.text = 'First Name ' + fa_icon('sort-alpha-down')
+        else:
+            self.sort_by = 'name_down'
+            self.ids.sort_by_name_button.text = 'First Name ' + fa_icon('sort-alpha-down')
+        self.populate_search_results()
+
+    def on_sort_by_last_name_button_clicked(self, *args):
+        self.ids.sort_by_id_button.text = 'ID ' + fa_icon('')
+        self.ids.sort_by_name_button.text = 'First Name ' + fa_icon('')
+        self.ids.sort_by_last_name_button.text = 'Last Name ' + fa_icon('')
+        if self.sort_by == 'last_name_down':
+            self.sort_by = 'last_name_up'
+            self.ids.sort_by_last_name_button.text = 'Last Name ' + fa_icon('sort-alpha-up')
+        elif self.sort_by == 'last_name_up':
+            self.sort_by = 'last_name_down'
+            self.ids.sort_by_last_name_button.text = 'Last Name ' + fa_icon('sort-alpha-down')
+        else:
+            self.sort_by = 'last_name_down'
+            self.ids.sort_by_last_name_button.text = 'Last Name ' + fa_icon('sort-alpha-down')
         self.populate_search_results()

@@ -1452,5 +1452,8 @@ fa_map = {
     "zhihu": "\uf63f",
 }
 
+
 def fa_icon(name, font_file='fonts/fa-solid.ttf'):
+    if name not in fa_map:
+        return ''
     return '[font={}]{}[/font]'.format(font_file, fa_map[name])
