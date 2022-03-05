@@ -229,6 +229,22 @@ kv = """
                     height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
+                Label:
+                    id: this_month_sold_usd
+                    height: dp(20)
+                    size_hint_y: None
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                    text: "This month, sold BTC for a total of $0"
+                Label:
+                    id: this_month_bought_usd
+                    height: dp(20)
+                    size_hint_y: None
+                    text_size: self.size
+                    valign: "bottom"
+                    halign: "left"
+                    text: "This month, bought BTC for a total of $0"
 
         BoxLayout:
             orientation: 'horizontal'
@@ -278,6 +294,7 @@ class EditCustomerScreen(screen.AppScreen):
         Cache.remove('kv.image')
         Cache.remove('kv.texture')
         customer_info = local_storage.read_customer_info(self.customer_id) or {}
+        bought, sold = local_storage.calculate_customer_transactions_this_month(self.customer_id)
         self.ids.customer_first_name_input.text = customer_info.get('first_name') or ''
         self.ids.customer_last_name_input.text = customer_info.get('last_name') or ''
         self.ids.customer_phone_input.text = customer_info.get('phone') or ''
@@ -291,6 +308,8 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.customer_passport_picture_image.source = ''
         self.ids.customer_passport_picture_image.source = local_storage.customer_passport_filepath(self.customer_id)
         self.ids.customer_passport_picture_filepath_label.text = local_storage.customer_passport_filepath(self.customer_id)
+        self.ids.this_month_sold_usd.text = f'This month, sold BTC for a total of [b]${sold}[/b]'
+        self.ids.this_month_bought_usd.text = f'This month, bought BTC for a total of [b]${bought}[/b]'
 
     def save_info(self):
         local_storage.write_customer_info(dict(
