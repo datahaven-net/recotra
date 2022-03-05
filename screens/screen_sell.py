@@ -430,7 +430,7 @@ class SellScreen(AppScreen):
                     self.ids.person_last_name_input.text,
                     limit_transactions,
                 )
-                msg += 'At the moment, the customer has bought BTC for ${} in total.'.format(bought)
+                msg += 'This month, the customer bought BTC for a total of ${}.'.format(bought)
                 dialogs.show_one_button_dialog(
                     title='Transactions amount limit exceeded',
                     message=msg,
