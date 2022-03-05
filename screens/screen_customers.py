@@ -198,9 +198,9 @@ class CustomersScreen(AppScreen):
         else:
             new_data = list(self.ids.customers_view.data_copy)
         if self.sort_by == 'customer_id_down':
-            new_data.sort(key=lambda d: d['customer_id'], reverse=False)
+            new_data.sort(key=lambda d: int(d['customer_id']), reverse=False)
         elif self.sort_by == 'customer_id_up':
-            new_data.sort(key=lambda d: d['customer_id'], reverse=True)
+            new_data.sort(key=lambda d: int(d['customer_id']), reverse=True)
         elif self.sort_by == 'name_down':
             new_data.sort(key=lambda d: d['first_name'].lower(), reverse=False)
         elif self.sort_by == 'name_up':
