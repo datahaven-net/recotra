@@ -188,6 +188,7 @@ kv = """
 class AddCustomerScreen(screen.AppScreen):
 
     new_customer_id = None
+    camera_on = False
 
     def take_pic_screen(self):
         return self.scr_manager().get_screen('camera_take_picture_screen')
@@ -204,11 +205,28 @@ class AddCustomerScreen(screen.AppScreen):
         self.ids.customer_passport_picture_image.source = ''
 
     def on_enter(self, *args):
-        if self.new_customer_id is None:
+        # print('on_enter', args, self.new_customer_id, self.camera_on)
+        if self.camera_on:
+            self.camera_on = False
+            return
+        if self.new_customer_id is not None:
+            local_storage.erase_customer_info(self.new_customer_id)
+            self.new_customer_id = None
+            self.new_customer_id = local_storage.create_new_customer_info()
+            self.clean_input_fields()
+        else:
             self.new_customer_id = local_storage.create_new_customer_info()
             self.clean_input_fields()
 
+    def on_leave(self, *args):
+        # print('on_leave', args, self.new_customer_id, self.camera_on)
+        if self.new_customer_id is not None:
+            if not self.camera_on:
+                local_storage.erase_customer_info(self.new_customer_id)
+                self.new_customer_id = None
+
     def on_customer_photo_button_clicked(self, *args):
+        self.camera_on = True
         self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
             name='camera_take_picture_screen',
             picture_taken_callback=self.on_customer_photo_picture_ready,
@@ -218,6 +236,7 @@ class AddCustomerScreen(screen.AppScreen):
         self.scr_manager().current = 'camera_take_picture_screen'
 
     def on_customer_passport_button_clicked(self, *args):
+        self.camera_on = True
         self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
             name='camera_take_picture_screen',
             picture_taken_callback=self.on_customer_passport_picture_ready,
@@ -230,11 +249,13 @@ class AddCustomerScreen(screen.AppScreen):
         self.ids.customer_photo_picture_image.source = args[0]
         self.scr_manager().current = 'add_customer_screen'
         self.scr_manager().remove_widget(self.camera_screen)
+        # self.camera_on = False
 
     def on_customer_passport_picture_ready(self, *args):
         self.ids.customer_passport_picture_image.source = args[0]
         self.scr_manager().current = 'add_customer_screen'
         self.scr_manager().remove_widget(self.camera_screen)
+        # self.camera_on = False
 
     def on_add_customer_save_button_clicked(self, *args):
         local_storage.write_customer_info(dict(
@@ -246,5 +267,7 @@ class AddCustomerScreen(screen.AppScreen):
             address=self.ids.customer_address_input.text,
             atm_id='',
         ))
+        self.new_customer_id = None
+        self.camera_on = False
         self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
         self.scr_manager().current = 'customers_screen'
