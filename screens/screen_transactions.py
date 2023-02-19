@@ -176,7 +176,7 @@ kv = """
                 id: select_year_button
                 width: dp(60)
                 text: '-'
-                values: '-', '2022', '2021', '2020', '2019'
+                values: '-', %s
 
             RoundedButton:
                 text: 'PDF report'
@@ -201,7 +201,7 @@ kv = """
                 size_hint_x: None
                 on_release: root.on_verfy_transactions_button_clicked()
 
-"""
+""" % ','.join(["'%s'" % y for y in range(datetime.date.today().year, datetime.date.today().year-5,-1)])
 
 #------------------------------------------------------------------------------
 
