@@ -8,7 +8,8 @@ One person with a computer, printer, scanner, webcam can trade Bitcoin with in p
 You can provide the same service as a "Bitcoin ATM" with far lower capital costs.
 It is also much easier to keep in operation than an ATM.
 
-Link to Video showing use of this software coming here soon:   
+Link to Video showing use of this software coming here soon
+
 
 Regulators classify this under VASP - Virtual Asset Service Provider
 
@@ -36,3 +37,5 @@ Also to make sure you are running the most recent version you can run following 
 Then you should be able to start the application inside development environment:
 
 		make run
+
+
