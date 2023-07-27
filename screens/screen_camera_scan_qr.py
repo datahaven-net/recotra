@@ -50,7 +50,7 @@ class CameraScanQRScreen(screen.AppScreen):
         self.add_widget(self.container)
 
         self.camera_texture = Image(
-            id='camera_texture',
+            # id='camera_texture',
             size_hint=(1, 1, ),
             allow_stretch=True,
             keep_ratio=True,
@@ -59,7 +59,7 @@ class CameraScanQRScreen(screen.AppScreen):
         self.container.add_widget(self.camera_texture)
 
         btn = CloseButton(
-            id='cancel_button',
+            # id='cancel_button',
             pos_hint = {"right": 1, "top": 1, },
             text=fa_icon('window-close'),
             on_release = self.on_cancel_button_clicked,

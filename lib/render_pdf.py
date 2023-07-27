@@ -19,8 +19,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         qr_filepath = tempfile.mktemp(suffix='.png', prefix='btc-contract-qr-')
     if os.path.isfile(qr_filepath):
         os.remove(qr_filepath)
-    html_template = """
-<html>
+    html_template = """<html>
 <head>
     <title>Bitcoin.ai Ltd.</title>
 </head>
@@ -188,6 +187,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
     pdfkit.from_string(
         input=rendered_html,
         output_path=pdf_filepath,
+        options={"enable-local-file-access": ""},
     )
     with open(pdf_filepath, "rb") as pdf_file:
         pdf_raw = pdf_file.read()
@@ -256,6 +256,7 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
     pdfkit.from_string(
         input=rendered_html,
         output_path=pdf_filepath,
+        options={"enable-local-file-access": ""},
     )
     with open(pdf_filepath, "rb") as pdf_file:
         pdf_raw = pdf_file.read()
@@ -358,6 +359,7 @@ def build_transactions_report_old(selected_transactions, selected_month, selecte
     pdfkit.from_string(
         input=rendered_html,
         output_path=pdf_filepath,
+        options={"enable-local-file-access": ""},
     )
     with open(pdf_filepath, "rb") as pdf_file:
         pdf_raw = pdf_file.read()
@@ -480,6 +482,7 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
     pdfkit.from_string(
         input=rendered_html,
         output_path=pdf_filepath,
+        options={"enable-local-file-access": ""},
     )
     with open(pdf_filepath, "rb") as pdf_file:
         pdf_raw = pdf_file.read()

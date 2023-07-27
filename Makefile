@@ -23,7 +23,10 @@ venv:
 	@rm -rf venv
 	@$(PYTHON_VERSION) -m venv venv
 	@$(PIP) install --upgrade pip
-	@$(PIP) install Cython pygments docutils pillow
+	@$(PIP) install Cython
+	@$(PIP) install -r $(REQUIREMENTS_TXT)
+
+pip_install:
 	@$(PIP) install -r $(REQUIREMENTS_TXT)
 
 install_python38:
@@ -46,3 +49,4 @@ update:
 
 run:
 	@$(PYTHON) main.py
+

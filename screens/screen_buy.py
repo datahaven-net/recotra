@@ -35,7 +35,7 @@ kv = """
     width: dp(510)
     height: self.minimum_height
     multiline: False
-
+    write_tab: False
 
 <BuyScreen>:
 
@@ -199,7 +199,7 @@ class BuyScreen(AppScreen):
         if self.ids.receive_address_input.text:
             return
         cur_settings = local_storage.read_settings()
-        recent_btc_address = cur_settings.get('recent_btc_address')
+        recent_btc_address = cur_settings.get('recent_btc_address') or ''
         receiving_btc_address_list = cur_settings.get('receiving_btc_address_list', [])
         if receiving_btc_address_list:
             recent_pos = -1
@@ -422,6 +422,13 @@ class BuyScreen(AppScreen):
     #------------------------------------------------------------------------------
 
     def on_start_transaction_button_clicked(self):
+        if not self.selected_customer_info:
+            msg = 'Please select a customer first, click "Select customer" button.'
+            dialogs.show_one_button_dialog(
+                title='Need to select a cusomer',
+                message=msg,
+            )
+            return
         bought, sold = local_storage.calculate_customer_transactions_this_month(self.selected_customer_id)
         if _Debug:
             print('sold: %r   bought: %r' % (sold, bought, ))

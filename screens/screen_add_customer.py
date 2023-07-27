@@ -119,6 +119,8 @@ kv = """
                     height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
+                    multiline: False
+                    write_tab: False
 
                 Label:
                     text_size: self.size
@@ -132,6 +134,8 @@ kv = """
                     height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
+                    multiline: False
+                    write_tab: False
 
                 Label:
                     text_size: self.size
@@ -145,6 +149,8 @@ kv = """
                     height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
+                    multiline: False
+                    write_tab: False
 
                 Label:
                     text_size: self.size
@@ -158,6 +164,8 @@ kv = """
                     height: dp(30)
                     size_hint_x: None
                     size_hint_y: None
+                    multiline: False
+                    write_tab: False
 
                 Label:
                     text_size: self.size
@@ -171,6 +179,8 @@ kv = """
                     height: dp(90)
                     size_hint_x: None
                     size_hint_y: None
+                    multiline: True
+                    write_tab: False
 
         BoxLayout:
             orientation: 'horizontal'
@@ -230,6 +240,7 @@ class AddCustomerScreen(screen.AppScreen):
         self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
             name='camera_take_picture_screen',
             picture_taken_callback=self.on_customer_photo_picture_ready,
+            cancel_callback=self.on_customer_photo_picture_cancel,
             picture_filepath=local_storage.customer_photo_filepath(self.new_customer_id), 
         )
         self.scr_manager().add_widget(self.camera_screen)
@@ -240,6 +251,7 @@ class AddCustomerScreen(screen.AppScreen):
         self.camera_screen = screen_camera_take_picture.CameraTakePictureScreen(
             name='camera_take_picture_screen',
             picture_taken_callback=self.on_customer_passport_picture_ready,
+            cancel_callback=self.on_customer_passport_picture_cancel,
             picture_filepath=local_storage.customer_passport_filepath(self.new_customer_id),
         )
         self.scr_manager().add_widget(self.camera_screen)
@@ -251,11 +263,21 @@ class AddCustomerScreen(screen.AppScreen):
         self.scr_manager().remove_widget(self.camera_screen)
         # self.camera_on = False
 
+    def on_customer_photo_picture_cancel(self, *args):
+        self.ids.customer_photo_picture_image.source = ''
+        self.scr_manager().current = 'add_customer_screen'
+        self.scr_manager().remove_widget(self.camera_screen)
+
     def on_customer_passport_picture_ready(self, *args):
         self.ids.customer_passport_picture_image.source = args[0]
         self.scr_manager().current = 'add_customer_screen'
         self.scr_manager().remove_widget(self.camera_screen)
         # self.camera_on = False
+
+    def on_customer_passport_picture_cancel(self, *args):
+        self.ids.customer_passport_picture_image.source = ''
+        self.scr_manager().current = 'add_customer_screen'
+        self.scr_manager().remove_widget(self.camera_screen)
 
     def on_add_customer_save_button_clicked(self, *args):
         local_storage.write_customer_info(dict(

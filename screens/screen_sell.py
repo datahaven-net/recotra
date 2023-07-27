@@ -35,6 +35,7 @@ kv = """
     width: dp(510)
     height: self.minimum_height
     multiline: False
+    write_tab: False
 
 
 <SellScreen>:
@@ -418,6 +419,13 @@ class SellScreen(AppScreen):
     #------------------------------------------------------------------------------
 
     def on_start_transaction_button_clicked(self):
+        if not self.selected_customer_info:
+            msg = 'Please select a customer first, click "Select customer" button.'
+            dialogs.show_one_button_dialog(
+                title='Need to select a cusomer',
+                message=msg,
+            )
+            return
         bought, sold = local_storage.calculate_customer_transactions_this_month(self.selected_customer_id)
         if _Debug:
             print('sold: %r   bought: %r' % (sold, bought, ))
