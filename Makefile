@@ -23,8 +23,8 @@ venv:
 	@rm -rf venv
 	@$(PYTHON_VERSION) -m venv venv
 	@$(PIP) install --upgrade pip
-	@$(PIP) install pgen
-	@$(PIP) install Cython
+	@$(PIP) install pgen==0.2.1
+	@$(PIP) install Cython==3.0.0
 	@$(PIP) install -r $(REQUIREMENTS_TXT)
 
 pip_install:
