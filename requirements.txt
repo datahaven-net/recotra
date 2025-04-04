@@ -9,4 +9,4 @@ Pygments==2.15.1
 pyzbar==0.1.9
 qrcode==7.4.2
 sha3==0.2.1
-
+numpy==1.26.4

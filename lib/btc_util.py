@@ -47,7 +47,7 @@ def clean_btc_amount(inp):
 #------------------------------------------------------------------------------
 
 def fetch_transactions(btc_address):
-    url = 'https://chain.api.btc.com/v3/address/{}/tx'.format(btc_address)
+    url = 'https://btcscan.org/api/address/{}/txs'.format(btc_address)
     try:
         response = requests.get(url, headers={
             'User-Agent': 'curl/7.68.0',
@@ -70,19 +70,19 @@ def fetch_transactions(btc_address):
     result = {}
     if json_response:
         try:
-            tr_list = ((json_response.get('data', {}) or {}).get('list', []) or [])
+            tr_list = list(json_response)
         except Exception as exc:
             if _Debug:
                 print(exc, json_response)
             return {}
         for tr in tr_list:
-            result[tr['hash']] = {
-                'balance_diff': tr['balance_diff'] / 100000000.0,
-                'block_time': tr['block_time'],
-                'hash': tr['hash'],
+            result[tr['txid']] = {
+                'block_time': tr['status']['block_time'],
+                'hash': tr['txid'],
+                'outputs': [vout['value'] / 100000000.0 for vout in tr['vout']],
             }
     if _Debug:
-        print('fetch_transactions found %d' % len(result))
+        print('fetch_transactions found %d transactions' % len(result))
     return result
 
 
@@ -106,21 +106,25 @@ def verify_contract(contract_details, price_precision_matching_percent=1.0, pric
         return []
     matching_transactions = []
     for tr_info in btc_transactions.values():
-        balance_diff = tr_info['balance_diff']
         block_time = tr_info['block_time']
         block_local_time = datetime.datetime.fromtimestamp(0) + datetime.timedelta(seconds=block_time)
         diff_seconds = (block_local_time - contract_local_time).total_seconds()
         if _Debug:
-            print('    compare with %r %r %r' % (tr_info['hash'], block_local_time, balance_diff, ))
+            print('    compare with %r %r %r' % (tr_info['hash'], block_local_time, tr_info['outputs'], ))
         if time_matching_seconds_before:
             if diff_seconds < -time_matching_seconds_before:
                 continue
         if time_matching_seconds_after:
             if diff_seconds > time_matching_seconds_after:
                 continue
-        if (expected_balance_diff_min <= balance_diff and balance_diff <= expected_balance_diff_max) or (
-            expected_balance_fixed_diff_min <= balance_diff and balance_diff <= expected_balance_fixed_diff_max):
-            matching_transactions.append(tr_info)
+        for balance_diff in tr_info['outputs']:
+            if (
+                expected_balance_diff_min <= balance_diff and balance_diff <= expected_balance_diff_max
+            ) or (
+                expected_balance_fixed_diff_min <= balance_diff and balance_diff <= expected_balance_fixed_diff_max
+            ):
+                matching_transactions.append(tr_info)
+                break
     if _Debug:
         if len(matching_transactions) == 1:
             print('    SUCCESS', contract_local_time, contract_details['btc_amount'], expected_balance_diff_min, expected_balance_diff_max)
