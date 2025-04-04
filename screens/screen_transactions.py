@@ -340,6 +340,8 @@ class TransactionsScreen(screen.AppScreen):
             self.transactions_to_be_verified.append(transaction_details)
             if len(self.transactions_to_be_verified) >= 10:
                 break
+        if _Debug:
+            print('transactions to be verified: %d' % len(self.transactions_to_be_verified))
         Clock.schedule_once(self.verify_next_transaction, 0)
 
     def verify_next_transaction(self, *args):
