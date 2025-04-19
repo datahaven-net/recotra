@@ -71,16 +71,19 @@ def show_one_button_dialog(title, message, dialog_size=(dp(400), dp(200), ), but
         size_hint=(1, None, ),
         color=(1, 1, 1, 1, ),
         valign='top',
+        halign='center',
     )
     closeButton = Button(
         text=button_text,
         size_hint=(None, None, ),
         size=(dp(45), dp(20), ),
+        pos_hint={'right': 1},
     )
     layout.add_widget(popupLabel)
     layout.add_widget(closeButton)
     popup = Popup(
         title=title,
+        title_align='center',
         content=layout,
         size_hint=(None, None, ),
         size=dialog_size,
