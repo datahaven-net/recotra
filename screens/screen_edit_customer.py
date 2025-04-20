@@ -1,6 +1,7 @@
 import os
 import datetime
 import calendar
+import urllib.parse
 
 #------------------------------------------------------------------------------
 
@@ -336,6 +337,13 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_edit_customer_copy_location_button_clicked()
+
+            RoundedButton:
+                text: "Google customer"
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_google_customer_button_clicked()
+
 """ % (
     ','.join(["'%s'" % y for y in range(datetime.date.today().year, datetime.date.today().year-50, -1)]),
     ','.join(["'%s'" % m for m in months_names]),
@@ -360,6 +368,10 @@ class EditCustomerScreen(screen.AppScreen):
             self.ids.select_id_expire_year_button.text = year
             self.ids.select_id_expire_month_button.text = months_names[int(month) - 1]
             self.ids.select_id_expire_day_button.text = day
+        else:
+            self.ids.select_id_expire_year_button.text = '-'
+            self.ids.select_id_expire_month_button.text = '-'
+            self.ids.select_id_expire_day_button.text = '-'
         self.ids.customer_first_name_input.text = customer_info.get('first_name') or ''
         self.ids.customer_last_name_input.text = customer_info.get('last_name') or ''
         self.ids.customer_phone_input.text = customer_info.get('phone') or ''
@@ -491,6 +503,17 @@ class EditCustomerScreen(screen.AppScreen):
 
     def on_edit_customer_copy_location_button_clicked(self, *args):
         system.copy_xclip(local_storage.customer_dir(self.customer_id))
+
+    def on_google_customer_button_clicked(self, *args):
+        if self.ids.customer_first_name_input.text and self.ids.customer_last_name_input.text:
+            system.open_webbrowser('https://www.google.ru/search?q=%s+%s+Anguilla' % (
+                urllib.parse.quote_plus(self.ids.customer_first_name_input.text),
+                urllib.parse.quote_plus(self.ids.customer_last_name_input.text),
+            ))
+            system.open_webbrowser('https://www.google.ru/search?q=%s+%s+Facebook+Anguilla' % (
+                urllib.parse.quote_plus(self.ids.customer_first_name_input.text),
+                urllib.parse.quote_plus(self.ids.customer_last_name_input.text),
+            ))
 
     def on_select_id_expire_year_button_clicked(self, *args):
         year = self.ids.select_id_expire_year_button.text

@@ -420,10 +420,19 @@ class SellScreen(AppScreen):
 
     def on_start_transaction_button_clicked(self):
         if not self.selected_customer_info:
-            msg = 'Please select a customer first, click "Select customer" button.'
             dialogs.show_one_button_dialog(
                 title='Need to select a cusomer',
-                message=msg,
+                message='Please select a customer first, click "Select customer" button.',
+            )
+            return
+        if not self.selected_customer_info.get('id_expire_date'):
+            customer_info = local_storage.read_customer_info(self.selected_customer_id)
+            if customer_info:
+                self.selected_customer_info = customer_info
+        if not self.selected_customer_info.get('id_expire_date'):
+            dialogs.show_one_button_dialog(
+                title='Must provide expiration ID / Passport expiration date',
+                message='Please update customer profile with actual ID / Passport expiration date.',
             )
             return
         bought, sold = local_storage.calculate_customer_transactions_this_month(self.selected_customer_id)
