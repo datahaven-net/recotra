@@ -10,6 +10,10 @@ from storage import local_storage
 
 #------------------------------------------------------------------------------
 
+_Debug = False
+
+#------------------------------------------------------------------------------
+
 kv = """
 <CustomerRecord@SelectableRecord>:
 
@@ -166,6 +170,8 @@ class CustomersView(SelectableRecycleView):
         self.data_copy = list(self.data)
 
     def on_selection_applied(self, item, index, is_selected, prev_selected):
+        if _Debug:
+            print('on_selection_applied', item, index, is_selected, prev_selected)
         cust_screen =  App.get_running_app().root.ids.scr_manager.get_screen('customers_screen')
         cust_screen.customer_delete_button.disabled = not is_selected
         cust_screen.customer_edit_button.disabled = not is_selected
@@ -179,9 +185,17 @@ class CustomersScreen(AppScreen):
     sort_by = 'customer_id_down'
 
     def clear_selected_items(self):
+        if _Debug:
+            print('clear_selected_items')
         self.ids.customers_view.clear_selection()
         self.ids.customer_edit_button.disabled = True
         self.ids.customer_delete_button.disabled = True
+
+    def enable_action_buttons(self):
+        if _Debug:
+            print('enable_action_buttons')
+        self.ids.customer_edit_button.disabled = False
+        self.ids.customer_delete_button.disabled = False
 
     def populate_search_results(self):
         s = self.ids.search_input.text.lower()
@@ -210,6 +224,12 @@ class CustomersScreen(AppScreen):
         elif self.sort_by == 'last_name_up':
             new_data.sort(key=lambda d: d['last_name'].lower(), reverse=True)
         self.ids.customers_view.data = new_data
+
+    def on_enter(self, *args):
+        if _Debug:
+            print('on_enter', self.ids.customers_view.selected_item)
+        if self.ids.customers_view.selected_item:
+            self.enable_action_buttons()
 
     def on_leave(self, *args):
         self.clear_selected_items()

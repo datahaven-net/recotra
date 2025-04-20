@@ -122,6 +122,34 @@ kv = """
             size: self.size[0]-4, self.size[1]-4
             radius: [self.corner_radius,]
 
+
+<CompactSpinnerOption>:
+    markup: True
+    background_normal: ''
+    background_down: ''
+    background_disabled_normal: ''
+    background_color: .95,.95,.95,1
+    color: .5,.5,.5,1
+    corner_radius: 0
+
+
+<CompactSpinner>:
+    size_hint: (None, None)
+    width: dp(48)
+    height: dp(20)
+    sync_height: True
+    background_normal: ''
+    background_down: ''
+    background_disabled_normal: ''
+    background_color: 1,1,1,1
+    color: 0,0,0,1
+    corner_radius: 0
+    canvas.after:
+        Color:
+            rgba: (0, 0, 0, 1)
+        Line:
+            rectangle: (self.x-1, self.y-1, self.width+2, self.height+2) 
+            width: dp(1)
 """
 
 
@@ -139,3 +167,11 @@ class RoundedSpinnerOption(SpinnerOption):
 
 class RoundedSpinner(Spinner):
     option_cls = RoundedSpinnerOption
+
+
+class CompactSpinnerOption(SpinnerOption):
+    pass
+
+
+class CompactSpinner(Spinner):
+    option_cls = CompactSpinnerOption

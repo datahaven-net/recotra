@@ -44,8 +44,8 @@ class SelectableRecord(RecycleDataViewBehavior, StackLayout):
         prev_selected = self.selected
         if is_selected:
             rv.selected_item = self
-        else:
-            rv.selected_item = None
+        # else:
+            # rv.selected_item = None
         self.selected = is_selected
         rv.on_selection_applied(self, index, is_selected, prev_selected)
         return index
