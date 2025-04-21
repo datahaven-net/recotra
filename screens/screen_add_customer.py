@@ -236,7 +236,7 @@ kv = """
                         id: customer_address_input
                         text: ""
                         width: dp(250)
-                        height: dp(90)
+                        height: dp(60)
                         size_hint_x: None
                         size_hint_y: None
                         multiline: True
@@ -403,6 +403,8 @@ class AddCustomerScreen(screen.AppScreen):
             atm_id='',
             id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
             risk_rating=self.ids.select_risk_rating_button.text,
+            is_blocked=False,
+            text_notes='',
         ))
         self.new_customer_id = None
         self.camera_on = False

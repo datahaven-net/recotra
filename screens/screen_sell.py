@@ -425,14 +425,36 @@ class SellScreen(AppScreen):
                 message='Please select a customer first, click "Select customer" button.',
             )
             return
+        if self.selected_customer_info.get('is_blocked'):
+            dialogs.show_one_button_dialog(
+                title='Customer is currently flagged and restricted for any transactions.',
+                message=self.selected_customer_info.get('text_notes') or 'No additional information was provided.',
+            )
+            return
         if not self.selected_customer_info.get('id_expire_date'):
             customer_info = local_storage.read_customer_info(self.selected_customer_id)
             if customer_info:
                 self.selected_customer_info = customer_info
         if not self.selected_customer_info.get('id_expire_date'):
             dialogs.show_one_button_dialog(
-                title='Must provide expiration ID / Passport expiration date',
+                title='Must provide ID / Passport expiration date',
                 message='Please update customer profile with actual ID / Passport expiration date.',
+            )
+            return
+        try:
+            id_expire_date = datetime.date(*map(int, self.selected_customer_info.get('id_expire_date').split('-')))
+        except Exception as e:
+            if _Debug:
+                print('invalid id_expire_date %r: %r' % (e, self.selected_customer_info.get('id_expire_date'), ))
+            dialogs.show_one_button_dialog(
+                title='Invalid ID / Passport expiration date',
+                message='Please update customer profile with currect ID / Passport expiration date.',
+            )
+            return
+        if datetime.datetime.now().date() > id_expire_date:
+            dialogs.show_one_button_dialog(
+                title='Customer ID / Passport is expired',
+                message='The ID / Passport of the client whose details are currently stored in the database has expired:\n\n%s' % self.selected_customer_info.get('id_expire_date'),
             )
             return
         bought, sold = local_storage.calculate_customer_transactions_this_month(self.selected_customer_id)
