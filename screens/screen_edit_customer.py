@@ -302,6 +302,35 @@ kv = """
                         halign: "left"
                         text: "This month, bought BTC for a total of $0"
 
+                    Widget:
+                        size_hint_y: None
+                        height: dp(4)
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        height: dp(24)
+                        width: dp(340)
+
+                        Label:
+                            text_size: self.size
+                            size_hint: (None, None)
+                            width: dp(84)
+                            height: dp(24)
+                            halign: "left"
+                            text: "Risk rating: "
+
+                        CompactSpinner:
+                            id: select_risk_rating_button
+                            width: dp(72)
+                            text: 'low'
+                            values: 'low', 'medium', 'high'
+                            on_text: root.on_select_risk_rating_button_clicked()
+
+                        Widget:
+                            size_hint: 1, None
+                            height: dp(22)
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
@@ -387,6 +416,7 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.customer_passport_picture_filepath_label.text = local_storage.customer_passport_filepath(self.customer_id)
         self.ids.this_month_sold_usd.text = f'This month, sold BTC for a total of [b]${sold}[/b]'
         self.ids.this_month_bought_usd.text = f'This month, bought BTC for a total of [b]${bought}[/b]'
+        self.ids.select_risk_rating_button.text = customer_info.get('risk_rating') or 'low'
 
     def save_info(self):
         year = self.ids.select_id_expire_year_button.text
@@ -403,6 +433,7 @@ class EditCustomerScreen(screen.AppScreen):
             atm_id=self.ids.customer_atm_id_input.text,
             limit_transactions=self.ids.customer_limit_transactions_input.text,
             id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
+            risk_rating=self.ids.select_risk_rating_button.text,
         ))
 
     def on_enter(self, *args):
@@ -544,4 +575,7 @@ class EditCustomerScreen(screen.AppScreen):
             self.ids.select_id_expire_day_button.values = [str(d) for d in range(1, 31+1)]
 
     def on_select_id_expire_day_button_clicked(self, *args):
+        pass
+
+    def on_select_risk_rating_button_clicked(self, *args):
         pass
