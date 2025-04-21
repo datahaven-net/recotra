@@ -242,6 +242,35 @@ kv = """
                         multiline: True
                         write_tab: False
 
+                    Widget:
+                        size_hint_y: None
+                        height: dp(4)
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        height: dp(24)
+                        width: dp(340)
+
+                        Label:
+                            text_size: self.size
+                            size_hint: (None, None)
+                            width: dp(84)
+                            height: dp(24)
+                            halign: "left"
+                            text: "Risk rating: "
+
+                        CompactSpinner:
+                            id: select_risk_rating_button
+                            width: dp(72)
+                            text: 'low'
+                            values: 'low', 'medium', 'high'
+                            on_text: root.on_select_risk_rating_button_clicked()
+
+                        Widget:
+                            size_hint: 1, None
+                            height: dp(22)
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: None
@@ -286,6 +315,7 @@ class AddCustomerScreen(screen.AppScreen):
         self.ids.select_id_expire_year_button.text = '-'
         self.ids.select_id_expire_month_button.text = '-'
         self.ids.select_id_expire_day_button.text = '-'
+        self.ids.select_risk_rating_button.text = 'low'
 
     def on_enter(self, *args):
         # print('on_enter', args, self.new_customer_id, self.camera_on)
@@ -372,6 +402,7 @@ class AddCustomerScreen(screen.AppScreen):
             address=self.ids.customer_address_input.text,
             atm_id='',
             id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
+            risk_rating=self.ids.select_risk_rating_button.text,
         ))
         self.new_customer_id = None
         self.camera_on = False
@@ -419,3 +450,6 @@ class AddCustomerScreen(screen.AppScreen):
                 urllib.parse.quote_plus(self.ids.customer_first_name_input.text),
                 urllib.parse.quote_plus(self.ids.customer_last_name_input.text),
             ))
+
+    def on_select_risk_rating_button_clicked(self, *args):
+        pass
