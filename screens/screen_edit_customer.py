@@ -251,7 +251,7 @@ kv = """
                         id: customer_address_input
                         text: ""
                         width: dp(340)
-                        height: dp(90)
+                        height: dp(60)
                         size_hint_x: None
                         size_hint_y: None
 
@@ -318,6 +318,7 @@ kv = """
                             width: dp(84)
                             height: dp(24)
                             halign: "left"
+                            valign: "middle"
                             text: "Risk rating: "
 
                         CompactSpinner:
@@ -330,6 +331,37 @@ kv = """
                         Widget:
                             size_hint: 1, None
                             height: dp(22)
+
+                        Label:
+                            text_size: self.size
+                            size_hint: (None, None)
+                            width: dp(64)
+                            height: dp(24)
+                            halign: "left"
+                            valign: "middle"
+                            text: "Blocked: "
+
+                        CheckBox:
+                            id: customer_blocked_check_box
+                            color: 0,0,0,1
+                            size_hint: (None, None)
+                            width: dp(24)
+                            height: dp(24)
+
+                    Label:
+                        text_size: self.size
+                        height: dp(30)
+                        halign: "left"
+                        valign: "bottom"
+                        text: "Notes:"
+                    TextInput:
+                        id: text_notes_input
+                        text: ""
+                        width: dp(340)
+                        height: dp(60)
+                        size_hint_x: None
+                        size_hint_y: None
+
 
         BoxLayout:
             orientation: 'horizontal'
@@ -417,6 +449,8 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.this_month_sold_usd.text = f'This month, sold BTC for a total of [b]${sold}[/b]'
         self.ids.this_month_bought_usd.text = f'This month, bought BTC for a total of [b]${bought}[/b]'
         self.ids.select_risk_rating_button.text = customer_info.get('risk_rating') or 'low'
+        self.ids.customer_blocked_check_box.active = customer_info.get('is_blocked') or False
+        self.ids.text_notes_input.text = customer_info.get('text_notes') or ''
 
     def save_info(self):
         year = self.ids.select_id_expire_year_button.text
@@ -434,6 +468,8 @@ class EditCustomerScreen(screen.AppScreen):
             limit_transactions=self.ids.customer_limit_transactions_input.text,
             id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
             risk_rating=self.ids.select_risk_rating_button.text,
+            is_blocked=self.ids.customer_blocked_check_box.active,
+            text_notes=self.ids.text_notes_input.text,
         ))
 
     def on_enter(self, *args):
