@@ -30,7 +30,7 @@ def build_transactions_report(selected_transactions, csv_filepath=None, delimite
         csv_filepath = tempfile.mktemp(suffix='.csv', prefix='transactions-')
     with open(csv_filepath,'w') as fou:
         dw = csv.DictWriter(fou, delimiter=delimiter, fieldnames=[
-            'Customer', 'Transaction type', 'Amount BTC', 'Amount US $', 'BTC price', 'Date', 'Receiving Address',
+            'Transaction ID', 'Customer', 'Transaction type', 'Amount BTC', 'Amount US $', 'BTC price', 'Date', 'Receiving Address',
         ])
         dw.writeheader()
         for t in selected_transactions:
@@ -39,6 +39,7 @@ def build_transactions_report(selected_transactions, csv_filepath=None, delimite
             btc_change = -float(t['btc_amount']) if t['contract_type'] == 'sales' else float(t['btc_amount'])
             usd_change = float(t['usd_amount']) if t['contract_type'] == 'sales' else -float(t['usd_amount'])
             dw.writerow({
+                'Transaction ID': f"{t['transaction_id']}",
                 'Customer': f"{customer_name}".replace(delimiter, ''),
                 'Transaction type': tr_type.replace(delimiter, ''),
                 'Amount BTC': f"{btc_change}".replace(delimiter, ''),

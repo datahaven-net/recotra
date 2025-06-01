@@ -19,6 +19,9 @@ def init():
 def home_dir():
     return os.path.expanduser('~/.recotra')
 
+def attachments_dir():
+    return os.path.join(home_dir(), 'attachments')
+
 def customers_dir():
     return os.path.join(home_dir(), 'customers')
 
@@ -57,6 +60,11 @@ def transaction_filepath(transaction_id):
 
 #------------------------------------------------------------------------------
 
+def transaction_attachments_dir_path(transaction_id):
+    return os.path.join(attachments_dir(), 'transaction'+str(transaction_id))
+
+#------------------------------------------------------------------------------
+
 def settings_filepath():
     return os.path.join(home_dir(), 'settings.json')
 
@@ -65,6 +73,8 @@ def settings_filepath():
 def create_home_dir():
     if not os.path.isdir(home_dir()):
         os.mkdir(home_dir())
+    if not os.path.isdir(attachments_dir()):
+        os.mkdir(attachments_dir())
     if not os.path.isdir(transactions_dir()):
         os.mkdir(transactions_dir())
     if not os.path.isdir(customers_dir()):

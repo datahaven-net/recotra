@@ -382,6 +382,7 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
     <h3>{selected_month} {selected_year}</h3>
     <table border=1 cellspacing=0 cellpadding=5 >
         <tr>
+            <th>Transaction ID</th>
             <th>Customer</th>
             <th>Transaction type</th>
             <th>Amount BTC</th>
@@ -450,6 +451,7 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
 
         table_content += f'''
         <tr>
+            <td nowrap>{t['transaction_id']}</td>
             <td nowrap>{customer_name}</td>
             <td nowrap>{tr_type}</td>
             <td nowrap>{btc_change}</td>

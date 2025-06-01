@@ -5,6 +5,7 @@ Kivy-Garden==0.1.5
 opencv-python==4.8.0.74
 pdfkit==1.0.0
 Pillow==9.5.0
+plyer==2.1.0
 Pygments==2.15.1
 pyzbar==0.1.9
 qrcode==7.4.2

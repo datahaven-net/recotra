@@ -1,13 +1,18 @@
+import os
 import datetime
+import tempfile
+import shutil
 
 #------------------------------------------------------------------------------
 
 from kivy.clock import Clock
+from kivy.clock import mainthread
 
 #------------------------------------------------------------------------------
 
 from lib import coinmarketcap_client
 from lib import btc_util
+from lib import system
 
 from components.screen import AppScreen
 from components import dialogs
@@ -62,6 +67,13 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_scan_customer_id_button_clicked()
+
+            RoundedButton:
+                id: attach_file_button
+                text: "attach a file"
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_attach_file_button_clicked()
 
             RoundedButton:
                 text: "clear"
@@ -182,6 +194,10 @@ class BuyScreen(AppScreen):
     populated_receive_address_qr_scan = None
     populated_customer_id_qr_scan = None
 
+    def __init__(self, **kw):
+        super(BuyScreen, self).__init__(**kw)
+        self.attachments = []
+
     def clean_input_fields(self):
         if _Debug:
             print('clean_input_fields')
@@ -194,6 +210,7 @@ class BuyScreen(AppScreen):
         self.ids.usd_amount_input.text = '0.0'
         self.ids.btc_amount_input.text = '0.0'
         self.ids.receive_address_input.text = ''
+        self.attachments = []
 
     def populate_next_btc_address(self):
         if self.ids.receive_address_input.text:
@@ -421,7 +438,61 @@ class BuyScreen(AppScreen):
 
     #------------------------------------------------------------------------------
 
+    @mainthread
+    def on_attach_file_button_clicked(self, *args):
+        if _Debug:
+            print('BuyScreen.on_attach_file_button_clicked', args)
+        if system.is_osx():
+            from lib import filechooser_macosx
+            fc = filechooser_macosx.MacFileChooser(
+                title="Upload a file",
+                preview=True,
+                show_hidden=False,
+                on_selection=self.on_upload_file_selected,
+            )
+            fc.run()
+        else:
+            from plyer import filechooser  # @UnresolvedImport
+            if system.is_windows():
+                self._latest_cwd = os.getcwd()
+            filechooser.open_file(
+                title="Upload a file",
+                preview=True,
+                show_hidden=False,
+                on_selection=self.on_upload_file_selected,
+            )
+
+    def on_upload_file_selected(self, *args, **kwargs):
+        if _Debug:
+            print('BuyScreen.on_upload_file_selected', args, kwargs)
+        if system.is_windows():
+            try:
+                os.chdir(self._latest_cwd)
+            except:
+                pass
+        file_path = args[0][0]
+        file_name = os.path.basename(file_path)
+        if not os.path.isfile(file_path):
+            if _Debug:
+                print('BuyScreen.on_upload_file_selected file do not exist', file_path)
+            return
+        attachment_temp_file_path = tempfile.mktemp(
+            suffix='_' + file_name,
+            prefix='attachment_',
+            dir=local_storage.temp_dir(),
+        )
+        try:
+            shutil.copy(file_path, attachment_temp_file_path)
+        except Exception as exc:
+            if _Debug:
+                print('BuyScreen.on_upload_file_selected :', exc)
+            return
+        self.attachments.append(attachment_temp_file_path)
+
+    #------------------------------------------------------------------------------
+
     def on_start_transaction_button_clicked(self):
+        cur_settings = local_storage.read_settings()
         if not self.selected_customer_info:
             dialogs.show_one_button_dialog(
                 title='Need to select a cusomer',
@@ -457,15 +528,15 @@ class BuyScreen(AppScreen):
         if datetime.datetime.now().date() > id_expire_date:
             dialogs.show_one_button_dialog(
                 title='Customer ID / Passport is expired',
-                message='The ID / Passport of the client whose details are currently stored in the database has expired:\m\n%s' % self.selected_customer_info.get('id_expire_date'),
+                message='The ID / Passport of the client whose details are currently stored in the database has expired:\n\n%s' % self.selected_customer_info.get('id_expire_date'),
             )
             return
         bought, sold = local_storage.calculate_customer_transactions_this_month(self.selected_customer_id)
         if _Debug:
             print('sold: %r   bought: %r' % (sold, bought, ))
+        usd_amount = float(self.ids.usd_amount_input.text)
         limit_transactions = float(self.selected_customer_info.get('limit_transactions', '0') or '0')
         if limit_transactions:
-            usd_amount = float(self.ids.usd_amount_input.text)
             if sold + usd_amount > limit_transactions:
                 msg = 'Customer {} {} is only authorized for ${} per month.\n'.format(
                     self.ids.person_first_name_input.text,
@@ -478,8 +549,15 @@ class BuyScreen(AppScreen):
                     message=msg,
                 )
                 return
+        source_of_funds_limit = float(cur_settings.get('source_of_funds_limit', '5000'))
+        if usd_amount >= source_of_funds_limit:
+            if not self.attachments:
+                dialogs.show_one_button_dialog(
+                    title='Source of funds is required',
+                    message='For contracts more than $%s customers must provide documents to prove their source of funds. Click "attach a file" button and select scanned document file location.' % int(source_of_funds_limit),
+                )
+                return
         t_now = datetime.datetime.now()
-        cur_settings = local_storage.read_settings()
         usd_btc_commission_percent = float(cur_settings.get('usd_btc_commission_percent', '0.0'))
         btc_price_current = float(self.ids.btc_price_input.text)
         factor = (100.0 + usd_btc_commission_percent) / 100.0
@@ -520,6 +598,17 @@ class BuyScreen(AppScreen):
         ))
         new_transaction_details = local_storage.create_new_transaction(transaction_details)
         local_storage.write_transaction(new_transaction_details['transaction_id'], new_transaction_details)
+        attachments_dir_path = local_storage.transaction_attachments_dir_path(new_transaction_details['transaction_id'])
+        if not os.path.isdir(attachments_dir_path):
+            os.mkdir(attachments_dir_path)
+        for attachment in self.attachments:
+            attachment_file_name = os.path.basename(attachment)
+            destination_path = os.path.join(attachments_dir_path, attachment_file_name)
+            try:
+                os.rename(attachment, destination_path)
+            except Exception as exc:
+                if _Debug:
+                    print('was not able to rename file %r to %r : %r' % (attachment, destination_path, exc))
         if not is_lightning:
             cur_settings['recent_btc_address'] = self.ids.receive_address_input.text
         local_storage.write_settings(cur_settings)

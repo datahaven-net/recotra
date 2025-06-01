@@ -4,6 +4,48 @@ import subprocess
 
 #------------------------------------------------------------------------------
 
+from kivy import utils  # @UnresolvedImport
+
+#------------------------------------------------------------------------------
+
+_LatestState = None
+
+#------------------------------------------------------------------------------
+
+def current_platform():
+    global _LatestState
+    if _LatestState:
+        return _LatestState
+    _LatestState = str('' + utils.platform)
+    return _LatestState
+
+#------------------------------------------------------------------------------
+
+def is_linux():
+    return current_platform() == 'linux'
+
+
+def is_windows():
+    return current_platform() == 'win'
+
+
+def is_android():
+    return current_platform() == 'android'
+
+
+def is_ios():
+    return current_platform() == 'ios'
+
+
+def is_osx():
+    return current_platform() == 'macosx'
+
+
+def is_mobile():
+    return is_android() or is_ios()
+
+#------------------------------------------------------------------------------
+
 def open_system_explorer(path, as_folder=True):
     """
     Simple and portable way to show location or file on local disk to the user.
