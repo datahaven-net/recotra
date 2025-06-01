@@ -271,7 +271,8 @@ class TransactionsScreen(screen.AppScreen):
         selected_transactions = []
         for t in local_storage.load_transactions_list():
             if t.get('blockchain_status') != 'confirmed':
-                continue
+                if not t.get('void'):
+                    continue
             if selected_year != '-' and not t['date'].endswith(selected_year):
                 continue
             if selected_month != '-' and not t['date'].startswith(selected_month[:3]):
