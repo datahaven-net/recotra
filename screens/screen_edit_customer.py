@@ -406,7 +406,7 @@ kv = """
                 on_release: root.on_google_customer_button_clicked()
 
 """ % (
-    ','.join(["'%s'" % y for y in range(datetime.date.today().year, datetime.date.today().year-50, -1)]),
+    ','.join(["'%s'" % y for y in range(datetime.date.today().year+25, datetime.date.today().year-5, -1)]),
     ','.join(["'%s'" % m for m in months_names]),
     ','.join(["'%s'" % d for d in range(1, 31+1)]),
 )

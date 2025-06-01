@@ -239,6 +239,20 @@ kv = """
                         text: ""
                         on_text: root.on_field_modified('qr_code_size')
 
+                    OptionHeaderLabel:
+                        text: "regulations"
+                    Widget:
+                        size: 1, 1
+
+                    OptionFieldLabel:
+                        text: "source of funds is required above $ US:"
+                    OptionFieldInput:
+                        id: source_of_funds_limit
+                        hint_text: '5000'
+                        text: ""
+                        on_text: root.on_field_modified('source_of_funds_limit')
+
+
                 Widget:
                     size: 1, 1
                     size_hint: 0.5, 1
@@ -303,6 +317,7 @@ class SettingsScreen(AppScreen):
         self.ids.time_matching_seconds_after.text = cur_settings.get('time_matching_seconds_after', '0')
         self.ids.contract_expiration_period_days.text = cur_settings.get('contract_expiration_period_days', '0')
         self.ids.qr_code_size.text = cur_settings.get('qr_code_size', '600')
+        self.ids.source_of_funds_limit.text = cur_settings.get('source_of_funds_limit', '5000')
         self.ids.save_settings_button.disabled = True
 
     def on_enter(self, *args):
@@ -330,5 +345,6 @@ class SettingsScreen(AppScreen):
         cur_settings['time_matching_seconds_after'] = self.ids.time_matching_seconds_after.text
         cur_settings['contract_expiration_period_days'] = self.ids.contract_expiration_period_days.text
         cur_settings['qr_code_size'] = self.ids.qr_code_size.text
+        cur_settings['source_of_funds_limit'] = self.ids.source_of_funds_limit.text
         local_storage.write_settings(cur_settings)
         self.ids.save_settings_button.disabled = True

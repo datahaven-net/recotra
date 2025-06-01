@@ -194,6 +194,20 @@ kv = """
                     id: blockchain_status_input
                     text: ''
 
+                TransactionFieldHeader:
+                    text: "[size=20]Attachments[/size]"
+                Widget:
+                    size: 1, 1
+
+                TransactionFieldLabel:
+                    text: ''
+                TransactionFieldValue:
+                    id: attachments_input
+                    text_size: self.width, None
+                    size_hint: 1, None
+                    height: self.texture_size[1]
+                    text: ''
+
         LeftAlignLabel:
             id: verify_status_label
             size_hint: 1, None
@@ -212,6 +226,16 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_pdf_file_button_clicked()
+
+            Widget:
+                size_hint: None, 1
+                width: dp(20)
+
+            RoundedButton:
+                text: 'print attachments'
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_attachments_button_clicked()
 
             Widget:
                 size_hint: None, 1
@@ -302,6 +326,13 @@ class OneTransactionScreen(AppScreen):
         self.ids.started_date_time_input.text = '{} at {}'.format(tran_details['date'] or '', tran_details['time'] or '')
         self.ids.verify_button.disabled = tran_details.get('blockchain_status', 'unconfirmed') == 'confirmed'
 
+        attachments_dir_path = local_storage.transaction_attachments_dir_path(self.transaction_id)
+        attachments_text_list = []
+        if os.path.isdir(attachments_dir_path):
+            for attachment in os.listdir(attachments_dir_path):
+                attachments_text_list.append(attachment)
+        self.ids.attachments_input.text = ', '.join(attachments_text_list)
+
     def on_enter(self, *args):
         self.ids.verify_status_label.text = ''
         if self.transaction_id is None:
@@ -319,6 +350,12 @@ class OneTransactionScreen(AppScreen):
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
             system.open_system_explorer(pdf_contract['filename'], as_folder=False)
+
+    def on_attachments_button_clicked(self):
+        attachments_dir_path = local_storage.transaction_attachments_dir_path(self.transaction_id)
+        if os.path.isdir(attachments_dir_path):
+            for attachment in os.listdir(attachments_dir_path):
+                system.open_system_explorer(os.path.join(attachments_dir_path, attachment), as_folder=False)
 
     def on_confirm_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)
