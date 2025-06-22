@@ -349,13 +349,13 @@ class OneTransactionScreen(AppScreen):
                 disclosure_statement=cur_settings.get('disclosure_statement') or '',
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
-            system.open_system_explorer(pdf_contract['filename'], as_folder=False)
+            system.open_path_in_os(pdf_contract['filename'])
 
     def on_attachments_button_clicked(self):
         attachments_dir_path = local_storage.transaction_attachments_dir_path(self.transaction_id)
         if os.path.isdir(attachments_dir_path):
             for attachment in os.listdir(attachments_dir_path):
-                system.open_system_explorer(os.path.join(attachments_dir_path, attachment), as_folder=False)
+                system.open_system_explorer(os.path.join(attachments_dir_path, attachment), as_folder=True)
 
     def on_confirm_button_clicked(self):
         transaction_details = local_storage.read_transaction(self.transaction_id)

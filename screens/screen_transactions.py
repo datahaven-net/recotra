@@ -231,7 +231,14 @@ class TransactionsView(list_view.SelectableRecycleView):
         else:
             self.parent.parent.ids.disable_transaction_button.disabled = True
 
-    def populate(self):
+    def populate(self, selected_customer_id=None):
+        tr_list = []
+        for t in local_storage.load_transactions_list():
+            if not selected_customer_id:
+                tr_list.append(t)
+                continue
+            if str(selected_customer_id) == str(t['buyer'].get('customer_id') or '') or str(selected_customer_id) == str(t['seller'].get('customer_id') or ''):
+                tr_list.append(t)
         self.data = [{
             'tr_id': str(t['transaction_id']),
             'tr_type': 'sold',
@@ -244,8 +251,6 @@ class TransactionsView(list_view.SelectableRecycleView):
             'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
             'date': t['date'],
             'from_to': '{} -> {}'.format(
-                # (t['seller']['btc_address'][:35] + '...') if t.get('lightning') else t['seller']['btc_address'],
-                # (t['buyer']['btc_address'][:35] + '...') if t.get('lightning') else t['buyer']['btc_address'],
                 t['seller']['btc_address'][:4] + '...' + t['seller']['btc_address'][-4:],
                 t['buyer']['btc_address'][:4] + '...' + t['buyer']['btc_address'][-4:],
             ),
@@ -254,17 +259,21 @@ class TransactionsView(list_view.SelectableRecycleView):
                 'void' if t.get('void') else (t.get('blockchain_status', 'unconfirmed')),
             ),
             'void': '1' if t.get('void') else '',
-        } for t in local_storage.load_transactions_list()]
+        } for t in tr_list]
 
 #------------------------------------------------------------------------------
 
 class TransactionsScreen(screen.AppScreen):
 
     transactions_to_be_verified = ListProperty([])
-    verification_progress = 0 
+    verification_progress = 0
+    selected_customer_id = None
 
     def on_enter(self, *args):
-        self.ids.transactions_view.populate()
+        self.ids.transactions_view.populate(selected_customer_id=self.selected_customer_id)
+
+    def on_leave(self, *args):
+        self.selected_customer_id = None
 
     def on_view_transaction_button_clicked(self):
         self.scr('one_transaction_screen').transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
@@ -298,7 +307,7 @@ class TransactionsScreen(screen.AppScreen):
         if tr:
             tr['void'] = True
             local_storage.write_transaction(transaction_id, tr)
-            self.ids.transactions_view.populate()
+            self.ids.transactions_view.populate(selected_customer_id=self.selected_customer_id)
 
     def on_print_pdf_transactions_button_clicked(self):
         selected_month = self.ids.select_month_button.text
@@ -307,6 +316,9 @@ class TransactionsScreen(screen.AppScreen):
             return
         selected_transactions = []
         for t in local_storage.load_transactions_list():
+            if self.selected_customer_id:
+                if str(self.selected_customer_id) != str(t['buyer'].get('customer_id') or '') and str(self.selected_customer_id) != str(t['seller'].get('customer_id') or ''):
+                    continue
             if t.get('blockchain_status') != 'confirmed':
                 if not t.get('void'):
                     continue
@@ -327,7 +339,7 @@ class TransactionsScreen(screen.AppScreen):
             selected_year=selected_year,
             pdf_filepath=os.path.join(local_storage.reports_dir(), output_filename),
         )
-        system.open_system_explorer(pdf_report['filename'], as_folder=True)
+        system.open_path_in_os(pdf_report['filename'])
 
     def on_print_csv_transactions_button_clicked(self):
         selected_month = self.ids.select_month_button.text
@@ -336,6 +348,9 @@ class TransactionsScreen(screen.AppScreen):
             return
         selected_transactions = []
         for t in local_storage.load_transactions_list():
+            if self.selected_customer_id:
+                if str(self.selected_customer_id) != str(t['buyer'].get('customer_id') or '') and str(self.selected_customer_id) != str(t['seller'].get('customer_id') or ''):
+                    continue
             if t.get('blockchain_status') != 'confirmed':
                 continue
             if selected_year != '-' and not t['date'].endswith(selected_year):
@@ -353,7 +368,7 @@ class TransactionsScreen(screen.AppScreen):
             selected_transactions=selected_transactions,
             csv_filepath=os.path.join(local_storage.reports_dir(), output_filename),
         )
-        system.open_system_explorer(csv_report_filename, as_folder=True)
+        system.open_path_in_os(csv_report_filename)
 
     def on_verfy_transactions_button_clicked(self):
         cur_settings = local_storage.read_settings()
@@ -363,19 +378,22 @@ class TransactionsScreen(screen.AppScreen):
             contract_expiration_period_days = 0
         self.ids.verify_contracts_button.disabled = True
         self.verification_progress = 0
-        for transaction_details in local_storage.load_transactions_list():
-            if transaction_details.get('blockchain_status') == 'confirmed':
+        for t in local_storage.load_transactions_list():
+            if self.selected_customer_id:
+                if str(self.selected_customer_id) != str(t['buyer'].get('customer_id') or '') and str(self.selected_customer_id) != str(t['seller'].get('customer_id') or ''):
+                    continue
+            if t.get('blockchain_status') == 'confirmed':
                 continue
-            if transaction_details.get('void'):
+            if t.get('void'):
                 continue
             if contract_expiration_period_days:
                 contract_local_time = datetime.datetime.strptime(
-                    '{} {}'.format(transaction_details['date'], transaction_details['time']),
+                    '{} {}'.format(t['date'], t['time']),
                     '%b %d %Y %I:%M %p')
                 t_now = datetime.datetime.now()
                 if (t_now - contract_local_time).days > contract_expiration_period_days:
                     continue
-            self.transactions_to_be_verified.append(transaction_details)
+            self.transactions_to_be_verified.append(t)
             if len(self.transactions_to_be_verified) >= 10:
                 break
         if _Debug:
