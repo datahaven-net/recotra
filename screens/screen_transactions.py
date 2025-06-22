@@ -25,7 +25,7 @@ _Debug = False
 #------------------------------------------------------------------------------
 
 kv = """
-<TransactionRecord@SelectableRecord>:
+<TransactionRecord>:
 
     canvas.before:
         Color:
@@ -52,69 +52,71 @@ kv = """
     Label:
         id: tr_id
         text: root.tr_id
-        size_hint: None, 0.36
+        size_hint: None, 0.35
         width: dp(40)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: seller
-        text: root.seller
+        text: '[color=#0000aa][ref=transaction_'+root.tr_id+']<'+root.seller+'>[/ref][/color]'
         markup: True
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        bold: True
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
+        on_ref_press: root.on_seller_text_ref_pressed(*args)
     Label:
         id: tr_type
         text: root.tr_type
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: amount_btc
         text: root.amount_btc
         markup: True
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: buyer
-        text: root.buyer
+        text: '[color=#0000aa][ref=transaction_'+root.tr_id+']<'+root.buyer+'>[/ref][/color]'
+        markup: True
         bold: True
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
+        on_ref_press: root.on_buyer_text_ref_pressed(*args)
     Label:
         id: price_btc
         text: root.price_btc
         markup: True
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: amount_usd
         text: root.amount_usd
         markup: True
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: date
         text: root.date
-        size_hint: None, 0.36
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: from_to
         text: root.from_to
-        font_name: 'DejaVuSans'
-        font_size: sp(12)
-        size_hint: None, 0.3
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
     Label:
         id: blockchain_status
         text: root.blockchain_status
-        size_hint: None, 0.3
-        width: self.texture_size[0] + dp(10)
+        size_hint: None, 0.35
+        width: self.texture_size[0] + dp(5)
         color: (0,0,0,.5) if root.void == '1' else (0,0,0,1)
 
 
@@ -205,6 +207,16 @@ kv = """
 
 #------------------------------------------------------------------------------
 
+class TransactionRecord(list_view.SelectableRecord):
+
+    def on_seller_text_ref_pressed(self, *args):
+        self.parent.parent.parent.parent.on_seller_text_ref_pressed(args[1])
+
+    def on_buyer_text_ref_pressed(self, *args):
+        self.parent.parent.parent.parent.on_buyer_text_ref_pressed(args[1])
+
+#------------------------------------------------------------------------------
+
 class TransactionsView(list_view.SelectableRecycleView):
 
     def __init__(self, **kwargs):
@@ -224,14 +236,18 @@ class TransactionsView(list_view.SelectableRecycleView):
             'tr_id': str(t['transaction_id']),
             'tr_type': 'sold',
             'buyer': '[b]{} {}[/b]'.format(t['buyer']['first_name'], t['buyer']['last_name']),
+            'buyer_id': t['buyer'].get('customer_id') or '',
             'amount_btc': '[b]{}[/b] BTC to'.format(t['btc_amount']),
             'seller': '[b]{} {}[/b]'.format(t['seller']['first_name'], t['seller']['last_name']),
+            'seller_id': t['seller'].get('customer_id') or '',
             'price_btc': 'at [b]{}[/b] $/BTC'.format(t['btc_price']),
             'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
             'date': t['date'],
             'from_to': '{} -> {}'.format(
-                (t['seller']['btc_address'][:35] + '...') if t.get('lightning') else t['seller']['btc_address'],
-                (t['buyer']['btc_address'][:35] + '...') if t.get('lightning') else t['buyer']['btc_address'],
+                # (t['seller']['btc_address'][:35] + '...') if t.get('lightning') else t['seller']['btc_address'],
+                # (t['buyer']['btc_address'][:35] + '...') if t.get('lightning') else t['buyer']['btc_address'],
+                t['seller']['btc_address'][:4] + '...' + t['seller']['btc_address'][-4:],
+                t['buyer']['btc_address'][:4] + '...' + t['buyer']['btc_address'][-4:],
             ),
             'blockchain_status': '[color={}][{}][/color]'.format(
                 '#d07050' if t.get('void') else ('#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060'),
@@ -254,14 +270,35 @@ class TransactionsScreen(screen.AppScreen):
         self.scr('one_transaction_screen').transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
         self.scr_manager().current = 'one_transaction_screen'
 
+    def on_seller_text_ref_pressed(self, *args):
+        if _Debug:
+            print('TransactionsScreen.on_seller_text_ref_pressed', args)
+        transaction_id = args[0].replace('transaction_', '')
+        tr = local_storage.read_transaction(transaction_id)
+        if tr:
+            customer_id = (tr.get('seller') or {}).get('customer_id') or ''
+            if customer_id:
+                self.scr('edit_customer_screen').customer_id = customer_id
+                self.scr_manager().current = 'edit_customer_screen'
+
+    def on_buyer_text_ref_pressed(self, *args):
+        if _Debug:
+            print('TransactionsScreen.on_buyer_text_ref_pressed', args)
+        transaction_id = args[0].replace('transaction_', '')
+        tr = local_storage.read_transaction(transaction_id)
+        if tr:
+            customer_id = (tr.get('buyer') or {}).get('customer_id') or ''
+            if customer_id:
+                self.scr('edit_customer_screen').customer_id = customer_id
+                self.scr_manager().current = 'edit_customer_screen'
+        
     def on_disable_transaction_button_clicked(self):
         transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
         tr = local_storage.read_transaction(transaction_id)
-        if not tr:
-            return
-        tr['void'] = True
-        local_storage.write_transaction(transaction_id, tr)
-        self.ids.transactions_view.populate()
+        if tr:
+            tr['void'] = True
+            local_storage.write_transaction(transaction_id, tr)
+            self.ids.transactions_view.populate()
 
     def on_print_pdf_transactions_button_clicked(self):
         selected_month = self.ids.select_month_button.text
