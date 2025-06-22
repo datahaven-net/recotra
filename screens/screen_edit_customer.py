@@ -376,6 +376,12 @@ kv = """
                 on_release: root.on_edit_customer_save_button_clicked()
 
             RoundedButton:
+                text: "transactions"
+                width: self.texture_size[0] + dp(20)
+                size_hint_x: None
+                on_release: root.on_customer_transactions_button_clicked()
+
+            RoundedButton:
                 text: "scan ATM ID"
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
@@ -392,12 +398,6 @@ kv = """
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
                 on_release: root.on_edit_customer_open_folder_button_clicked()
-
-            RoundedButton:
-                text: "copy location"
-                width: self.texture_size[0] + dp(20)
-                size_hint_x: None
-                on_release: root.on_edit_customer_copy_location_button_clicked()
 
             RoundedButton:
                 text: "Google customer"
@@ -533,6 +533,10 @@ class EditCustomerScreen(screen.AppScreen):
         self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
         self.scr_manager().current = 'customers_screen'
 
+    def on_customer_transactions_button_clicked(self, *args):
+        self.scr_manager().get_screen('transactions_screen').selected_customer_id = self.customer_id
+        self.scr_manager().current = 'transactions_screen'
+
     def on_edit_customer_scan_atm_id_button_clicked(self, *args):
         self.scan_atm_id_screen = CameraScanQRScreen(
             name='camera_scan_atm_id_screen',
@@ -563,7 +567,7 @@ class EditCustomerScreen(screen.AppScreen):
             customer_photo_filepath=local_storage.customer_photo_filepath(self.customer_id),
             pdf_filepath=os.path.join(local_storage.customer_dir(self.customer_id), 'id_card.pdf'),
         )
-        system.open_system_explorer(id_card['filename'], as_folder=False)
+        system.open_path_in_os(id_card['filename'])
 
     def on_edit_customer_open_folder_button_clicked(self, *args):
         system.open_system_explorer(local_storage.customer_dir(self.customer_id))

@@ -8,6 +8,10 @@ from kivy import utils  # @UnresolvedImport
 
 #------------------------------------------------------------------------------
 
+_Debug = False
+
+#------------------------------------------------------------------------------
+
 _LatestState = None
 
 #------------------------------------------------------------------------------
@@ -43,6 +47,39 @@ def is_osx():
 
 def is_mobile():
     return is_android() or is_ios()
+
+#------------------------------------------------------------------------------
+
+
+def open_path_in_os(filepath):
+    """
+    A portable way to open location or file on local disk with a default OS method.
+    """
+    try:
+        if is_windows():
+            if os.path.isfile(filepath):
+                subprocess.Popen(['explorer', '/select,', '%s' % (filepath.replace('/', '\\'))])
+                return True
+            subprocess.Popen(['explorer', '%s' % (filepath.replace('/', '\\'))])
+            return True
+        elif is_linux():
+            subprocess.Popen(['xdg-open', filepath])
+            return True
+        elif is_osx():
+            subprocess.Popen(['open', '-R', filepath])
+            return True
+    except Exception as exc:
+        if _Debug:
+            print('system.open_path_in_os %r : %r' % (filepath, exc, ))
+        return False
+    try:
+        import webbrowser
+        webbrowser.open(filepath)
+        return True
+    except Exception as e:
+        if _Debug:
+            print('file %r failed to open with default OS method: %r' % (filepath, e, ))
+    return False
 
 #------------------------------------------------------------------------------
 

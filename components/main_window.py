@@ -95,7 +95,7 @@ kv = """
 
             RoundedButton:
                 text: 'Transactions'
-                on_press: scr_manager.current = 'transactions_screen'
+                on_press: root.on_transactions_menu_button_clicked()
                 width: self.texture_size[0] + dp(20)
                 size_hint_x: None
 
@@ -124,4 +124,10 @@ class ScreenManagement(ScreenManager):
 #------------------------------------------------------------------------------
 
 class MainWindow(FloatLayout):
-    pass
+
+    def on_transactions_menu_button_clicked(self, *args):
+        self.ids.scr_manager.get_screen('transactions_screen').selected_customer_id = None
+        if self.ids.scr_manager.current == 'transactions_screen':
+            self.ids.scr_manager.get_screen('transactions_screen').ids.transactions_view.populate()
+        else:
+            self.ids.scr_manager.current = 'transactions_screen'
