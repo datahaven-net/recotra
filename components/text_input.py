@@ -1,9 +1,36 @@
 from kivy.uix.textinput import TextInput
-from kivy.properties import StringProperty  # @UnresolvedImport
+from kivy.properties import NumericProperty, StringProperty  # @UnresolvedImport
 
 #------------------------------------------------------------------------------
 
 DEFAULT_PADDING = 10
+
+#------------------------------------------------------------------------------
+
+kv = """
+<DynamicHeightTextInput>:
+    size_hint_y: None
+    height: self.line_height * 1 + self.padding[1] + self.padding[3] + self.extra_padding
+    padding: (dp(10), dp(10))
+    max_lines: 20
+"""
+
+class DynamicHeightTextInput(TextInput):
+
+    extra_padding = NumericProperty('0dp')
+
+    def insert_text(self, substring, from_undo=False):
+        result = super(DynamicHeightTextInput, self).insert_text(substring=substring, from_undo=from_undo)
+        self.refresh_height()
+        return result
+
+    def do_backspace(self, from_undo=False, mode='bkspc'):
+        result = super(DynamicHeightTextInput, self).do_backspace(from_undo=from_undo, mode=mode)
+        self.refresh_height()
+        return result
+
+    def refresh_height(self):
+        self.height = self.line_height * min(self.max_lines, int(len(self.text.split('\n')))) + self.padding[1] + self.padding[3] + self.extra_padding
 
 #------------------------------------------------------------------------------
 

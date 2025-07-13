@@ -354,14 +354,12 @@ kv = """
                         halign: "left"
                         valign: "bottom"
                         text: "Notes:"
-                    TextInput:
+                    DynamicHeightTextInput:
                         id: text_notes_input
+                        multiline: True
                         text: ""
-                        width: dp(340)
-                        height: dp(60)
                         size_hint_x: None
-                        size_hint_y: None
-
+                        width: dp(330)
 
         BoxLayout:
             orientation: 'horizontal'
@@ -451,6 +449,7 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.select_risk_rating_button.text = customer_info.get('risk_rating') or 'low'
         self.ids.customer_blocked_check_box.active = customer_info.get('is_blocked') or False
         self.ids.text_notes_input.text = customer_info.get('text_notes') or ''
+        self.ids.text_notes_input.refresh_height()
 
     def save_info(self):
         year = self.ids.select_id_expire_year_button.text
