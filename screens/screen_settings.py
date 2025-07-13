@@ -136,6 +136,13 @@ kv = """
                         on_text: root.on_field_modified('business_phone')
 
                     OptionFieldLabel:
+                        text: "Bank account info:"
+                    OptionFieldInput:
+                        id: business_bank_account_info
+                        text: ""
+                        on_text: root.on_field_modified('business_bank_account_info')
+
+                    OptionFieldLabel:
                         text: "receiving BitCoin addresses:"
                     OptionFieldBTCAddressListInput:
                         id: receiving_btc_address
@@ -306,6 +313,7 @@ class SettingsScreen(AppScreen):
         self.ids.business_address.text = cur_settings.get('business_address', '')
         self.ids.business_email.text = cur_settings.get('business_email', '')
         self.ids.business_phone.text = cur_settings.get('business_phone', '')
+        self.ids.business_bank_account_info.text = cur_settings.get('business_bank_account_info', '')
         self.ids.disclosure_statement.text = cur_settings.get('disclosure_statement', '')
         self.ids.receiving_btc_address.text = '\n'.join(cur_settings.get('receiving_btc_address_list', []))
         self.ids.coinmarketcap_api_key.text = cur_settings.get('coinmarketcap_api_key', '')
@@ -334,6 +342,7 @@ class SettingsScreen(AppScreen):
         cur_settings['business_address'] = self.ids.business_address.text
         cur_settings['business_email'] = self.ids.business_email.text
         cur_settings['business_phone'] = self.ids.business_phone.text
+        cur_settings['business_bank_account_info'] = self.ids.business_bank_account_info.text
         cur_settings['disclosure_statement'] = self.ids.disclosure_statement.text
         cur_settings['receiving_btc_address_list'] = list(filter(None, self.ids.receiving_btc_address.text.split('\n')))
         cur_settings['coinmarketcap_api_key'] = self.ids.coinmarketcap_api_key.text

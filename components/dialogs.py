@@ -2,9 +2,8 @@ from kivy.metrics import dp
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.floatlayout import FloatLayout
+from kivy.properties import StringProperty  # @UnresolvedImport
 
 
 kv = """
@@ -38,6 +37,28 @@ kv = """
                 text: 'cancel'
                 background_color: 128,128,128,0.7
                 on_press: root._cancel()
+
+
+<InputTextMultilineContent>:
+    orientation: "vertical"
+    spacing: dp(12)
+    size_hint_y: None
+    height: dp(240)
+
+    Label:
+        text: root.text_content
+
+    TextInput:
+        id: text_input
+        multiline: True
+        text: ''
+        halign: 'left'
+        text_size: self.size
+        width: dp(310)
+        height: dp(200)
+        size_hint: None, None
+        font_name: 'RobotoMono-Regular'
+        font_size: '8sp'
 """
 
 #------------------------------------------------------------------------------
@@ -90,3 +111,59 @@ def show_one_button_dialog(title, message, dialog_size=(dp(400), dp(200), ), but
     )
     popup.open()
     closeButton.bind(on_press=popup.dismiss)
+
+#------------------------------------------------------------------------------
+
+class InputTextMultilineContent(BoxLayout):
+    text_content = StringProperty()
+
+#------------------------------------------------------------------------------
+
+def open_text_input_dialog(title, text, dialog_size=(dp(400), dp(200), ), button_confirm='Confirm', button_cancel='Cancel', cb=None):
+    content = InputTextMultilineContent(text_content=text)
+    layout = BoxLayout(
+        orientation='vertical',
+        padding=dp(5),
+    )
+    confirm_button = Button(
+        text=button_confirm,
+        size_hint=(None, None, ),
+        size=(dp(45), dp(20), ),
+        pos_hint={'right': 1},
+    )
+    close_button = Button(
+        text=button_cancel,
+        size_hint=(None, None, ),
+        size=(dp(45), dp(20), ),
+        pos_hint={'right': 1},
+    )
+    layout.add_widget(content)
+    layout.add_widget(confirm_button)
+    layout.add_widget(close_button)
+    popup = Popup(
+        title=title,
+        title_align='center',
+        content=layout,
+        size_hint=(None, None, ),
+        size=dialog_size,
+    )
+
+    def on_close(*args, **kwargs):
+        popup.dismiss()
+        if cb:
+            cb(None)
+
+    def on_confirm(*args, **kwargs):
+        inp = content.ids.text_input.text
+        popup.dismiss()
+        if cb:
+            cb(inp)
+
+    def on_open(*args, **kwargs):
+        content.ids.text_input.focus = True
+
+    confirm_button.bind(on_press=on_confirm)
+    close_button.bind(on_press=on_close)
+    popup.bind(on_open=on_open)
+    popup.open()
+    return popup

@@ -19,6 +19,7 @@ from components import labels
 from components import list_view
 from components import dialogs
 from components import main_window
+from components import text_input
 
 from screens import screen_buy
 from screens import screen_sell
@@ -53,6 +54,7 @@ kv = """
     buttons.kv,
     list_view.kv,
     dialogs.kv,
+    text_input.kv,
     screen_buy.kv,
     screen_sell.kv,
     screen_customers.kv,

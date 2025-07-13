@@ -180,6 +180,22 @@ kv = """
                         text: fa_icon('camera')
                         on_release: root.on_receive_address_scan_qr_button_clicked()
 
+                BuyFieldLabel:
+                    text: ""
+                CompactSpinner:
+                    id: select_contract_type_button
+                    width: dp(110)
+                    text: 'contract type'
+                    color: (1,0,0,1)
+                    values: 'CASH', 'ON-LINE'
+                    on_text: root.on_select_contract_type_button_clicked()
+
+                BuyFieldLabel:
+                    text: "Bank account info:"
+                BuyFieldInput:
+                    id: bank_info_input
+                    text: ""
+                    disabled: True
 
 """
 
@@ -210,6 +226,9 @@ class BuyScreen(AppScreen):
         self.ids.usd_amount_input.text = '0.0'
         self.ids.btc_amount_input.text = '0.0'
         self.ids.receive_address_input.text = ''
+        self.ids.select_contract_type_button.text = 'contract type'
+        self.ids.select_contract_type_button.color = (1,0,0,1)
+        self.ids.bank_info_input.text = ''
         self.attachments = []
 
     def populate_next_btc_address(self):
@@ -306,6 +325,8 @@ class BuyScreen(AppScreen):
         if self.populated_receive_address_qr_scan:
             self.ids.receive_address_input.text = btc_util.parse_btc_url(self.populated_receive_address_qr_scan)['address']
             self.populated_receive_address_qr_scan = None
+        self.ids.select_contract_type_button.text = 'contract type'
+        self.ids.select_contract_type_button.color = (1,0,0,1)
 
     #------------------------------------------------------------------------------
 
@@ -491,8 +512,34 @@ class BuyScreen(AppScreen):
 
     #------------------------------------------------------------------------------
 
+    def on_select_contract_type_button_clicked(self, *args, **kwargs):
+        if _Debug:
+            print('BuyScreen.on_select_contract_type_button_clicked', self.ids.select_contract_type_button.text)
+        if self.ids.select_contract_type_button.text in ('CASH', 'ON-LINE'):
+            self.ids.select_contract_type_button.color = (0,0,0,1)
+            if self.ids.select_contract_type_button.text == 'ON-LINE':
+                self.ids.bank_info_input.disabled = False
+            else:
+                self.ids.bank_info_input.disabled = True
+                self.ids.bank_info_input.text = ''
+
+    #------------------------------------------------------------------------------
+
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
+        if self.ids.select_contract_type_button.text not in ('CASH', 'ON-LINE'):
+            dialogs.show_one_button_dialog(
+                title='Need to select payment type',
+                message='Please select a payment type for the new contract: CASH or ON-LINE.',
+            )
+            return
+        if self.ids.select_contract_type_button.text == 'ON-LINE':
+            if not self.ids.bank_info_input.text.strip():
+                dialogs.show_one_button_dialog(
+                    title='Need to provide customer Bank account info',
+                    message='Please fill in Bank account information to start the contract.',
+                )
+                return
         if not self.selected_customer_info:
             dialogs.show_one_button_dialog(
                 title='Need to select a cusomer',
@@ -566,6 +613,7 @@ class BuyScreen(AppScreen):
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='purchase',
+            payment_type=self.ids.select_contract_type_button.text.lower(),
             lightning=is_lightning,
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
@@ -582,6 +630,7 @@ class BuyScreen(AppScreen):
                 address=self.ids.person_address_input.text,
                 email=self.ids.person_email_input.text,
                 phone=self.ids.person_phone_input.text,
+                bank_info=self.ids.bank_info_input.text.strip() if self.ids.select_contract_type_button.text == 'ON-LINE' else '',
             ),
             buyer=dict(
                 customer_id=None,
