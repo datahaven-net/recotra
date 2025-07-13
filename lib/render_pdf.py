@@ -51,6 +51,9 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                     <br>
                     Price for this contract: <b>${btc_price}</b> US / BTC
                     <br>
+                    Payment type: {payment_type}
+                    {bank_account_info}
+                    <br>
                     Dollar Amount: <b>${usd_amount}</b> US
                     <br>
                     Bitcoin Amount: {btc_amount}
@@ -110,6 +113,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
     """
     cur_settings = local_storage.read_settings()
     contract_type = transaction_details['contract_type']
+    payment_type = (transaction_details.get('payment_type') or 'cash').strip().lower()
     buyer = transaction_details['buyer']
     seller = transaction_details['seller']
     customer_id = seller['customer_id'] if contract_type == 'purchase' else buyer['customer_id']
@@ -125,10 +129,12 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         else:
             ln_signature_customer = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
     try:
-        qr_code_size = int(cur_settings['qr_code_size'])
+        qr_code_size = min(500, int(cur_settings['qr_code_size']))
     except:
-        qr_code_size = 600
+        qr_code_size = 500
     params = {
+        'payment_type': payment_type,
+        'bank_account_info': ('<br>Bank account info:<br>' + (seller.get('bank_info') or '(not provided)')) if payment_type == 'on-line' else '',
         'qr_filepath': qr_filepath,
         'face_photo_filepath': face_photo_filepath,
         'contract_type_str': contract_type.upper(),
@@ -151,6 +157,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         'qr_code_size': qr_code_size,
     }
     params.update(transaction_details)
+    params['payment_type'] = params['payment_type'].replace('on-line', 'bank transfer')
     if str(params['fee_percent']).endswith('.0'):
         params['fee_percent'] = str(params['fee_percent'])[:-2]
     if 'world_btc_price' not in params:

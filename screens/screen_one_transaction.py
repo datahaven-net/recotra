@@ -18,6 +18,10 @@ from storage import local_storage
 
 #------------------------------------------------------------------------------
 
+_Debug = False
+
+#------------------------------------------------------------------------------
+
 kv = """
 <TransactionFieldLabel@RightAlignLabel>:
     size_hint_x: None
@@ -194,6 +198,17 @@ kv = """
                     id: blockchain_status_input
                     text: ''
 
+                TransactionFieldLabel:
+                    text: "payment type:"
+                TransactionFieldValue:
+                    id: payment_type_input
+                    text: ''
+                TransactionFieldLabel:
+                    text: "Bank account info:"
+                TransactionFieldValue:
+                    id: bank_info_input
+                    text: ''
+
                 TransactionFieldHeader:
                     text: "[size=20]Attachments[/size]"
                 Widget:
@@ -325,6 +340,8 @@ class OneTransactionScreen(AppScreen):
         )
         self.ids.started_date_time_input.text = '{} at {}'.format(tran_details['date'] or '', tran_details['time'] or '')
         self.ids.verify_button.disabled = tran_details.get('blockchain_status', 'unconfirmed') == 'confirmed'
+        self.ids.payment_type_input.text = (tran_details.get('payment_type') or 'cash').replace('on-line', 'bank transfer')
+        self.ids.bank_info_input.text = tran_details['seller'].get('bank_info') or '(not provided)'
 
         attachments_dir_path = local_storage.transaction_attachments_dir_path(self.transaction_id)
         attachments_text_list = []
@@ -349,6 +366,8 @@ class OneTransactionScreen(AppScreen):
                 disclosure_statement=cur_settings.get('disclosure_statement') or '',
                 pdf_filepath=os.path.join(local_storage.contracts_dir(), 'transaction_{}.pdf'.format(self.transaction_id)),
             )
+            if _Debug:
+                print('pdf_contract:', pdf_contract['filename'])
             system.open_path_in_os(pdf_contract['filename'])
 
     def on_attachments_button_clicked(self):

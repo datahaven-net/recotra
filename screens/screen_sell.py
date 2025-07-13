@@ -180,6 +180,17 @@ kv = """
                         width: self.texture_size[0] + dp(16)
                         text: fa_icon('camera')
                         on_release: root.on_receive_address_scan_qr_button_clicked()
+
+                SellFieldLabel:
+                    text: ""
+                CompactSpinner:
+                    id: select_contract_type_button
+                    width: dp(110)
+                    text: 'contract type'
+                    color: (1,0,0,1)
+                    values: 'CASH', 'ON-LINE'
+                    on_text: root.on_select_contract_type_button_clicked()
+
 """
 
 #------------------------------------------------------------------------------
@@ -210,6 +221,8 @@ class SellScreen(AppScreen):
         # self.ids.btc_price_input.text = '0.0'
         self.ids.btc_amount_input.text = '0.0'
         self.ids.receive_address_input.text = ''
+        self.ids.select_contract_type_button.text = 'contract type'
+        self.ids.select_contract_type_button.color = (1,0,0,1)
         self.attachments = []
 
     def populate_btc_usd_price(self):
@@ -319,6 +332,8 @@ class SellScreen(AppScreen):
         if self.populated_receive_address_qr_scan:
             self.ids.receive_address_input.text = btc_util.parse_btc_url(self.populated_receive_address_qr_scan)['address']
             self.populated_receive_address_qr_scan = None
+        self.ids.select_contract_type_button.text = 'contract type'
+        self.ids.select_contract_type_button.color = (1,0,0,1)
 
     #------------------------------------------------------------------------------
 
@@ -488,8 +503,27 @@ class SellScreen(AppScreen):
 
     #------------------------------------------------------------------------------
 
+    def on_select_contract_type_button_clicked(self, *args, **kwargs):
+        if self.ids.select_contract_type_button.text in ('CASH', 'ON-LINE'):
+            self.ids.select_contract_type_button.color = (0,0,0,1)
+
+    #------------------------------------------------------------------------------
+
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
+        if self.ids.select_contract_type_button.text not in ('CASH', 'ON-LINE'):
+            dialogs.show_one_button_dialog(
+                title='Need to select payment type',
+                message='Please select a payment type for the new contract: CASH or ON-LINE.',
+            )
+            return
+        if self.ids.select_contract_type_button.text == 'ON-LINE':
+            if not (cur_settings.get('business_bank_account_info', '') or '').strip():
+                dialogs.show_one_button_dialog(
+                    title='Need to provide business Bank account info',
+                    message='Please go te settings and fill in "Bank account info" details first.',
+                )
+                return
         if not self.selected_customer_info:
             dialogs.show_one_button_dialog(
                 title='Need to select a cusomer',
@@ -562,6 +596,7 @@ class SellScreen(AppScreen):
         transaction_details = {}
         transaction_details.update(dict(
             contract_type='sales',
+            payment_type=self.ids.select_contract_type_button.text.lower(),
             lightning=self.ids.receive_address_input.text.lower().startswith('lnbc'),
             usd_amount=self.ids.usd_amount_input.text,
             world_btc_price=self.ids.btc_price_input.text,
@@ -578,6 +613,7 @@ class SellScreen(AppScreen):
                 email=cur_settings.get('business_email', ''),
                 phone=cur_settings.get('business_phone', ''),
                 btc_address=(cur_settings.get('receiving_btc_address_list', ['', ]) or ['', ])[0],
+                bank_info=cur_settings.get('business_bank_account_info', '') if self.ids.select_contract_type_button.text == 'ON-LINE' else '',
             ),
             buyer=dict(
                 customer_id=self.selected_customer_id,

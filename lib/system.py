@@ -58,15 +58,15 @@ def open_path_in_os(filepath):
     try:
         if is_windows():
             if os.path.isfile(filepath):
-                subprocess.Popen(['explorer', '/select,', '"%s"' % (filepath.replace('/', '\\'))])
+                subprocess.Popen(['explorer', '/select,', '%s' % (filepath.replace('/', '\\'))])
                 return True
-            subprocess.Popen(['explorer', '"%s"' % (filepath.replace('/', '\\'))])
+            subprocess.Popen(['explorer', '%s' % (filepath.replace('/', '\\'))])
             return True
         elif is_linux():
-            subprocess.Popen(['xdg-open', '"%s"' % filepath])
+            subprocess.Popen(['xdg-open', '%s' % filepath])
             return True
         elif is_osx():
-            subprocess.Popen(['open', '-R', '"%s"' % filepath])
+            subprocess.Popen(['open', '-R', '%s' % filepath])
             return True
     except Exception as exc:
         if _Debug:
@@ -91,20 +91,20 @@ def open_system_explorer(path, as_folder=True):
         if as_folder:
             if platform.system() == "Windows":
                 if os.path.isfile(path):
-                    subprocess.Popen(['explorer', '/select,', '"%s"' % (path.replace('/', '\\'))])
+                    subprocess.Popen(['explorer', '/select,', '%s' % (path.replace('/', '\\'))])
                 else:
-                    subprocess.Popen(['explorer', '"%s"' % (path.replace('/', '\\'))])
+                    subprocess.Popen(['explorer', '%s' % (path.replace('/', '\\'))])
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", "-R", path])
             else:
-                subprocess.Popen(['sh', '-c', 'nautilus "%s"' % path])
+                subprocess.Popen(['sh', '-c', 'nautilus', '%s' % path])
         else:
             if platform.system() == "Windows":
                 os.startfile(path)  # @UndefinedVariable
             elif platform.system() == "Darwin":
-                subprocess.Popen(["open", "-R", '"%s"' % path])
+                subprocess.Popen(["open", "-R", '%s' % path])
             else:
-                subprocess.Popen(["xdg-open", '"%s"' % path])
+                subprocess.Popen(["xdg-open", '%s' % path])
     except:
         try:
             import webbrowser
