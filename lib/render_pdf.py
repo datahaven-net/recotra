@@ -40,7 +40,6 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         <tr valign=top>
             <td colspan="3">
                 <font size=+2>
-                <p>
                     Customer {buying_selling} Bitcoin{ln}: <b>{first_name} {last_name}</b>
                     <br>
                     Customer number: {customer_id}
@@ -50,7 +49,15 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                     Price offset: {fee_percent}%
                     <br>
                     Price for this contract: <b>${btc_price}</b> US / BTC
-                    <br>
+                </font>
+            </td>
+            <td colspan="1">
+                <img src="{face_photo_filepath}" width="250">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4">
+                <font size=+2>
                     Payment type: {payment_type}
                     {bank_account_info}
                     <br>
@@ -62,11 +69,7 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
                     <br>
                     Time: {time}
                     {ln_extra}
-                </p>
                 </font>
-            </td>
-            <td colspan="1">
-                <img src="{face_photo_filepath}" width="150">
             </td>
         </tr>
         <tr>
@@ -129,12 +132,12 @@ def build_pdf_contract(transaction_details, disclosure_statement='', pdf_filepat
         else:
             ln_signature_customer = '<br><br><br><hr><font size=+1>signature after received lightning</font>'
     try:
-        qr_code_size = min(500, int(cur_settings['qr_code_size']))
+        qr_code_size = min(440, int(cur_settings['qr_code_size']))
     except:
-        qr_code_size = 500
+        qr_code_size = 440
     params = {
         'payment_type': payment_type,
-        'bank_account_info': ('<br>Bank account info:<br>' + (seller.get('bank_info') or '(not provided)')) if payment_type == 'on-line' else '',
+        'bank_account_info': ('<br>Bank account info: ' + (seller.get('bank_info') or '(not provided)')) if payment_type == 'on-line' else '',
         'qr_filepath': qr_filepath,
         'face_photo_filepath': face_photo_filepath,
         'contract_type_str': contract_type.upper(),
@@ -275,108 +278,6 @@ def build_id_card(customer_info, customer_photo_filepath=None, pdf_filepath=None
 
 #------------------------------------------------------------------------------
 
-def build_transactions_report_old(selected_transactions, selected_month, selected_year, pdf_filepath=None):
-    if not pdf_filepath:
-        pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='transactions-')
-    html_template = """
-<html>
-<head>
-    <title>Bitcoin.ai Ltd.</title>
-</head>
-<body>
-    <h3>{selected_month} {selected_year}</h3>
-    <table border=1 cellspacing=0 cellpadding=5 >
-        <tr>
-            <th>Seller</th>
-            <th>Buyer</th>
-            <th>Amount BTC</th>
-            <th>Amount US $</th>
-            <th>Date</th>
-            <th>Receiving Address</th>
-        </tr>
-{table_content}
-    </table>
-<br>
-<table>
-<tr><td>
-    <p>
-        Total BTC received: <b>{total_btc_bought}</b>
-    </p>
-    <p>
-        Total Dollars paid out: <b>{total_usd_sold}</b> US $
-    </p>
-</td>
-<td>&nbsp;&nbsp;&nbsp;</td>
-<td>
-    <p>
-        Total BTC paid out: <b>{total_btc_sold}</b>
-    </p>
-    <p>
-        Total Dollars received: <b>{total_usd_bought}</b> US $
-    </p>
-</td></tr>
-</table>
-</body>
-</html>
-    """
-    table_content = ''
-    total_btc_bought = 0.0
-    total_usd_bought = 0.0
-    total_btc_sold = 0.0
-    total_usd_sold = 0.0
-    for t in selected_transactions:
-        seller = '' if t['contract_type'] == 'sales' else f"{t['seller']['first_name']} {t['seller']['last_name']}"
-        buyer = '' if t['contract_type'] == 'purchase' else f"{t['buyer']['first_name']} {t['buyer']['last_name']}"
-        btc_addr = t['buyer']['btc_address']
-        if t.get('lightning'):
-            btc_addr = '{}<br>{}<br>{}<br>{}<br>{}'.format(
-                btc_addr[:60],
-                btc_addr[60:120],
-                btc_addr[120:180],
-                btc_addr[180:240],
-                btc_addr[240:],
-            )
-
-        table_content += f'''
-        <tr>
-            <td nowrap>{seller}</td>
-            <td nowrap>{buyer}</td>
-            <td nowrap>{t['btc_amount']}</td>
-            <td nowrap>{t['usd_amount']}</td>
-            <td nowrap>{t['date']}</td>
-            <td nowrap>{btc_addr}</td>
-        </tr>
-        '''
-        if t['contract_type'] == 'sales':
-            total_btc_sold += float(t['btc_amount'])
-            total_usd_bought += float(t['usd_amount'])
-        else:
-            total_btc_bought += float(t['btc_amount'])
-            total_usd_sold += float(t['usd_amount'])
-    params = {
-        'table_content': table_content,
-        'selected_month': selected_month.replace('-', ''),
-        'selected_year': selected_year.replace('-', ''),
-        'total_btc_bought': round(total_btc_bought, 6),
-        'total_usd_bought': round(total_usd_bought, 2),
-        'total_btc_sold': round(total_btc_sold, 6),
-        'total_usd_sold': round(total_usd_sold, 2),
-    }
-    rendered_html = html_template.format(**params)
-    pdfkit.from_string(
-        input=rendered_html,
-        output_path=pdf_filepath,
-        options={"enable-local-file-access": ""},
-    )
-    with open(pdf_filepath, "rb") as pdf_file:
-        pdf_raw = pdf_file.read()
-    return {
-        'body': pdf_raw,
-        'filename': pdf_filepath,
-    }
-
-#------------------------------------------------------------------------------
-
 def build_transactions_report(selected_transactions, selected_month, selected_year, pdf_filepath=None):
     if not pdf_filepath:
         pdf_filepath = tempfile.mktemp(suffix='.pdf', prefix='transactions-')
@@ -387,7 +288,7 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
 </head>
 <body>
     <h3>{selected_month} {selected_year}</h3>
-    <table border=1 cellspacing=0 cellpadding=5 >
+    <table border=1 cellspacing=0 cellpadding=4>
         <tr>
             <th>Transaction ID</th>
             <th>Customer</th>
@@ -397,6 +298,7 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
             <th>BTC price</th>
             <th>Date</th>
             <th>Receiving Address</th>
+            <th>Payment details</>
         </tr>
 {table_content}
     </table>
@@ -447,25 +349,30 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
         btc_change = -float(t['btc_amount']) if t['contract_type'] == 'sales' else float(t['btc_amount'])
         usd_change = float(t['usd_amount']) if t['contract_type'] == 'sales' else -float(t['usd_amount'])
         btc_addr = t['buyer']['btc_address']
+        bank_info = t['seller'].get('bank_info') or 'cash'
         if t.get('lightning'):
-            btc_addr = '{}<br>{}<br>{}<br>{}<br>{}'.format(
-                btc_addr[:60],
-                btc_addr[60:120],
-                btc_addr[120:180],
-                btc_addr[180:240],
-                btc_addr[240:],
+            btc_addr = '{}<br>{}<br>{}<br>{}<br>{}<br>{}<br>{}<br>{}'.format(
+                btc_addr[:40],
+                btc_addr[40:80],
+                btc_addr[80:120],
+                btc_addr[120:160],
+                btc_addr[160:200],
+                btc_addr[200:240],
+                btc_addr[240:280],
+                btc_addr[280:],
             )
 
         table_content += f'''
         <tr>
-            <td nowrap>{t['transaction_id']}</td>
-            <td nowrap>{customer_name}</td>
-            <td nowrap>{tr_type}</td>
-            <td nowrap>{btc_change}</td>
-            <td nowrap>{usd_change}</td>
-            <td nowrap>{t['btc_price']}</td>
-            <td nowrap>{t['date']}</td>
-            <td nowrap>{btc_addr}</td>
+            <td valign=top nowrap>{t['transaction_id']}</td>
+            <td valign=top>{customer_name}</td>
+            <td valign=top nowrap>{tr_type}</td>
+            <td valign=top nowrap>{btc_change}</td>
+            <td valign=top nowrap>{usd_change}</td>
+            <td valign=top nowrap>{t['btc_price']}</td>
+            <td valign=top nowrap>{t['date']}</td>
+            <td valign=top nowrap><font size=-1><code>{btc_addr}</code></font></td>
+            <td valign=top>{bank_info}</td>
         </tr>
         '''
         if t['contract_type'] == 'sales':
