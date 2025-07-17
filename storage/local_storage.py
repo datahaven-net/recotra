@@ -236,8 +236,8 @@ def calculate_customer_transactions_this_month(customer_id):
     customer_sold_this_month = 0
     customer_bought_this_month = 0
     for t in load_transactions_list():
-        # if t.get('blockchain_status') != 'confirmed':
-        #     continue
+        if t.get('void'):
+            continue
         selected = False
         if t['buyer']['customer_id'] and int(t['buyer']['customer_id']) == int(customer_id):
             selected = True
