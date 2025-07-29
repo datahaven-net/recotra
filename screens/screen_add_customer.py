@@ -170,7 +170,7 @@ kv = """
                         text_size: self.size
                         valign: "bottom"
                         halign: "left"
-                        text: "First name:"
+                        text: "First and middle names:"
                     TextInput:
                         id: customer_first_name_input
                         text: ""

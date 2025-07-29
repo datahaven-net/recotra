@@ -87,6 +87,8 @@ def open_system_explorer(path, as_folder=True):
     """
     Simple and portable way to show location or file on local disk to the user.
     """
+    if _Debug:
+        print('system.open_system_explorer %r' % path)
     try:
         if as_folder:
             if platform.system() == "Windows":
@@ -97,7 +99,7 @@ def open_system_explorer(path, as_folder=True):
             elif platform.system() == "Darwin":
                 subprocess.Popen(["open", "-R", path])
             else:
-                subprocess.Popen(['sh', '-c', 'nautilus', '%s' % path])
+                subprocess.Popen(['open', '%s' % path])
         else:
             if platform.system() == "Windows":
                 os.startfile(path)  # @UndefinedVariable
