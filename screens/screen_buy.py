@@ -325,8 +325,6 @@ class BuyScreen(AppScreen):
         if self.populated_receive_address_qr_scan:
             self.ids.receive_address_input.text = btc_util.parse_btc_url(self.populated_receive_address_qr_scan)['address']
             self.populated_receive_address_qr_scan = None
-        self.ids.select_contract_type_button.text = 'contract type'
-        self.ids.select_contract_type_button.color = (1,0,0,1)
 
     #------------------------------------------------------------------------------
 
