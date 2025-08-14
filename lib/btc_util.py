@@ -76,8 +76,15 @@ def fetch_transactions(btc_address):
                 print(exc, json_response)
             return {}
         for tr in tr_list:
+            st = tr.get('status') or {}
+            if not st:
+                continue
+            if not st.get('confirmed'):
+                continue
+            if 'block_time' not in st:
+                continue
             result[tr['txid']] = {
-                'block_time': tr['status']['block_time'],
+                'block_time': st['block_time'],
                 'hash': tr['txid'],
                 'outputs': [vout['value'] / 100000000.0 for vout in tr['vout']],
             }
