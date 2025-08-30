@@ -42,11 +42,7 @@ kv = """
 <InputTextMultilineContent>:
     orientation: "vertical"
     spacing: dp(12)
-    size_hint_y: None
-    height: dp(240)
-
-    Label:
-        text: root.text_content
+    size_hint: (1, 1)
 
     TextInput:
         id: text_input
@@ -54,11 +50,7 @@ kv = """
         text: ''
         halign: 'left'
         text_size: self.size
-        width: dp(310)
-        height: dp(200)
-        size_hint: None, None
-        font_name: 'RobotoMono-Regular'
-        font_size: '8sp'
+        size_hint: 1, 1
 """
 
 #------------------------------------------------------------------------------
@@ -115,34 +107,38 @@ def show_one_button_dialog(title, message, dialog_size=(dp(400), dp(200), ), but
 #------------------------------------------------------------------------------
 
 class InputTextMultilineContent(BoxLayout):
-    text_content = StringProperty()
+    pass
 
 #------------------------------------------------------------------------------
 
 def open_text_input_dialog(title, text, dialog_size=(dp(400), dp(200), ), button_confirm='Confirm', button_cancel='Cancel', cb=None):
-    content = InputTextMultilineContent(text_content=text)
-    layout = BoxLayout(
-        orientation='vertical',
-        padding=dp(5),
-    )
-    confirm_button = Button(
-        text=button_confirm,
-        size_hint=(None, None, ),
-        size=(dp(45), dp(20), ),
-        pos_hint={'right': 1},
-    )
-    close_button = Button(
-        text=button_cancel,
-        size_hint=(None, None, ),
-        size=(dp(45), dp(20), ),
-        pos_hint={'right': 1},
-    )
+    layout = BoxLayout(orientation='vertical', padding=dp(3))
+    content = InputTextMultilineContent()
+    content.ids.text_input.text = text
     layout.add_widget(content)
-    layout.add_widget(confirm_button)
-    layout.add_widget(close_button)
+    if button_confirm:
+        confirm_button = Button(
+            color=(1,1,1,1),
+            text=button_confirm,
+            size_hint=(None, None, ),
+            size=(dp(70), dp(25), ),
+            pos_hint={'right': 1},
+        )
+        layout.add_widget(confirm_button)
+    if button_cancel:
+        close_button = Button(
+            color=(1,1,1,1),
+            text=button_cancel,
+            size_hint=(None, None, ),
+            size=(dp(70), dp(25), ),
+            pos_hint={'right': 1},
+        )
+        layout.add_widget(close_button)
     popup = Popup(
         title=title,
         title_align='center',
+        title_color=(0,0,0,1),
+        background='',
         content=layout,
         size_hint=(None, None, ),
         size=dialog_size,

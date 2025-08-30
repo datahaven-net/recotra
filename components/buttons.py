@@ -3,6 +3,36 @@ from kivy.uix.spinner import Spinner, SpinnerOption
 
 
 kv = """
+<SimpleButton>:
+    markup: True
+    background_color: 0,0,0,0
+    color: 0,0,0,1
+    disabled_color: .8,.8,.8,1
+    background_disabled_normal: ''
+    height: dp(30)
+    size_hint_y: None
+    bg_normal: .4,.4,.4,1
+    bg_pressed: .6,.6,.6,1
+    bg_disabled: .3,.3,.3,1
+    bg_normal_2: .6,.6,.6,1
+    bg_pressed_2: .7,.7,.7,1
+    bg_disabled_2: .4,.4,.4,1
+    corner_radius: 3
+    canvas.before:
+        Color:
+            rgba: self.bg_disabled if self.disabled else (self.bg_normal if self.state == 'normal' else self.bg_pressed) 
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [self.corner_radius+1,]
+        Color:
+            rgba: self.bg_disabled_2 if self.disabled else (self.bg_normal_2 if self.state == 'normal' else self.bg_pressed_2)
+        RoundedRectangle:
+            pos: self.pos[0]+2, self.pos[1]+2
+            size: self.size[0]-4, self.size[1]-4
+            radius: [self.corner_radius,]
+
+
 <RoundedButton>:
     markup: True
     background_color: 0,0,0,0
@@ -151,6 +181,10 @@ kv = """
             rectangle: (self.x-1, self.y-1, self.width+2, self.height+2) 
             width: dp(1)
 """
+
+
+class SimpleButton(Button):
+    pass
 
 
 class RoundedButton(Button):
