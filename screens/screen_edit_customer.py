@@ -349,13 +349,26 @@ kv = """
                             width: dp(24)
                             height: dp(24)
 
+                    Label:
+                        text_size: self.size
+                        height: dp(30)
+                        halign: "left"
+                        valign: "bottom"
+                        text: "Notes:"
+                    AlignedTextInput:
+                        id: text_notes_input
+                        multiline: True
+                        text: ""
+                        size_hint: None, None
+                        width: dp(330)
+                        height: dp(150)
                     SimpleButton:
                         halign: "right"
                         valign: "bottom"
                         size_hint: (None, None)
-                        height: dp(30)
-                        width: dp(120)
-                        text: "customer notes"
+                        height: dp(20)
+                        width: dp(50)
+                        text: "edit"
                         on_release: root.on_notes_button_clicked()
 
         BoxLayout:
@@ -411,7 +424,6 @@ kv = """
 class EditCustomerScreen(screen.AppScreen):
 
     customer_id = None
-    customer_text_notes = ''
 
     def take_pic_screen(self):
         return self.scr_manager().get_screen('camera_take_picture_screen')
@@ -448,7 +460,7 @@ class EditCustomerScreen(screen.AppScreen):
         self.ids.this_month_bought_usd.text = f'This month, bought BTC for a total of [b]${bought}[/b]'
         self.ids.select_risk_rating_button.text = customer_info.get('risk_rating') or 'low'
         self.ids.customer_blocked_check_box.active = customer_info.get('is_blocked') or False
-        self.customer_text_notes = customer_info.get('text_notes') or ''
+        self.ids.text_notes_input.text = customer_info.get('text_notes') or ''
 
     def save_info(self):
         year = self.ids.select_id_expire_year_button.text
@@ -467,7 +479,7 @@ class EditCustomerScreen(screen.AppScreen):
             id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
             risk_rating=self.ids.select_risk_rating_button.text,
             is_blocked=self.ids.customer_blocked_check_box.active,
-            text_notes=self.customer_text_notes,
+            text_notes=self.ids.text_notes_input.text,
         ))
 
     def on_enter(self, *args):
@@ -576,7 +588,7 @@ class EditCustomerScreen(screen.AppScreen):
     def on_notes_button_clicked(self, *args):
         dialogs.open_text_input_dialog(
             title=f'Customer {self.customer_id} notes',
-            text=self.customer_text_notes,
+            text=self.ids.text_notes_input.text,
             dialog_size=(dp(600), dp(400), ),
             button_confirm='save',
             button_cancel='cancel',
@@ -586,7 +598,7 @@ class EditCustomerScreen(screen.AppScreen):
     def on_customer_text_notes_dialog_result(self, result):
         if result is None:
             return
-        self.customer_text_notes = result
+        self.ids.text_notes_input.text = result
 
     def on_google_customer_button_clicked(self, *args):
         if self.ids.customer_first_name_input.text and self.ids.customer_last_name_input.text:
