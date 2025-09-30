@@ -581,7 +581,7 @@ class BuyScreen(AppScreen):
             print('sold: %r   bought: %r' % (sold, bought, ))
         usd_amount = float(self.ids.usd_amount_input.text)
         limit_transactions = float(self.selected_customer_info.get('limit_transactions', '0') or '0')
-        if limit_transactions:
+        if limit_transactions > 0:
             if sold + usd_amount > limit_transactions:
                 msg = 'Customer {} {} is only authorized for ${} per month.\n'.format(
                     self.ids.person_first_name_input.text,
