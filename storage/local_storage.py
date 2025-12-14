@@ -11,6 +11,10 @@ from lib import btc_util
 
 #------------------------------------------------------------------------------
 
+_Debug = False
+
+#------------------------------------------------------------------------------
+
 def init():
     create_home_dir()
 
@@ -167,7 +171,8 @@ def create_new_customer_info():
             max_customer_id = int(customer_id)
     new_customer_id = str(max_customer_id + 1)
     os.mkdir(customer_dir(new_customer_id))
-    print('new customer info created', new_customer_id)
+    if _Debug:
+        print('new customer info created', new_customer_id)
     return str(new_customer_id)
 
 
@@ -175,7 +180,8 @@ def write_customer_info(customer_info):
     create_home_dir()
     create_customer_dir(customer_info['customer_id'])
     ret = WriteTextFile(customer_info_filepath(customer_info['customer_id']), jsn.dumps(customer_info, indent=2))
-    print('customer info stored', customer_info['customer_id'])
+    if _Debug:
+        print('customer info stored', customer_info['customer_id'])
     return ret
 
 
@@ -188,7 +194,8 @@ def erase_customer_info(customer_id):
         os.rmdir(customer_dir(customer_id))
     except:
         pass
-    print('customer info erased', customer_id)
+    if _Debug:
+        print('customer info erased', customer_id)
 
 
 def read_customer_info(customer_id):
@@ -199,7 +206,8 @@ def read_customer_info(customer_id):
     if not src:
         return None
     json_data = jsn.loads_text(src)
-    print('customer info loaded', customer_id)
+    if _Debug:
+        print('customer info loaded', customer_id)
     return json_data
 
 #------------------------------------------------------------------------------
