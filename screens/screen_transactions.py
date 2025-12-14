@@ -232,6 +232,7 @@ class TransactionsView(list_view.SelectableRecycleView):
             self.parent.parent.ids.disable_transaction_button.disabled = True
 
     def populate(self, selected_customer_id=None):
+        cur_settings = local_storage.read_settings()
         tr_list = []
         for t in local_storage.load_transactions_list():
             if not selected_customer_id:
@@ -239,27 +240,35 @@ class TransactionsView(list_view.SelectableRecycleView):
                 continue
             if str(selected_customer_id) == str(t['buyer'].get('customer_id') or '') or str(selected_customer_id) == str(t['seller'].get('customer_id') or ''):
                 tr_list.append(t)
-        self.data = [{
-            'tr_id': str(t['transaction_id']),
-            'tr_type': 'sold',
-            'buyer': '[b]{} {}[/b]'.format(t['buyer']['first_name'], t['buyer']['last_name']),
-            'buyer_id': t['buyer'].get('customer_id') or '',
-            'amount_btc': '[b]{}[/b] BTC to'.format(t['btc_amount']),
-            'seller': '[b]{} {}[/b]'.format(t['seller']['first_name'], t['seller']['last_name']),
-            'seller_id': t['seller'].get('customer_id') or '',
-            'price_btc': 'at [b]{}[/b] $/BTC'.format(t['btc_price']),
-            'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
-            'date': t['date'],
-            'from_to': '{} -> {}'.format(
-                t['seller']['btc_address'][:4] + '...' + t['seller']['btc_address'][-4:],
-                t['buyer']['btc_address'][:4] + '...' + t['buyer']['btc_address'][-4:],
-            ),
-            'blockchain_status': '[color={}][{}][/color]'.format(
-                '#d07050' if t.get('void') else ('#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060'),
-                'void' if t.get('void') else (t.get('blockchain_status', 'unconfirmed')),
-            ),
-            'void': '1' if t.get('void') else '',
-        } for t in tr_list]
+        self.data = []
+        for t in tr_list:
+            seller_full_name = '[b]{} {}[/b]'.format(t['seller']['first_name'], t['seller']['last_name'])
+            buyer_full_name = '[b]{} {}[/b]'.format(t['buyer']['first_name'], t['buyer']['last_name'])
+            if t['contract_type'] == 'sales':
+                seller_full_name = cur_settings.get('business_company_name') or seller_full_name
+            else:
+                buyer_full_name = cur_settings.get('business_company_name') or buyer_full_name
+            self.data.append({
+                'tr_id': str(t['transaction_id']),
+                'tr_type': 'sold',
+                'buyer': buyer_full_name,
+                'buyer_id': t['buyer'].get('customer_id') or '',
+                'amount_btc': '[b]{}[/b] BTC to'.format(t['btc_amount']),
+                'seller': seller_full_name,
+                'seller_id': t['seller'].get('customer_id') or '',
+                'price_btc': 'at [b]{}[/b] $/BTC'.format(t['btc_price']),
+                'amount_usd': 'with [b]{}$ US[/b]'.format(t['usd_amount']),
+                'date': t['date'],
+                'from_to': '{} -> {}'.format(
+                    t['seller']['btc_address'][:4] + '...' + t['seller']['btc_address'][-4:],
+                    t['buyer']['btc_address'][:4] + '...' + t['buyer']['btc_address'][-4:],
+                ),
+                'blockchain_status': '[color={}][{}][/color]'.format(
+                    '#d07050' if t.get('void') else ('#a0a060' if t.get('blockchain_status') != 'confirmed' else '#60b060'),
+                    'void' if t.get('void') else (t.get('blockchain_status', 'unconfirmed')),
+                ),
+                'void': '1' if t.get('void') else '',
+            })
 
 #------------------------------------------------------------------------------
 
@@ -287,8 +296,10 @@ class TransactionsScreen(screen.AppScreen):
         if tr:
             customer_id = (tr.get('seller') or {}).get('customer_id') or ''
             if customer_id:
-                self.scr('edit_customer_screen').customer_id = customer_id
-                self.scr_manager().current = 'edit_customer_screen'
+                customer_info = local_storage.read_customer_info(customer_id) or {}
+                if customer_info:
+                    self.scr('edit_customer_screen').customer_id = customer_id
+                    self.scr_manager().current = 'edit_customer_screen'
 
     def on_buyer_text_ref_pressed(self, *args):
         if _Debug:
@@ -298,8 +309,10 @@ class TransactionsScreen(screen.AppScreen):
         if tr:
             customer_id = (tr.get('buyer') or {}).get('customer_id') or ''
             if customer_id:
-                self.scr('edit_customer_screen').customer_id = customer_id
-                self.scr_manager().current = 'edit_customer_screen'
+                customer_info = local_storage.read_customer_info(customer_id) or {}
+                if customer_info:
+                    self.scr('edit_customer_screen').customer_id = customer_id
+                    self.scr_manager().current = 'edit_customer_screen'
         
     def on_disable_transaction_button_clicked(self):
         transaction_id = self.ids.transactions_view.selected_item.ids.tr_id.text
