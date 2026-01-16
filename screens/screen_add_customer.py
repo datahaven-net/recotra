@@ -5,12 +5,14 @@ import urllib.parse
 #------------------------------------------------------------------------------
 
 from kivy.cache import Cache
+from kivy.metrics import dp
 
 #------------------------------------------------------------------------------
 
 from components import screen
 from components import dialogs
 from components.webfont import fa_icon
+from components.list_view import SelectableRecycleView
 
 from lib import system
 
@@ -158,6 +160,85 @@ kv = """
                             values: '-', %s
                             on_text: root.on_select_id_expire_day_button_clicked()
 
+                    Widget:
+                        size_hint_y: None
+                        height: dp(15)
+
+                    Label:
+                        text_size: self.size
+                        height: dp(30)
+                        halign: "right"
+                        valign: "bottom"
+                        text: "Related URLs:"
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        pos_hint: {'right': 1}
+                        halign: "right"
+                        height: dp(24)
+                        width: dp(340)
+                        padding: dp(0)
+                        spacing: dp(5)
+
+                        Widget:
+                            size_hint: 1, None
+                            height: dp(20)
+                        SimpleButton:
+                            id: related_urls_add_button
+                            halign: "right"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "add"
+                            on_release: root.on_related_urls_add_button_clicked()
+                        SimpleButton:
+                            id: related_urls_paste_button
+                            halign: "right"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "paste"
+                            on_release: root.on_related_urls_paste_button_clicked()
+                        SimpleButton:
+                            id: related_urls_remove_button
+                            halign: "right"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "remove"
+                            disabled: True
+                            on_release: root.on_related_urls_remove_button_clicked()
+                        SimpleButton:
+                            id: related_urls_open_button
+                            halign: "right"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "open"
+                            disabled: True
+                            on_release: root.on_related_urls_open_button_clicked()
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        pos_hint: {'right': 1}
+                        height: dp(80)
+                        width: dp(330)
+                        padding: dp(0)
+
+                        RelatedURLsView:
+                            id: related_urls_view
+                            size_hint: 1, 1
+
                 BoxLayout:
                     orientation: 'vertical'
                     pos_hint: {'top': 1}
@@ -294,6 +375,31 @@ kv = """
     ','.join(["'%s'" % d for d in range(1, 31+1)]),
 )
 
+#------------------------------------------------------------------------------
+
+class RelatedURLsView(SelectableRecycleView):
+
+    def __init__(self, **kwargs):
+        super(RelatedURLsView, self).__init__(**kwargs)
+        self.data_copy = []
+
+    def populate(self):
+        self.data = []
+        self.data_copy = list(self.data)
+        self.scroll_x = 0
+        self.scroll_y = 0
+
+    def on_selection_applied(self, item, index, is_selected, prev_selected):
+        root = self.parent.parent.parent.parent.parent.parent
+        if is_selected:
+            root.ids.related_urls_remove_button.disabled = False
+            root.ids.related_urls_open_button.disabled = False
+        else:
+            root.ids.related_urls_remove_button.disabled = True
+            root.ids.related_urls_open_button.disabled = True
+
+#------------------------------------------------------------------------------
+
 class AddCustomerScreen(screen.AppScreen):
 
     new_customer_id = None
@@ -316,6 +422,43 @@ class AddCustomerScreen(screen.AppScreen):
         self.ids.select_id_expire_month_button.text = '-'
         self.ids.select_id_expire_day_button.text = '-'
         self.ids.select_risk_rating_button.text = 'low'
+        self.ids.related_urls_view.data = []
+
+    def on_add_customer_save_button_clicked(self, *args):
+        year = self.ids.select_id_expire_year_button.text
+        month = self.ids.select_id_expire_month_button.text
+        day = self.ids.select_id_expire_day_button.text
+        if year == '-' or month == '-' or day == '-':
+            dialogs.show_one_button_dialog(
+                title='Warning',
+                message='ID / Passport expiration Date is mandatory',
+            )
+            return
+        if not self.ids.related_urls_view.data:
+            dialogs.show_one_button_dialog(
+                title='Warning',
+                message='Must first perform Google search of the customer and provide some related URLs',
+            )
+            return
+        month_pos = months_names.index(month) + 1
+        local_storage.write_customer_info(dict(
+            customer_id=self.new_customer_id,
+            first_name=self.ids.customer_first_name_input.text,
+            last_name=self.ids.customer_last_name_input.text,
+            phone=self.ids.customer_phone_input.text,
+            email=self.ids.customer_email_input.text,
+            address=self.ids.customer_address_input.text,
+            atm_id='',
+            id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
+            risk_rating=self.ids.select_risk_rating_button.text,
+            is_blocked=False,
+            text_notes='',
+            related_urls=[d['url'] for d in self.ids.related_urls_view.data],
+        ))
+        self.new_customer_id = None
+        self.camera_on = False
+        self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
+        self.scr_manager().current = 'customers_screen'
 
     def on_enter(self, *args):
         # print('on_enter', args, self.new_customer_id, self.camera_on)
@@ -382,35 +525,6 @@ class AddCustomerScreen(screen.AppScreen):
         self.scr_manager().current = 'add_customer_screen'
         self.scr_manager().remove_widget(self.camera_screen)
 
-    def on_add_customer_save_button_clicked(self, *args):
-        year = self.ids.select_id_expire_year_button.text
-        month = self.ids.select_id_expire_month_button.text
-        day = self.ids.select_id_expire_day_button.text
-        if year == '-' or month == '-' or day == '-':
-            dialogs.show_one_button_dialog(
-                title='Warning',
-                message='ID / Passport expiration Date is mandatory',
-            )
-            return
-        month_pos = months_names.index(month) + 1
-        local_storage.write_customer_info(dict(
-            customer_id=self.new_customer_id,
-            first_name=self.ids.customer_first_name_input.text,
-            last_name=self.ids.customer_last_name_input.text,
-            phone=self.ids.customer_phone_input.text,
-            email=self.ids.customer_email_input.text,
-            address=self.ids.customer_address_input.text,
-            atm_id='',
-            id_expire_date='%s-%s-%s' % (year, str(month_pos), day),
-            risk_rating=self.ids.select_risk_rating_button.text,
-            is_blocked=False,
-            text_notes='',
-        ))
-        self.new_customer_id = None
-        self.camera_on = False
-        self.scr_manager().get_screen('customers_screen').ids.customers_view.populate()
-        self.scr_manager().current = 'customers_screen'
-
     def on_select_id_expire_year_button_clicked(self, *args):
         year = self.ids.select_id_expire_year_button.text
         month = self.ids.select_id_expire_month_button.text
@@ -455,3 +569,47 @@ class AddCustomerScreen(screen.AppScreen):
 
     def on_select_risk_rating_button_clicked(self, *args):
         pass
+
+    def on_related_urls_add_button_clicked(self, *args):
+        dialogs.open_text_input_dialog(
+            title=f'Customer related URL',
+            dialog_size=(dp(600), dp(140), ),
+            button_confirm='add',
+            button_cancel='cancel',
+            multiline=False,
+            cb=self.on_add_related_url_dialog_result,
+        )
+
+    def on_add_related_url_dialog_result(self, url):
+        if url:
+            found = False
+            for d in self.ids.related_urls_view.data:
+                if d['url'] == url:
+                    found = True
+                    break
+            if not found:
+                self.ids.related_urls_view.data.append({'url': url})
+
+    def on_related_urls_paste_button_clicked(self, *args):
+        url = system.paste_xclip()
+        if url:
+            found = False
+            for d in self.ids.related_urls_view.data:
+                if d['url'] == url:
+                    found = True
+                    break
+            if not found:
+                self.ids.related_urls_view.data.append({'url': url})
+
+    def on_related_urls_remove_button_clicked(self, *args):
+        if self.ids.related_urls_view.selected_item:
+            for d in self.ids.related_urls_view.data:
+                if d['url'] == self.ids.related_urls_view.selected_item.url:
+                    self.ids.related_urls_view.data.remove(d)
+                    self.ids.related_urls_remove_button.disabled = True
+                    self.ids.related_urls_open_button.disabled = True
+                    break
+
+    def on_related_urls_open_button_clicked(self, *args):
+        if self.ids.related_urls_view.selected_item:
+            system.open_webbrowser(self.ids.related_urls_view.selected_item.url)
