@@ -42,9 +42,7 @@ class AlignedTextInput(TextInput):
     def __init__(self, **kwargs):
         self.halign = kwargs.get("halign", "left")
         self.valign = kwargs.get("valign", "top")
-
         self.bind(on_text=self.on_text)
-
         super().__init__(**kwargs)
         
     def on_text(self, instance, value):

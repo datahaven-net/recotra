@@ -1,6 +1,7 @@
 from kivy.properties import BooleanProperty, ObjectProperty  # @UnresolvedImport
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.stacklayout import StackLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
@@ -36,6 +37,33 @@ class SelectableRecord(RecycleDataViewBehavior, StackLayout):
 
     def on_touch_down(self, touch):
         if super(SelectableRecord, self).on_touch_down(touch):
+            return True
+        if self.collide_point(*touch.pos) and self.selectable:
+            return self.parent.select_with_touch(self.index, touch)
+
+    def apply_selection(self, rv, index, is_selected):
+        prev_selected = self.selected
+        if is_selected:
+            rv.selected_item = self
+        # else:
+            # rv.selected_item = None
+        self.selected = is_selected
+        rv.on_selection_applied(self, index, is_selected, prev_selected)
+        return index
+
+
+class SelectableBoxRecord(RecycleDataViewBehavior, BoxLayout):
+
+    index = None
+    selected = BooleanProperty(False)
+    selectable = BooleanProperty(True)
+
+    def refresh_view_attrs(self, rv, index, data):
+        self.index = index
+        return super(SelectableBoxRecord, self).refresh_view_attrs(rv, index, data)
+
+    def on_touch_down(self, touch):
+        if super(SelectableBoxRecord, self).on_touch_down(touch):
             return True
         if self.collide_point(*touch.pos) and self.selectable:
             return self.parent.select_with_touch(self.index, touch)
