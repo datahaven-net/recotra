@@ -187,7 +187,7 @@ kv = """
                     width: dp(110)
                     text: 'contract type'
                     color: (1,0,0,1)
-                    values: 'CASH', 'ON-LINE'
+                    values: 'CASH', 'ON-LINE', 'CHECK'
                     on_text: root.on_select_contract_type_button_clicked()
 
                 BuyFieldLabel:
@@ -513,7 +513,7 @@ class BuyScreen(AppScreen):
     def on_select_contract_type_button_clicked(self, *args, **kwargs):
         if _Debug:
             print('BuyScreen.on_select_contract_type_button_clicked', self.ids.select_contract_type_button.text)
-        if self.ids.select_contract_type_button.text in ('CASH', 'ON-LINE'):
+        if self.ids.select_contract_type_button.text in ('CASH', 'ON-LINE', 'CHECK'):
             self.ids.select_contract_type_button.color = (0,0,0,1)
             if self.ids.select_contract_type_button.text == 'ON-LINE':
                 self.ids.bank_info_input.disabled = False
@@ -525,7 +525,7 @@ class BuyScreen(AppScreen):
 
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
-        if self.ids.select_contract_type_button.text not in ('CASH', 'ON-LINE'):
+        if self.ids.select_contract_type_button.text not in ('CASH', 'ON-LINE', 'CHECK'):
             dialogs.show_one_button_dialog(
                 title='Need to select payment type',
                 message='Please select a payment type for the new contract: CASH or ON-LINE.',
