@@ -365,7 +365,8 @@ class TransactionsScreen(screen.AppScreen):
                 if str(self.selected_customer_id) != str(t['buyer'].get('customer_id') or '') and str(self.selected_customer_id) != str(t['seller'].get('customer_id') or ''):
                     continue
             if t.get('blockchain_status') != 'confirmed':
-                continue
+                if not t.get('void'):
+                    continue
             if selected_year != '-' and not t['date'].endswith(selected_year):
                 continue
             if selected_month != '-' and not t['date'].startswith(selected_month[:3]):
