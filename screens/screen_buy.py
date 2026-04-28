@@ -525,6 +525,10 @@ class BuyScreen(AppScreen):
 
     def on_start_transaction_button_clicked(self):
         cur_settings = local_storage.read_settings()
+        if self.selected_customer_id:
+            customer_info = local_storage.read_customer_info(self.selected_customer_id)
+            if customer_info:
+                self.selected_customer_info = customer_info
         if self.ids.select_contract_type_button.text not in ('CASH', 'ON-LINE', 'CHECK'):
             dialogs.show_one_button_dialog(
                 title='Need to select payment type',
