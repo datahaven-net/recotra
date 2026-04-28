@@ -10,6 +10,7 @@ from kivy.properties import ListProperty  # @UnresolvedImport
 
 from components import screen
 from components import list_view
+from components import dialogs
 
 from storage import local_storage
 
@@ -328,18 +329,26 @@ class TransactionsScreen(screen.AppScreen):
         if selected_month != '-' and selected_year == '-':
             return
         selected_transactions = []
+        unconfirmed = []
         for t in local_storage.load_transactions_list():
             if self.selected_customer_id:
                 if str(self.selected_customer_id) != str(t['buyer'].get('customer_id') or '') and str(self.selected_customer_id) != str(t['seller'].get('customer_id') or ''):
-                    continue
-            if t.get('blockchain_status') != 'confirmed':
-                if not t.get('void'):
                     continue
             if selected_year != '-' and not t['date'].endswith(selected_year):
                 continue
             if selected_month != '-' and not t['date'].startswith(selected_month[:3]):
                 continue
+            if t.get('blockchain_status') != 'confirmed':
+                if not t.get('void'):
+                    unconfirmed.append(str(t['transaction_id']))
+                    continue
             selected_transactions.append(t)
+        if unconfirmed:
+            dialogs.show_one_button_dialog(
+                title='Found unconfirmed transactions',
+                message='Please verify following transactions first:\n%s' % (', '.join(unconfirmed)),
+            )
+            return
         output_filename = 'transactions'
         if selected_year != '-':
             output_filename += '_' + selected_year
@@ -360,18 +369,26 @@ class TransactionsScreen(screen.AppScreen):
         if selected_month != '-' and selected_year == '-':
             return
         selected_transactions = []
+        unconfirmed = []
         for t in local_storage.load_transactions_list():
             if self.selected_customer_id:
                 if str(self.selected_customer_id) != str(t['buyer'].get('customer_id') or '') and str(self.selected_customer_id) != str(t['seller'].get('customer_id') or ''):
-                    continue
-            if t.get('blockchain_status') != 'confirmed':
-                if not t.get('void'):
                     continue
             if selected_year != '-' and not t['date'].endswith(selected_year):
                 continue
             if selected_month != '-' and not t['date'].startswith(selected_month[:3]):
                 continue
+            if t.get('blockchain_status') != 'confirmed':
+                if not t.get('void'):
+                    unconfirmed.append(str(t['transaction_id']))
+                    continue
             selected_transactions.append(t)
+        if unconfirmed:
+            dialogs.show_one_button_dialog(
+                title='Found unconfirmed transactions',
+                message='Please verify following transactions first:\n%s' % (', '.join(unconfirmed)),
+            )
+            return
         output_filename = 'transactions'
         if selected_year != '-':
             output_filename += '_' + selected_year
