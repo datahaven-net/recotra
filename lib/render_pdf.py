@@ -350,6 +350,11 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
         usd_change = float(t['usd_amount']) if t['contract_type'] == 'sales' else -float(t['usd_amount'])
         btc_addr = t['buyer']['btc_address']
         bank_info = t['seller'].get('bank_info') or 'cash'
+        if t.get('void'):
+            if bank_info:
+                bank_info = bank_info + ' (void)'
+            else:
+                bank_info = 'void'
         if t.get('lightning'):
             btc_addr = '{}<br>{}<br>{}<br>{}<br>{}<br>{}<br>{}<br>{}'.format(
                 btc_addr[:40],
