@@ -349,12 +349,9 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
         btc_change = -float(t['btc_amount']) if t['contract_type'] == 'sales' else float(t['btc_amount'])
         usd_change = float(t['usd_amount']) if t['contract_type'] == 'sales' else -float(t['usd_amount'])
         btc_addr = t['buyer']['btc_address']
-        bank_info = t['seller'].get('bank_info') or 'cash'
+        details = t['seller'].get('bank_info') or 'cash'
         if t.get('void'):
-            if bank_info:
-                bank_info = bank_info + ' (void)'
-            else:
-                bank_info = 'void'
+            details = 'void'
         if t.get('lightning'):
             btc_addr = '{}<br>{}<br>{}<br>{}<br>{}<br>{}<br>{}<br>{}'.format(
                 btc_addr[:40],
@@ -377,17 +374,18 @@ def build_transactions_report(selected_transactions, selected_month, selected_ye
             <td valign=top nowrap>{t['btc_price']}</td>
             <td valign=top nowrap>{t['date']}</td>
             <td valign=top nowrap><font size=-1><code>{btc_addr}</code></font></td>
-            <td valign=top>{bank_info}</td>
+            <td valign=top>{details}</td>
         </tr>
         '''
-        if t['contract_type'] == 'sales':
-            total_btc_sold += float(t['btc_amount'])
-            total_usd_bought += float(t['usd_amount'])
-        else:
-            total_btc_bought += float(t['btc_amount'])
-            total_usd_sold += float(t['usd_amount'])
-        total_btc_change += btc_change
-        total_usd_change += usd_change
+        if not t.get('void'):
+            if t['contract_type'] == 'sales':
+                total_btc_sold += float(t['btc_amount'])
+                total_usd_bought += float(t['usd_amount'])
+            else:
+                total_btc_bought += float(t['btc_amount'])
+                total_usd_sold += float(t['usd_amount'])
+            total_btc_change += btc_change
+            total_usd_change += usd_change
     params = {
         'table_content': table_content,
         'selected_month': selected_month.replace('-', ''),
