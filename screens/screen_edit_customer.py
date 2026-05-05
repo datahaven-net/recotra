@@ -817,6 +817,7 @@ class EditCustomerScreen(screen.AppScreen):
     def on_related_urls_paste_button_clicked(self, *args):
         url = system.paste_xclip()
         if url:
+            url = url.replace('\n', '').replace('\t', ' ')
             found = False
             for d in self.ids.related_urls_view.data:
                 if d['url'] == url:

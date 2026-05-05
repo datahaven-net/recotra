@@ -86,7 +86,7 @@ kv = """
 
                     Widget:
                         size_hint_y: None
-                        height: dp(30)
+                        height: dp(5)
 
                     Label:
                         text_size: self.size
@@ -122,7 +122,7 @@ kv = """
 
                     Widget:
                         size_hint_y: None
-                        height: dp(30)
+                        height: dp(5)
 
                     Label:
                         text_size: self.size
@@ -162,82 +162,8 @@ kv = """
 
                     Widget:
                         size_hint_y: None
-                        height: dp(15)
+                        height: dp(5)
 
-                    Label:
-                        text_size: self.size
-                        height: dp(30)
-                        halign: "right"
-                        valign: "bottom"
-                        text: "Related URLs:"
-
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        size_hint: None, None
-                        pos_hint: {'right': 1}
-                        halign: "right"
-                        height: dp(24)
-                        width: dp(340)
-                        padding: dp(0)
-                        spacing: dp(5)
-
-                        Widget:
-                            size_hint: 1, None
-                            height: dp(20)
-                        SimpleButton:
-                            id: related_urls_add_button
-                            halign: "right"
-                            valign: "bottom"
-                            pos_hint: {'right': 1}
-                            size_hint: (None, None)
-                            height: dp(20)
-                            width: dp(60)
-                            text: "add"
-                            on_release: root.on_related_urls_add_button_clicked()
-                        SimpleButton:
-                            id: related_urls_paste_button
-                            halign: "right"
-                            valign: "bottom"
-                            pos_hint: {'right': 1}
-                            size_hint: (None, None)
-                            height: dp(20)
-                            width: dp(60)
-                            text: "paste"
-                            on_release: root.on_related_urls_paste_button_clicked()
-                        SimpleButton:
-                            id: related_urls_remove_button
-                            halign: "right"
-                            valign: "bottom"
-                            pos_hint: {'right': 1}
-                            size_hint: (None, None)
-                            height: dp(20)
-                            width: dp(60)
-                            text: "remove"
-                            disabled: True
-                            on_release: root.on_related_urls_remove_button_clicked()
-                        SimpleButton:
-                            id: related_urls_open_button
-                            halign: "right"
-                            valign: "bottom"
-                            pos_hint: {'right': 1}
-                            size_hint: (None, None)
-                            height: dp(20)
-                            width: dp(60)
-                            text: "open"
-                            disabled: True
-                            on_release: root.on_related_urls_open_button_clicked()
-
-                    BoxLayout:
-                        orientation: 'horizontal'
-                        size_hint: None, None
-                        pos_hint: {'right': 1}
-                        height: dp(80)
-                        width: dp(330)
-                        padding: dp(0)
-
-                        RelatedURLsView:
-                            id: related_urls_view
-                            size_hint: 1, 1
 
                 BoxLayout:
                     orientation: 'vertical'
@@ -325,7 +251,7 @@ kv = """
 
                     Widget:
                         size_hint_y: None
-                        height: dp(4)
+                        height: dp(1)
 
                     BoxLayout:
                         orientation: 'horizontal'
@@ -350,7 +276,83 @@ kv = """
 
                         Widget:
                             size_hint: 1, None
-                            height: dp(22)
+                            height: dp(5)
+
+                    Widget:
+                        size_hint: 1, None
+                        height: dp(5)
+
+                    Label:
+                        text_size: self.size
+                        height: dp(30)
+                        halign: "left"
+                        valign: "bottom"
+                        text: "Related URLs:"
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        pos_hint: {'left': 1}
+                        halign: "left"
+                        height: dp(24)
+                        width: dp(340)
+                        padding: dp(0)
+                        spacing: dp(5)
+
+                        SimpleButton:
+                            id: related_urls_add_button
+                            halign: "left"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "add"
+                            on_release: root.on_related_urls_add_button_clicked()
+                        SimpleButton:
+                            id: related_urls_paste_button
+                            halign: "left"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "paste"
+                            on_release: root.on_related_urls_paste_button_clicked()
+                        SimpleButton:
+                            id: related_urls_remove_button
+                            halign: "left"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "remove"
+                            disabled: True
+                            on_release: root.on_related_urls_remove_button_clicked()
+                        SimpleButton:
+                            id: related_urls_open_button
+                            halign: "left"
+                            valign: "bottom"
+                            pos_hint: {'right': 1}
+                            size_hint: (None, None)
+                            height: dp(20)
+                            width: dp(60)
+                            text: "open"
+                            disabled: True
+                            on_release: root.on_related_urls_open_button_clicked()
+
+                    BoxLayout:
+                        orientation: 'horizontal'
+                        size_hint: None, None
+                        pos_hint: {'left': 1}
+                        height: dp(80)
+                        width: dp(330)
+                        padding: dp(0)
+
+                        RelatedURLsView:
+                            id: related_urls_view
+                            size_hint: 1, 1
 
         BoxLayout:
             orientation: 'horizontal'
@@ -557,15 +559,30 @@ class AddCustomerScreen(screen.AppScreen):
         pass
 
     def on_google_customer_button_clicked(self, *args):
-        if self.ids.customer_first_name_input.text and self.ids.customer_last_name_input.text:
-            system.open_webbrowser('https://www.google.ru/search?q=%s+%s+Anguilla' % (
-                urllib.parse.quote_plus(self.ids.customer_first_name_input.text),
-                urllib.parse.quote_plus(self.ids.customer_last_name_input.text),
-            ))
-            system.open_webbrowser('https://www.google.ru/search?q=%s+%s+Facebook+Anguilla' % (
-                urllib.parse.quote_plus(self.ids.customer_first_name_input.text),
-                urllib.parse.quote_plus(self.ids.customer_last_name_input.text),
-            ))
+        fn = str(self.ids.customer_first_name_input.text).strip()
+        ln = str(self.ids.customer_last_name_input.text).strip()
+        if fn and ln:
+            url1 = 'https://www.google.ru/search?q=%s+%s+Anguilla' % (
+                urllib.parse.quote_plus(fn),
+                urllib.parse.quote_plus(ln),
+            )
+            url2 = 'https://www.google.ru/search?q=%s+%s+Facebook+Anguilla' % (
+                urllib.parse.quote_plus(fn),
+                urllib.parse.quote_plus(ln),
+            )
+            system.open_webbrowser(url1)
+            system.open_webbrowser(url2)
+            found1 = False
+            found2 = False
+            for d in self.ids.related_urls_view.data:
+                if d['url'] == url1:
+                    found1 = True
+                if d['url'] == url2:
+                    found2 = True
+            if not found1:
+                self.ids.related_urls_view.data.append({'url': url1})
+            if not found2:
+                self.ids.related_urls_view.data.append({'url': url2})
 
     def on_select_risk_rating_button_clicked(self, *args):
         pass
@@ -593,6 +610,7 @@ class AddCustomerScreen(screen.AppScreen):
     def on_related_urls_paste_button_clicked(self, *args):
         url = system.paste_xclip()
         if url:
+            url = url.replace('\n', '').replace('\t', ' ')
             found = False
             for d in self.ids.related_urls_view.data:
                 if d['url'] == url:
