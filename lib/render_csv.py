@@ -16,7 +16,7 @@ def build_transactions_report(selected_transactions, csv_filepath=None, delimite
             tr_type = "customer buying BTC" if t['contract_type'] == 'sales' else "customer selling BTC"
             btc_change = -float(t['btc_amount']) if t['contract_type'] == 'sales' else float(t['btc_amount'])
             usd_change = float(t['usd_amount']) if t['contract_type'] == 'sales' else -float(t['usd_amount'])
-            details = t['seller'].get('bank_info') or 'cash'
+            details = 'bank' if t['seller'].get('bank_info') else 'cash'
             if t.get('void'):
                 details = 'void'
             dw.writerow({
