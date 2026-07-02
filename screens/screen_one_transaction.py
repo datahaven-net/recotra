@@ -416,7 +416,7 @@ class OneTransactionScreen(AppScreen):
         else:
             self.ids.verify_button.disabled = True
             self.ids.verify_status_label.text = '[color=#505050]requesting transactions from btc.com ...[/color]'
-            matching_transactions = btc_util.verify_contract(
+            matching_transactions = btc_util.verify_contract_v2(
                 contract_details=transaction_details,
                 price_precision_fixed_amount=float(cur_settings.get('price_precision_fixed_amount', '0.0')),
                 price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),

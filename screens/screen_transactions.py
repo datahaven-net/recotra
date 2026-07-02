@@ -449,7 +449,7 @@ class TransactionsScreen(screen.AppScreen):
                 local_storage.write_transaction(transaction_details['transaction_id'], transaction_details)
                 confirmed = True
         else:
-            matching_transactions = btc_util.verify_contract(
+            matching_transactions = btc_util.verify_contract_v2(
                 contract_details=transaction_details,
                 price_precision_matching_percent=float(cur_settings.get('price_precision_matching_percent', '0.0')),
                 price_precision_fixed_amount=float(cur_settings.get('price_precision_fixed_amount', '0.0')),
