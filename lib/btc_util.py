@@ -5,7 +5,7 @@ import lib.btc_validator
 
 #------------------------------------------------------------------------------
 
-_Debug = False
+_Debug = True
 
 #------------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ def fetch_transactions(btc_address):
         response = requests.get(url, headers={
             'User-Agent': 'curl/7.68.0',
             'Accept': '*/*',
-        })
+        }, timeout=10)
         json_response = response.json()
     except Exception as exc:
         txt = ''
@@ -99,7 +99,41 @@ def fetch_transactions_advanced(btc_address):
         response = requests.get(url, headers={
             'User-Agent': 'curl/7.68.0',
             'Accept': '*/*',
-        })
+        }, timeout=10)
+        json_response = response.json()
+    except Exception as exc:
+        txt = ''
+        try:
+            txt = response.text
+        except:
+            pass
+        if txt.count('Access denied'):
+            txt = 'Access denied'
+        else:
+            txt = str(exc)
+        if _Debug:
+            print('fetch_transactions ERROR:', txt)
+        return {}
+    results = {}
+    for tx in json_response:
+        in_amt = sum(v['value'] for v in tx.get('vout', []) if v.get('scriptpubkey_address') == btc_address)
+        out_amt = sum(vin.get('prevout', {}).get('value', 0) for vin in tx.get('vin', []) if vin.get('prevout', {}).get('scriptpubkey_address') == btc_address)
+        results[tx['txid']] = {
+            'amount_in': in_amt * 0.00000001,
+            'amount_out': out_amt * 0.00000001,
+            'block_time': tx['status'].get('block_time'),
+            'hash': tx['txid'],
+        }
+    return results
+
+
+def fetch_transactions_from_mempool_space(btc_address):
+    url = 'https://mempool.space/api/address/{}/txs/chain'.format(btc_address)
+    try:
+        response = requests.get(url, headers={
+            'User-Agent': 'curl/7.68.0',
+            'Accept': '*/*',
+        }, timeout=10)
         json_response = response.json()
     except Exception as exc:
         txt = ''
@@ -183,7 +217,8 @@ def verify_contract_v2(contract_details, price_precision_matching_percent=1.0, p
     if LatestKnownBTCPrice is not None:
         expected_balance_fixed_diff_min -= price_precision_fixed_amount / LatestKnownBTCPrice
         expected_balance_fixed_diff_max += price_precision_fixed_amount / LatestKnownBTCPrice
-    btc_transactions = fetch_transactions_advanced(contract_details['buyer']['btc_address'])
+    # btc_transactions = fetch_transactions_advanced(contract_details['buyer']['btc_address'])
+    btc_transactions = fetch_transactions_from_mempool_space(contract_details['buyer']['btc_address'])
     contract_local_time = datetime.datetime.strptime('{} {}'.format(contract_details['date'], contract_details['time']), '%b %d %Y %I:%M %p')
     if _Debug:
         print('verify_contract', contract_local_time, contract_details['btc_amount'], expected_balance_diff_min, expected_balance_diff_max,
@@ -198,7 +233,7 @@ def verify_contract_v2(contract_details, price_precision_matching_percent=1.0, p
         block_local_time = datetime.datetime.fromtimestamp(0) + datetime.timedelta(seconds=block_time)
         diff_seconds = (block_local_time - contract_local_time).total_seconds()
         if _Debug:
-            print('    compare with %r %r %r' % (tr_info['hash'], block_local_time, tr_info['outputs'], ))
+            print('    compare with %r %r' % (tr_info['hash'], block_local_time, ))
         if time_matching_seconds_before:
             if diff_seconds < -time_matching_seconds_before:
                 continue
